@@ -121,33 +121,6 @@ namespace FishermanMod.Modules.BaseStates
                 foreach (HurtBox hitResult in hitresults)
                 {
                     FishermanSurvivor.ApplyHookEffect(attack.attacker,attack.inflictor, attack.damage, gameObject.transform.position, hitResult);
-                   /*
-                    // CharacterBody body = hitResult.healthComponent.body;
-                    //Log.Info(hitResult.healthComponent.gameObject.name);
-                    //Rigidbody component = hitResult.healthComponent.GetComponent<Rigidbody>();
-                    //float targetMass = (component ? component.mass : 1f);
-                    //float dist = Vector3.Distance(hitResult.transform.position, gameObject.transform.position);
-                    //Vector3 hookTarget = characterBody.transform.position;
-                    //hookTarget.y += dist * 0.45f;
-                    //Vector3 direction = (hookTarget - hitResult.transform.position).normalized;
-                    //float baseForce = 100 + targetMass;
-                    //Vector3 force = baseForce * dist * direction;
-
-                    //DamageInfo damageInfo = new DamageInfo
-                    //{
-                    //    attacker = attack.attacker,
-                    //    inflictor = attack.inflictor,
-                    //    crit = attack.isCrit,
-                    //    damage = 0,
-                    //    damageColorIndex = DamageColorIndex.Default,
-                    //    damageType = damageType,
-                    //    force = force,
-                    //    position = hitResult.transform.position,
-                    //    procChainMask = attack.procChainMask,
-                    //    procCoefficient = attack.procCoefficient
-                    //};
-                    //hitResult.healthComponent.TakeDamageForce(damageInfo, true);
-                   */
                 }
             }
             

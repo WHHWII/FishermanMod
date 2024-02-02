@@ -198,7 +198,7 @@ namespace FishermanMod.Survivors.Fisherman
                 keywordTokens = new string[] { "KEYWORD_AGILE" },
                 skillIcon = assetBundle.LoadAsset<Sprite>("texSecondaryIcon"),
 
-                activationState = new EntityStates.SerializableEntityStateType(typeof(SkillStates.Shoot)),
+                activationState = new EntityStates.SerializableEntityStateType(typeof(SkillStates.AimHook)),
                 activationStateMachineName = "Weapon2",
                 interruptPriority = EntityStates.InterruptPriority.Skill,
 
@@ -399,22 +399,24 @@ namespace FishermanMod.Survivors.Fisherman
                 force = force,
                 position = enemyHurtBox.transform.position,
             };
-            if(targetMass > 800)
+
+            if(targetMass > 700)
             {
-
-
-                damageInfo.damage = hookFailDamage;
                 damageInfo.force = force * 0.1f;
                 damageInfo.procCoefficient = 1;
                 damageInfo.procChainMask = default(ProcChainMask);
                 damageInfo.damageType = DamageType.BleedOnHit;
-
                 Log.Info("Mass too large, hook failed");
 
             }
-            enemyHurtBox.healthComponent.TakeDamage(damageInfo);
-            GlobalEventManager.instance.OnHitEnemy(damageInfo,body.gameObject);
-            GlobalEventManager.instance.OnHitAll(damageInfo, body.gameObject);
+            enemyHurtBox.healthComponent.TakeDamage(damageInfo); // apply force with no damage to prevent double hit
+            if (targetMass > 700) //better way to prevent double check?
+            {
+                damageInfo.damage = hookFailDamage;     //add damage for bleed calcution
+                GlobalEventManager.instance.OnHitEnemy(damageInfo, body.gameObject);
+                GlobalEventManager.instance.OnHitAll(damageInfo, body.gameObject);
+            }
+
         }
     }
 }

@@ -19,7 +19,6 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
             projectilePrefab = FishermanAssets.bombProjectilePrefab;
             //base.effectPrefab = Modules.Assets.SomeMuzzleEffect;
             //targetmuzzle = "muzzleThrow"
-
             attackSoundString = "HenryBombThrow";
 
             baseDuration = BaseDuration;

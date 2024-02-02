@@ -38,7 +38,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
                     muzzleString = "SwingRight";
                     break;
                 case 3:
-                    muzzleString = "SwingCenter";
+                    muzzleString = "Muzzle";
                     break;
             }
             playbackRateParam = "Slash.playbackRate";
@@ -52,7 +52,16 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
 
         protected override void PlayAttackAnimation()
         {
-            PlayCrossfade("Gesture, Override", "Slash" + (1 + swingIndex), playbackRateParam, duration, 0.1f * duration);
+            if(swingIndex == 2)
+            {
+                EffectManager.SimpleMuzzleFlash(EntityStates.Commando.CommandoWeapon.FirePistol2.muzzleEffectPrefab, gameObject, muzzleString, false);
+                PlayAnimation("LeftArm, Override", "ShootGun", "ShootGun.playbackRate", 1.8f);
+            }
+            else
+            {
+                PlayCrossfade("Gesture, Override", "Slash" + (1 + swingIndex), playbackRateParam, duration, 0.1f * duration);
+            }
+           
         }
 
         protected override void PlaySwingEffect()
