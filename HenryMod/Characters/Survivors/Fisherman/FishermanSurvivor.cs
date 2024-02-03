@@ -10,6 +10,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 
 namespace FishermanMod.Survivors.Fisherman
 {
@@ -32,6 +33,7 @@ namespace FishermanMod.Survivors.Fisherman
 
         //used when registering your survivor's language tokens
         public override string survivorTokenPrefix => FISHERMAN_PREFIX;
+
         
         public override BodyInfo bodyInfo => new BodyInfo
         {
@@ -189,6 +191,8 @@ namespace FishermanMod.Survivors.Fisherman
 
         private void AddSecondarySkills()
         {
+
+            
             //here is a basic skill def with all fields accounted for
             SkillDef secondarySkillDef1 = Skills.CreateSkillDef(new SkillDefInfo
             {
@@ -384,13 +388,15 @@ namespace FishermanMod.Survivors.Fisherman
             
             Rigidbody component = enemyHurtBox.healthComponent.GetComponent<Rigidbody>();
             float targetMass = (component ? component.mass : 1f);
-            Log.Info(enemyHurtBox.healthComponent.gameObject.name + ": mass =" + targetMass);
             float dist = Vector3.Distance(enemyHurtBox.transform.position, targetPos);
             Vector3 hookTarget = targetPos;
             hookTarget.y += dist * 0.45f;
             Vector3 direction = (hookTarget - enemyHurtBox.transform.position).normalized;
             float baseForce = 100 + targetMass;
             Vector3 force = baseForce * dist * direction;
+
+            Log.Info(enemyHurtBox.healthComponent.gameObject.name + ": mass =" + targetMass); // log mass
+
 
             DamageInfo damageInfo = new DamageInfo
             {

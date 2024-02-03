@@ -3,6 +3,7 @@ using UnityEngine;
 using FishermanMod.Modules;
 using System;
 using RoR2.Projectile;
+using UnityEngine.AddressableAssets;
 
 namespace FishermanMod.Survivors.Fisherman
 {
@@ -19,6 +20,7 @@ namespace FishermanMod.Survivors.Fisherman
 
         //projectiles
         public static GameObject bombProjectilePrefab;
+        public static GameObject hookProjectilePrefab;
 
         private static AssetBundle _assetBundle;
 
@@ -71,6 +73,8 @@ namespace FishermanMod.Survivors.Fisherman
         {
             CreateBombProjectile();
             Content.AddProjectilePrefab(bombProjectilePrefab);
+            CreateHookProjectile();
+           // Content.AddProjectilePrefab(hookProjectilePrefab);
         }
 
         private static void CreateBombProjectile()
@@ -98,6 +102,14 @@ namespace FishermanMod.Survivors.Fisherman
                 bombController.ghostPrefab = _assetBundle.CreateProjectileGhostPrefab("HenryBombGhost");
             
             bombController.startSound = "";
+        }
+
+        private static void CreateHookProjectile()
+        {
+            hookProjectilePrefab = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Engi/EngiMine.prefab").WaitForCompletion();
+            //hookProjectilePrefab = Assets.CloneProjectilePrefab("RoR2/DLC1/VoidRaidCrab/VoidRaidCrabMissileProjectile.prefab", "FishermanHookProjectile");
+            //UnityEngine.Object.Destroy(hookProjectilePrefab.GetComponent<ProjectileGrappleController>());
+            //hookProjectilePrefab.AddComponent<>
         }
         #endregion projectiles
     }
