@@ -34,7 +34,8 @@ namespace FishermanMod.Survivors.Fisherman
         //used when registering your survivor's language tokens
         public override string survivorTokenPrefix => FISHERMAN_PREFIX;
 
-        
+        public static SkillDef secondaryRecallFishHook;
+        public static SkillDef secondaryFireFishHook;
         public override BodyInfo bodyInfo => new BodyInfo
         {
             bodyName = bodyName,
@@ -152,6 +153,7 @@ namespace FishermanMod.Survivors.Fisherman
             
             Prefabs.AddEntityStateMachine(bodyPrefab, "Weapon");
             Prefabs.AddEntityStateMachine(bodyPrefab, "Weapon2");
+            Prefabs.AddEntityStateMachine(bodyPrefab, "FishookRecall");
         }
 
         #region skills
@@ -194,9 +196,9 @@ namespace FishermanMod.Survivors.Fisherman
 
             
             //here is a basic skill def with all fields accounted for
-            SkillDef secondarySkillDef1 = Skills.CreateSkillDef(new SkillDefInfo
+            FishermanSurvivor.secondaryFireFishHook = Skills.CreateSkillDef(new SkillDefInfo
             {
-                skillName = "HenryGun",
+                skillName = "CastFishHook",
                 skillNameToken = FISHERMAN_PREFIX + "SECONDARY_GUN_NAME",
                 skillDescriptionToken = FISHERMAN_PREFIX + "SECONDARY_GUN_DESCRIPTION",
                 keywordTokens = new string[] { "KEYWORD_AGILE" },
@@ -206,7 +208,7 @@ namespace FishermanMod.Survivors.Fisherman
                 activationStateMachineName = "Weapon2",
                 interruptPriority = EntityStates.InterruptPriority.Skill,
 
-                baseRechargeInterval = 1f,
+                baseRechargeInterval = 6f,
                 baseMaxStock = 1,
 
                 rechargeStock = 1,
@@ -216,17 +218,48 @@ namespace FishermanMod.Survivors.Fisherman
                 resetCooldownTimerOnUse = false,
                 fullRestockOnAssign = true,
                 dontAllowPastMaxStocks = false,
-                mustKeyPress = false,
+                mustKeyPress = true,
+                beginSkillCooldownOnSkillEnd = true,
+
+                isCombatSkill = false,
+                canceledFromSprinting = false,
+                cancelSprintingOnActivation = false,
+                forceSprintDuringState = false,
+                
+
+            });
+
+            FishermanSurvivor.secondaryRecallFishHook = Skills.CreateSkillDef(new SkillDefInfo
+            {
+                skillName = "RecallFishHook",
+                skillNameToken = FISHERMAN_PREFIX + "SECONDARY_GUN_NAME",
+                skillDescriptionToken = FISHERMAN_PREFIX + "SECONDARY_GUN_DESCRIPTION",
+                keywordTokens = new string[] { "KEYWORD_AGILE" },
+                skillIcon = assetBundle.LoadAsset<Sprite>("texUtilityIcon"),
+
+                activationState = new EntityStates.SerializableEntityStateType(typeof(SkillStates.RecallHook)),
+                activationStateMachineName = "Weapon2",
+                interruptPriority = EntityStates.InterruptPriority.Skill,
+
+                baseRechargeInterval = 0.5f,
+                baseMaxStock = 1,
+
+                rechargeStock = 1,
+                requiredStock = 1,
+                stockToConsume = 1,
+
+                resetCooldownTimerOnUse = false,
+                fullRestockOnAssign = true,
+                dontAllowPastMaxStocks = false,
+                mustKeyPress = true,
                 beginSkillCooldownOnSkillEnd = false,
 
                 isCombatSkill = true,
                 canceledFromSprinting = false,
                 cancelSprintingOnActivation = false,
                 forceSprintDuringState = false,
-
             });
-
-            Skills.AddSecondarySkills(bodyPrefab, secondarySkillDef1);
+                Skills.AddSecondarySkills(bodyPrefab, secondaryFireFishHook, secondaryRecallFishHook);
         }
 
         private void AddUtiitySkills()
@@ -382,7 +415,7 @@ namespace FishermanMod.Survivors.Fisherman
         }
 
 
-        public static void ApplyHookEffect(GameObject attacker, GameObject inflictor, float hookFailDamage, Vector3 targetPos, HurtBox enemyHurtBox)
+        public static void ApplyFishermanPassiveFishHookEffect(GameObject attacker, GameObject inflictor, float hookFailDamage, Vector3 targetPos, HurtBox enemyHurtBox)
         {
             CharacterBody body = enemyHurtBox.healthComponent.body;
             
@@ -423,6 +456,13 @@ namespace FishermanMod.Survivors.Fisherman
                 GlobalEventManager.instance.OnHitAll(damageInfo, body.gameObject);
             }
 
+        }
+
+        //should probably make this use a list
+        public static FishHookController deployedHook;
+        public static void SetDeployedHook(FishHookController fishHookInstance)
+        {
+            deployedHook = fishHookInstance;
         }
     }
 }

@@ -6,6 +6,7 @@ namespace FishermanMod.Survivors.Fisherman
     {
         public static void Init()
         {
+            
             Modules.Content.AddEntityState(typeof(SlashCombo));
 
             Modules.Content.AddEntityState(typeof(Shoot));
@@ -13,6 +14,10 @@ namespace FishermanMod.Survivors.Fisherman
             Modules.Content.AddEntityState(typeof(Roll));
 
             Modules.Content.AddEntityState(typeof(ThrowBomb));
+
+            Modules.Content.AddEntityState(typeof(AimHook));
+
+            Modules.Content.AddEntityState(typeof(RecallHook));
         }
     }
 }

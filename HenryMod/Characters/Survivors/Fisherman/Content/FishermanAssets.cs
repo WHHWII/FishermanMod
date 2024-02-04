@@ -4,6 +4,8 @@ using FishermanMod.Modules;
 using System;
 using RoR2.Projectile;
 using UnityEngine.AddressableAssets;
+using UnityEngine.PlayerLoop;
+using FishermanMod.Survivors.Fisherman.Components;
 
 namespace FishermanMod.Survivors.Fisherman
 {
@@ -74,7 +76,7 @@ namespace FishermanMod.Survivors.Fisherman
             CreateBombProjectile();
             Content.AddProjectilePrefab(bombProjectilePrefab);
             CreateHookProjectile();
-           // Content.AddProjectilePrefab(hookProjectilePrefab);
+            Content.AddProjectilePrefab(hookProjectilePrefab);
         }
 
         private static void CreateBombProjectile()
@@ -106,11 +108,48 @@ namespace FishermanMod.Survivors.Fisherman
 
         private static void CreateHookProjectile()
         {
-            hookProjectilePrefab = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Engi/EngiMine.prefab").WaitForCompletion();
-            //hookProjectilePrefab = Assets.CloneProjectilePrefab("RoR2/DLC1/VoidRaidCrab/VoidRaidCrabMissileProjectile.prefab", "FishermanHookProjectile");
-            //UnityEngine.Object.Destroy(hookProjectilePrefab.GetComponent<ProjectileGrappleController>());
-            //hookProjectilePrefab.AddComponent<>
+            //hookProjectilePrefab = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Engi/EngiMine.prefab").WaitForCompletion();
+            hookProjectilePrefab = Assets.CloneProjectilePrefab("GravekeeperHookProjectileSimple", "FishermanHookProjectile");
+            Rigidbody rb = hookProjectilePrefab.GetComponent<Rigidbody>();
+            rb.useGravity = true;
+            rb.mass = 100;
+
+            ProjectileSimple ps = hookProjectilePrefab.GetComponent<ProjectileSimple>();
+            ps.desiredForwardSpeed = 80;
+            ps.lifetime = 999999;
+            
+
+            ProjectileStickOnImpact stickOnImpact = hookProjectilePrefab.GetComponent <ProjectileStickOnImpact>();
+            stickOnImpact.ignoreCharacters = false;
+            stickOnImpact.alignNormals = false;
+          
+            ProjectileSingleTargetImpact pstImpact = hookProjectilePrefab.GetComponent<ProjectileSingleTargetImpact>();
+
+            ProjectileController pc = hookProjectilePrefab.GetComponent<ProjectileController>();
+
+            FishHookController fishHook = hookProjectilePrefab.AddComponent<FishHookController>();
+            fishHook.rb = rb;
+            fishHook.stickComponent = stickOnImpact;
+            fishHook.controller = pc;
+
+            GameObject ghostPrefab = pc.ghostPrefab;
+            ProjectileGhostController gpc = ghostPrefab.GetComponent<ProjectileGhostController>();
+            UnityEngine.Object.Destroy(ghostPrefab.GetComponentInChildren<ObjectScaleCurve>()); // this removes the visual disapearing
+            //UnityEngine.Object.Destroy(hookProjectilePrefab.GetComponent<ProjectileController>().ghostPrefab.GetComponent<WinchControl>());
+            //WinchControl winch = ghostPrefab.GetComponent<WinchControl>();
+            //winch.enabled = false;
+            //UnityEngine.Object.Destroy(ghostPrefab.GetComponent<VFXAttributes>());
+            //VFXAttributes vfx = ghostPrefab.GetComponent<VFXAttributes>();
+            //vfx.enabled = false;
+            //UnityEngine.Object.Destroy(ghostPrefab.GetComponent<ProjectileGhostController>());
+            //ProjectileGhostCluster pgc = ghostPrefab.GetComponent<ProjectileGhostCluster>();
+
+            // winch.tailTransform = 
+            // winch.tailTransform
+            //stickOnImpact.stickEvent.RemoveAllListeners();
         }
         #endregion projectiles
     }
+
+        
 }

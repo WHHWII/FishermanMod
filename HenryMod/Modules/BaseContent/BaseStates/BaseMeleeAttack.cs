@@ -120,7 +120,7 @@ namespace FishermanMod.Modules.BaseStates
             {
                 foreach (HurtBox hitResult in hitresults)
                 {
-                    FishermanSurvivor.ApplyHookEffect(attack.attacker,attack.inflictor, attack.damage, gameObject.transform.position, hitResult);
+                    FishermanSurvivor.ApplyFishermanPassiveFishHookEffect(attack.attacker,attack.inflictor, attack.damage, gameObject.transform.position, hitResult);
                 }
             }
             
