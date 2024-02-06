@@ -32,7 +32,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
             //comes after modification to working AimThrowableBase
             base.OnEnter();
            
-
+            
 
             
             

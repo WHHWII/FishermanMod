@@ -429,7 +429,8 @@ namespace FishermanMod.Survivors.Fisherman
 
             if (bodyMass < maxMass && isHookImmune) return; // stop early if target is unhookable and unbleedable
             Vector3 force;
-            bool isFlyer = body.gameObject.GetComponent<VectorPID>() != null ? true: false;
+            //flying vermin seems to be the only flyer in the game that doesnt use a VectorPID to fly.
+            bool isFlyer = body.gameObject.GetComponent<VectorPID>() != null  || body.name == "FlyingVerminBody(Clone)"? true: false;
             
             float dist = Vector3.Distance(enemyPosition, targetPos);
 

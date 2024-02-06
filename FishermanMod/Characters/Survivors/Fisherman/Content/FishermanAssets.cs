@@ -126,10 +126,20 @@ namespace FishermanMod.Survivors.Fisherman
             stickOnImpact.alignNormals = false;
           
             ProjectileSingleTargetImpact pstImpact = hookProjectilePrefab.GetComponent<ProjectileSingleTargetImpact>();
-            
+            UnityEngine.Object.Destroy(pstImpact);
+            //pstImpact.enabled = false;
             ProjectileController pc = hookProjectilePrefab.GetComponent<ProjectileController>();
 
             CapsuleCollider collider = hookProjectilePrefab.GetComponent<CapsuleCollider>();
+
+            GameObject ItemInteractor = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            ItemInteractor.transform.parent = hookProjectilePrefab.transform;
+            ItemInteractor.transform.localPosition = Vector3.zero;
+            ItemInteractor.transform.localScale = Vector3.one * 6;
+            ItemInteractor.layer = 15;
+            UnityEngine.Object.Destroy(ItemInteractor.GetComponent<MeshRenderer>());
+            ItemInteractor.GetComponent<SphereCollider>().isTrigger = true;
+            
 
             FishHookController fishHook = hookProjectilePrefab.AddComponent<FishHookController>();
             fishHook.rb = rb;
@@ -137,6 +147,7 @@ namespace FishermanMod.Survivors.Fisherman
             fishHook.controller = pc;
             fishHook.projectileDamage = projectileDamage;
             fishHook.collider = collider;
+            //fishHook.pstImpact = pstImpact;
 
             GameObject ghostPrefab = pc.ghostPrefab;
             ProjectileGhostController gpc = ghostPrefab.GetComponent<ProjectileGhostController>();
