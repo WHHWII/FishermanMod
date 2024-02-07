@@ -204,7 +204,7 @@ namespace FishermanMod.Survivors.Fisherman
                 skillName = "CastFishHook",
                 skillNameToken = FISHERMAN_PREFIX + "SECONDARY_GUN_NAME",
                 skillDescriptionToken = FISHERMAN_PREFIX + "SECONDARY_GUN_DESCRIPTION",
-                keywordTokens = new string[] { "KEYWORD_AGILE" },
+                //keywordTokens = new string[] { "KEYWORD_AGILE" },
                 skillIcon = assetBundle.LoadAsset<Sprite>("texSecondaryIcon"),
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(SkillStates.AimHook)),
@@ -224,9 +224,9 @@ namespace FishermanMod.Survivors.Fisherman
                 mustKeyPress = true,
                 beginSkillCooldownOnSkillEnd = true,
 
-                isCombatSkill = false,
-                canceledFromSprinting = false,
-                cancelSprintingOnActivation = false,
+                isCombatSkill = true,
+                canceledFromSprinting = true,
+                cancelSprintingOnActivation = true,
                 forceSprintDuringState = false,
                 
 
@@ -257,12 +257,14 @@ namespace FishermanMod.Survivors.Fisherman
                 mustKeyPress = true,
                 beginSkillCooldownOnSkillEnd = false,
 
-                isCombatSkill = true,
+                isCombatSkill = false,
                 canceledFromSprinting = false,
                 cancelSprintingOnActivation = false,
                 forceSprintDuringState = false,
             });
-                Skills.AddSecondarySkills(bodyPrefab, secondaryFireFishHook, secondaryRecallFishHook);
+
+            InitValidInteractableGrabs();
+            Skills.AddSecondarySkills(bodyPrefab, secondaryFireFishHook, secondaryRecallFishHook);
         }
 
         private void AddUtiitySkills()
@@ -424,7 +426,7 @@ namespace FishermanMod.Survivors.Fisherman
             CharacterBody body = enemyHurtBox.healthComponent.body;
             Vector3 enemyPosition = enemyHurtBox.transform.position;
             Rigidbody bodyRB = enemyHurtBox.healthComponent.GetComponent<Rigidbody>();
-            float bodyMass = (bodyRB ? bodyRB.mass : 1f);
+            float bodyMass = (bodyRB ? bodyRB.mass : maxMass+1); // no rigid body = too heavy to hook 
             bool isHookImmune = body.HasBuff(FishermanBuffs.hookImmunityBuff);
 
             if (bodyMass < maxMass && isHookImmune) return; // stop early if target is unhookable and unbleedable
@@ -567,7 +569,8 @@ namespace FishermanMod.Survivors.Fisherman
 
             if(bodyMass > maxMass)
             {
-                
+                //play hook fail sound effect
+                //show hook hook fail decal on enemy
                 damageInfo.force = force * 0.1f;
                 damageInfo.procCoefficient = 1;
                 damageInfo.procChainMask = default(ProcChainMask);
@@ -576,11 +579,13 @@ namespace FishermanMod.Survivors.Fisherman
                 damageInfo.damage = hookFailDamage;  //add damage for bleed calcution
                 GlobalEventManager.instance.OnHitEnemy(damageInfo, body.gameObject);
                 GlobalEventManager.instance.OnHitAll(damageInfo, body.gameObject);
-                Log.Debug($"Mass too large, hook failed. New force: { damageInfo.force}");
+                Log.Debug($"Mass too large, hook failed. New force: { damageInfo.force}"); 
 
             }
             else if(!isHookImmune)
             {
+                //play hook success sound effect
+                //show hook success decal on enemy
                 Log.Debug("Hook Succeeded");
                 body.AddTimedBuff(FishermanBuffs.hookImmunityBuff, 0.3f);
                 enemyHurtBox.healthComponent.TakeDamage(damageInfo);
@@ -599,7 +604,40 @@ namespace FishermanMod.Survivors.Fisherman
         {
             deployedHook = fishHookInstance;
         }
+        static HashSet<String> GrabableInteractablesWhitelist = new HashSet<String>();
+        static HashSet<String> GrabableInteractablesBlacklist = new HashSet<String>();
+        static void InitValidInteractableGrabs()
+        {
+            GrabableInteractablesWhitelist.UnionWith(new[] {
+                "Turret1Broken",
 
-        
+            });
+            GrabableInteractablesBlacklist.UnionWith(new[] {
+                "MegaDroneBroken",
+                "Chest2",
+                "LunarChest",
+                "GoldChest",
+                "CategoryChest2Damage",
+                "CategoryChest2Utility",
+                "CategoryChest2Healing",
+
+
+            });
+
+        }
+        public static bool CheckIfInteractableIsGrabable(string name)
+        {
+            bool isGrabable = false;
+            name = name.Replace("(Clone)", "");
+            isGrabable = GrabableInteractablesWhitelist.Contains(name) ||
+                name.Contains("Drone") ||
+                name.Contains("Chest") ||
+                name.Contains("Barrel");
+
+            if (isGrabable) {
+                isGrabable = !GrabableInteractablesBlacklist.Contains(name);
+            }
+            return isGrabable;
+        }
     }
 }

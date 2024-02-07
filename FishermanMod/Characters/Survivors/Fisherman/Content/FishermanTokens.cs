@@ -47,12 +47,12 @@ namespace FishermanMod.Survivors.Fisherman
 
             #region Primary
             Language.Add(prefix + "PRIMARY_SLASH_NAME", "Debone");
-            Language.Add(prefix + "PRIMARY_SLASH_DESCRIPTION", Tokens.agilePrefix + $"Thwack in front for <style=cIsDamage>{100f * FishermanStaticValues.swordDamageCoefficient}% damage</style>.");
+            Language.Add(prefix + "PRIMARY_SLASH_DESCRIPTION", Tokens.agilePrefix + $"Thwack in front for <style=cIsDamage>{100f * FishermanStaticValues.swordDamageCoefficient}% damage.</style> Every 3rd Attack is a long range stab that <color=#d299ff>Hooks</color> fish.");
             #endregion
 
             #region Secondary
-            Language.Add(prefix + "SECONDARY_GUN_NAME", "Handgun");
-            Language.Add(prefix + "SECONDARY_GUN_DESCRIPTION", Tokens.agilePrefix + $"Fire a handgun for <style=cIsDamage>{100f * FishermanStaticValues.gunDamageCoefficient}% damage</style>.");
+            Language.Add(prefix + "SECONDARY_GUN_NAME", "Cast");
+            Language.Add(prefix + "SECONDARY_GUN_DESCRIPTION", Tokens.agilePrefix + $"Throw out a baited line that <style=cIsUtility>taunts</style> fish. Recall it to <color=#d299ff>Hook</color> fish for <style=cIsDamage>{100f * FishermanStaticValues.gunDamageCoefficient}% damage.</style> Can <color=#d299ff>Hook</color> all kinds of <style=cIsUtility>Treasure...</style>");
             #endregion
 
             #region Utility
@@ -66,8 +66,8 @@ namespace FishermanMod.Survivors.Fisherman
             #endregion
 
             #region Achievements
-            Language.Add(Tokens.GetAchievementNameToken(FishermanMasteryAchievement.identifier), "Henry: Mastery");
-            Language.Add(Tokens.GetAchievementDescriptionToken(FishermanMasteryAchievement.identifier), "As Henry, beat the game or obliterate on Monsoon.");
+            Language.Add(Tokens.GetAchievementNameToken(FishermanMasteryAchievement.identifier), "Fisherman: Mastery");
+            Language.Add(Tokens.GetAchievementDescriptionToken(FishermanMasteryAchievement.identifier), "As Fisherman, beat the game or obliterate on Monsoon.");
             #endregion
         }
     }

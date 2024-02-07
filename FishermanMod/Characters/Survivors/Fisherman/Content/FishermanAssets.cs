@@ -134,11 +134,34 @@ namespace FishermanMod.Survivors.Fisherman
 
             GameObject ItemInteractor = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             ItemInteractor.transform.parent = hookProjectilePrefab.transform;
+            UnityEngine.Object.Destroy(ItemInteractor.GetComponent<MeshRenderer>());
+            UnityEngine.Object.Destroy(ItemInteractor.GetComponent<MeshFilter>());
+            ItemInteractor.GetComponent<SphereCollider>().isTrigger = true;
             ItemInteractor.transform.localPosition = Vector3.zero;
             ItemInteractor.transform.localScale = Vector3.one * 6;
             ItemInteractor.layer = 15;
-            UnityEngine.Object.Destroy(ItemInteractor.GetComponent<MeshRenderer>());
-            ItemInteractor.GetComponent<SphereCollider>().isTrigger = true;
+            
+
+
+            //TeamComponent teamComp = hookProjectilePrefab.AddComponent<TeamComponent>();
+            //teamComp.teamIndex = TeamIndex.Player;
+            //CharacterBody hookBody = hookProjectilePrefab.AddComponent<CharacterBody>();
+            //hookBody.baseRegen = int.MaxValue;
+            //hookBody.baseMaxHealth = int.MaxValue;
+            //hookBody.baseArmor = int.MinValue;
+            //HealthComponent healthComp = hookProjectilePrefab.AddComponent<HealthComponent>();
+            //healthComp.health = int.MaxValue;
+            //healthComp.dontShowHealthbar = true;
+
+
+            GameObject enemyTaunter = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            enemyTaunter.transform.parent = hookProjectilePrefab.transform;
+            UnityEngine.Object.Destroy(enemyTaunter.GetComponent<MeshRenderer>());
+            UnityEngine.Object.Destroy(enemyTaunter.GetComponent<MeshFilter>());
+            enemyTaunter.GetComponent<SphereCollider>().isTrigger = true;
+            enemyTaunter.transform.localPosition = Vector3.zero;
+            enemyTaunter.transform.localScale = Vector3.one * 40;
+            enemyTaunter.layer = 15;
             
 
             FishHookController fishHook = hookProjectilePrefab.AddComponent<FishHookController>();
@@ -147,6 +170,7 @@ namespace FishermanMod.Survivors.Fisherman
             fishHook.controller = pc;
             fishHook.projectileDamage = projectileDamage;
             fishHook.collider = collider;
+            fishHook.enemyTaunter = enemyTaunter;
             //fishHook.pstImpact = pstImpact;
 
             GameObject ghostPrefab = pc.ghostPrefab;

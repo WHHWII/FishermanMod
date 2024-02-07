@@ -4,6 +4,10 @@
     {
         public const string agilePrefix = "<style=cIsUtility>Agile.</style>";
 
+        public static string HookText(string text)
+        {
+            return $"<color=#d299ff>{text}</style>";
+        }
         public static string DamageText(string text)
         {
             return $"<style=cIsDamage>{text}</style>";

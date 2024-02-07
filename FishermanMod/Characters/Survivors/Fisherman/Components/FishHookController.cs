@@ -12,6 +12,9 @@ using RoR2.Projectile;
 using UnityEngine.XR.WSA;
 using static UnityEngine.UI.GridLayoutGroup;
 using static UnityEngine.ParticleSystem.PlaybackState;
+using FishermanMod.Characters.Survivors.Fisherman.Components;
+using IL.RoR2.CharacterAI;
+using On.RoR2.CharacterAI;
 
 namespace FishermanMod.Survivors.Fisherman.Components
 {
@@ -22,6 +25,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
         public ProjectileController controller;
         public ProjectileDamage projectileDamage;
         public CapsuleCollider collider;
+        public GameObject enemyTaunter;
 
         bool isFlying = false;
         float distanceToOwner;
@@ -35,7 +39,9 @@ namespace FishermanMod.Survivors.Fisherman.Components
         float minTimeBeforeReturning = .5f;
         float maxFlyTime = 2;
 
-        HashSet<Collider> collidersHooked = new HashSet<Collider>();
+        HashSet<GameObject> objectsHooked = new HashSet<GameObject>();
+        HashSet<GameObject> enemiesTaunted = new HashSet<GameObject>();
+
         void Start()
         {
             //grappleOwnerRef.enabled = false;
@@ -72,6 +78,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
 
         public void FlyBack()
         {
+            enemyTaunter.SetActive(false);
             //Log.Debug("Flyback engaged");
             projectileDamage.damage = FishermanSurvivor.instance.bodyInfo.damage * FishermanStaticValues.gunDamageCoefficient;
             collider.radius += 1f;
@@ -112,33 +119,88 @@ namespace FishermanMod.Survivors.Fisherman.Components
             }
             return force;
         }
-        
+        bool CanThrow(GameObject gameObject)
+        {
+            if (!isFlying) return false;
+            if (objectsHooked.Contains(gameObject)) return false;
+
+            objectsHooked.Add(gameObject);
+            return true;
+        }
+        bool CanTaunt(GameObject gameObject)
+        {
+            if(enemiesTaunted.Contains(gameObject)) return false;
+            enemiesTaunted.Add(gameObject);
+            return true;
+        }
         void OnCollisionExit(UnityEngine.Collision collision)
         {
+            Log.Debug($"Collision Exit {collision.gameObject.name}");
+            if (!CanThrow(collision.gameObject)) return;
             ThrowMob(collision);
         }
         void OnCollisionEnter(UnityEngine.Collision collision)
         {
+            Log.Debug($"Collision Enter {collision.gameObject.name}");
             //stickComponent.TrySticking(collision.collider, Vector3.zero);
+            if (!CanThrow(collision.gameObject)) return;
             ThrowMob(collision);
         }
         void OnTriggerExit(Collider collider)
         {
-            ThrowItem(collider);
+            Log.Debug($"Trigger Exit {collider.gameObject.name}");
+            if (!CanThrow(collider.gameObject)) return;
+            if (ThrowItem(collider)) return;
+            ThrowInteractable(collider);
         }
         void OnTriggerEnter(Collider collider)
         {
-            ThrowItem(collider);
+            //Log.Debug($"Trigger Enter {collider.gameObject.name}");
+            //if (CanTaunt(collider.gameObject))
+            //{
+            //    Log.Debug($"-Can Taunt {collider.gameObject.name}");
+            //    TeamComponent team = collider.GetComponent<TeamComponent>();
+            //    if (team != null)
+            //    {
+            //        Log.Debug($"{collider.gameObject.name}'s Team =  {team.teamIndex}");
+            //        if (team.teamIndex != controller.owner.GetComponent<TeamComponent>().teamIndex)
+            //        {
+            //            Log.Debug($"{collider.gameObject.name} is on a different team than hook owner");
+            //            var ai = collider.gameObject.GetComponent<CharacterBody>().master.GetComponent<RoR2.CharacterAI.BaseAI>();
+            //            if(ai != null)
+            //            {
+            //                Log.Debug($"{collider.gameObject.name} Ai located, setting target");
+            //                //RoR2.CharacterAI.BaseAI.Target newTarget = new RoR2.CharacterAI.BaseAI.Target(controller.owner.GetComponent<CharacterBody>().master.GetComponent<RoR2.CharacterAI.BaseAI>());
+            //                //newTarget.gameObject = gameObject;
+            //                //newTarget._gameObject = gameObject;
+            //                //newTarget.characterBody = 
+            //                ai.currentEnemy.Reset();
+            //                ai.currentEnemy.gameObject = gameObject;
+            //                ai.currentEnemy.Update();
+            //                ai.
+
+                            
+            //            }
+            //        }
+            //    }
+
+
+
+
+            //}
+            
+            if (!CanThrow(collider.gameObject)) return;
+            if (ThrowItem(collider)) return;
+            ThrowInteractable(collider);
         }
         void ThrowMob(UnityEngine.Collision collision)
         {
-            if (!isFlying) return;
-            if (collidersHooked.Contains(collider)) return;
             //Log.Debug("Hit something");
             Log.Debug($" Hook impacted {collision.gameObject.name}");
             HurtBox target = collision.gameObject.GetComponent<HurtBox>();
             if (target != null)
             {
+                
                 DamageInfo FlyAttackDamage = new DamageInfo
                 {
                     attacker = controller.owner,
@@ -155,20 +217,41 @@ namespace FishermanMod.Survivors.Fisherman.Components
                 GlobalEventManager.instance.OnHitAll(FlyAttackDamage, target.gameObject);
                 //Log.Debug("\t a mob!");
                 FishermanSurvivor.ApplyFishermanPassiveFishHookEffect(ownerTransform.gameObject, ownerTransform.gameObject, projectileDamage.damage, ownerTransform.position, target);
-                collidersHooked.Add(collider);
             }
         }
-        void ThrowItem(Collider collider)
+        bool ThrowItem(Collider collider)
         {
-            if (!isFlying) return;
             
-            Log.Debug(collider.gameObject.name);
             if (collider.gameObject.name == "GenericPickup(Clone)")
             {
-                if (collidersHooked.Contains(collider)) return;
+                Log.Debug($"Item Hit, {collider.gameObject.name}");
                 Rigidbody itemBody = collider.gameObject.GetComponent<Rigidbody>();
-                itemBody.AddForce(CalculateReturnForce(returnForceBase, itemBody,true), ForceMode.Impulse);
-                collidersHooked.Add(collider);
+                itemBody.AddForce(CalculateReturnForce(returnForceBase, itemBody), ForceMode.Impulse);
+                return true;
+            }
+            return false;
+
+        } 
+
+        void ThrowInteractable(Collider collider)
+        {
+
+            EntityLocator eLoc = collider.gameObject.GetComponent<EntityLocator>();
+            if (eLoc != null)
+            {
+                bool isGrabbable = FishermanSurvivor.CheckIfInteractableIsGrabable(eLoc.entity.name);
+             
+                Log.Debug($"{eLoc.entity.name}: Can be grabbed?: {isGrabbable}");
+                if (!isGrabbable) return;
+                InteractableStopOnImpact stopper = eLoc.entity.AddComponent<InteractableStopOnImpact>();
+                stopper.rb = eLoc.entity.AddComponent<Rigidbody>();
+                stopper.rb.mass = 40;
+                
+                stopper.collider = eLoc.entity.AddComponent<SphereCollider>();
+                stopper.collider.radius = 0.5f;
+                //interactableBody.useGravity = false;
+                stopper.rb.AddForce(CalculateReturnForce(returnForceBase, stopper.rb), ForceMode.Impulse);
+                
             }
 
         }

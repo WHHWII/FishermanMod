@@ -1,5 +1,6 @@
 ﻿using EntityStates;
 using FishermanMod.Survivors.Fisherman;
+using On.RoR2.CharacterAI;
 using RoR2;
 using RoR2.Audio;
 using RoR2.Skills;
