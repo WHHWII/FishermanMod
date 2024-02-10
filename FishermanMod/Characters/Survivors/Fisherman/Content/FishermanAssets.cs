@@ -140,27 +140,28 @@ namespace FishermanMod.Survivors.Fisherman
             ItemInteractor.transform.localPosition = Vector3.zero;
             ItemInteractor.transform.localScale = Vector3.one * 6;
             ItemInteractor.layer = 15;
+
+
+
+            TeamComponent teamComp = hookProjectilePrefab.AddComponent<TeamComponent>();
+            teamComp.teamIndex = TeamIndex.Player;
+            CharacterBody hookBody = hookProjectilePrefab.AddComponent<CharacterBody>();
+            hookBody.baseRegen = int.MaxValue;
+            hookBody.baseMaxHealth = int.MaxValue;
+            hookBody.baseArmor = int.MinValue;
+            HealthComponent healthComp = hookProjectilePrefab.AddComponent<HealthComponent>();
+            healthComp.health = int.MaxValue;
+            healthComp.dontShowHealthbar = true;
+
             
-
-
-            //TeamComponent teamComp = hookProjectilePrefab.AddComponent<TeamComponent>();
-            //teamComp.teamIndex = TeamIndex.Player;
-            //CharacterBody hookBody = hookProjectilePrefab.AddComponent<CharacterBody>();
-            //hookBody.baseRegen = int.MaxValue;
-            //hookBody.baseMaxHealth = int.MaxValue;
-            //hookBody.baseArmor = int.MinValue;
-            //HealthComponent healthComp = hookProjectilePrefab.AddComponent<HealthComponent>();
-            //healthComp.health = int.MaxValue;
-            //healthComp.dontShowHealthbar = true;
-
 
             GameObject enemyTaunter = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             enemyTaunter.transform.parent = hookProjectilePrefab.transform;
-            UnityEngine.Object.Destroy(enemyTaunter.GetComponent<MeshRenderer>());
-            UnityEngine.Object.Destroy(enemyTaunter.GetComponent<MeshFilter>());
+            //UnityEngine.Object.Destroy(enemyTaunter.GetComponent<MeshRenderer>());
+            //UnityEngine.Object.Destroy(enemyTaunter.GetComponent<MeshFilter>());
             enemyTaunter.GetComponent<SphereCollider>().isTrigger = true;
             enemyTaunter.transform.localPosition = Vector3.zero;
-            enemyTaunter.transform.localScale = Vector3.one * 40;
+            enemyTaunter.transform.localScale = Vector3.one * 8;
             enemyTaunter.layer = 15;
             
 
@@ -171,6 +172,7 @@ namespace FishermanMod.Survivors.Fisherman
             fishHook.projectileDamage = projectileDamage;
             fishHook.collider = collider;
             fishHook.enemyTaunter = enemyTaunter;
+            fishHook.hookBody = hookBody;
             //fishHook.pstImpact = pstImpact;
 
             GameObject ghostPrefab = pc.ghostPrefab;

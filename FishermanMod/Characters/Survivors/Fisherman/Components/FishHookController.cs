@@ -15,6 +15,7 @@ using static UnityEngine.ParticleSystem.PlaybackState;
 using FishermanMod.Characters.Survivors.Fisherman.Components;
 using IL.RoR2.CharacterAI;
 using On.RoR2.CharacterAI;
+using System.Collections;
 
 namespace FishermanMod.Survivors.Fisherman.Components
 {
@@ -26,6 +27,8 @@ namespace FishermanMod.Survivors.Fisherman.Components
         public ProjectileDamage projectileDamage;
         public CapsuleCollider collider;
         public GameObject enemyTaunter;
+        public HurtBox hookHurtBox;
+        public CharacterBody hookBody;
 
         bool isFlying = false;
         float distanceToOwner;
@@ -39,14 +42,20 @@ namespace FishermanMod.Survivors.Fisherman.Components
         float minTimeBeforeReturning = .5f;
         float maxFlyTime = 2;
 
+        float maxTauntTime = 5f;
+        bool canPollTauntedEnemiesForRelease = true;
+
         HashSet<GameObject> objectsHooked = new HashSet<GameObject>();
         HashSet<GameObject> enemiesTaunted = new HashSet<GameObject>();
+        Dictionary<RoR2.CharacterAI.BaseAI, float> tauntedAITimers = new Dictionary<RoR2.CharacterAI.BaseAI, float>();
 
         void Start()
         {
             //grappleOwnerRef.enabled = false;
             ownerTransform = controller.owner.transform;
             FishermanSurvivor.SetDeployedHook(this);
+            
+            
         }
         void FixedUpdate()
         {
@@ -69,15 +78,27 @@ namespace FishermanMod.Survivors.Fisherman.Components
                     }
                     else
                     {
+
                         Destroy(gameObject);
                     }
                 }
                 
             }
-        }
 
+            if(tauntedAITimers.Count > 0 && canPollTauntedEnemiesForRelease)
+            {
+                ClearAgrro();
+                StartCoroutine(TauntReleasePollTimer());
+            }
+        }
+        IEnumerator TauntReleasePollTimer()
+        {
+            yield return new WaitForSeconds(maxTauntTime);
+            canPollTauntedEnemiesForRelease = true;
+        }
         public void FlyBack()
         {
+            ClearAgrro();
             enemyTaunter.SetActive(false);
             //Log.Debug("Flyback engaged");
             projectileDamage.damage = FishermanSurvivor.instance.bodyInfo.damage * FishermanStaticValues.gunDamageCoefficient;
@@ -142,6 +163,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
         void OnCollisionEnter(UnityEngine.Collision collision)
         {
             Log.Debug($"Collision Enter {collision.gameObject.name}");
+            //if (hookHurtBox == null) hookHurtBox = gameObject.AddComponent<HurtBox>();
             //stickComponent.TrySticking(collision.collider, Vector3.zero);
             if (!CanThrow(collision.gameObject)) return;
             ThrowMob(collision);
@@ -155,40 +177,9 @@ namespace FishermanMod.Survivors.Fisherman.Components
         }
         void OnTriggerEnter(Collider collider)
         {
-            //Log.Debug($"Trigger Enter {collider.gameObject.name}");
-            //if (CanTaunt(collider.gameObject))
-            //{
-            //    Log.Debug($"-Can Taunt {collider.gameObject.name}");
-            //    TeamComponent team = collider.GetComponent<TeamComponent>();
-            //    if (team != null)
-            //    {
-            //        Log.Debug($"{collider.gameObject.name}'s Team =  {team.teamIndex}");
-            //        if (team.teamIndex != controller.owner.GetComponent<TeamComponent>().teamIndex)
-            //        {
-            //            Log.Debug($"{collider.gameObject.name} is on a different team than hook owner");
-            //            var ai = collider.gameObject.GetComponent<CharacterBody>().master.GetComponent<RoR2.CharacterAI.BaseAI>();
-            //            if(ai != null)
-            //            {
-            //                Log.Debug($"{collider.gameObject.name} Ai located, setting target");
-            //                //RoR2.CharacterAI.BaseAI.Target newTarget = new RoR2.CharacterAI.BaseAI.Target(controller.owner.GetComponent<CharacterBody>().master.GetComponent<RoR2.CharacterAI.BaseAI>());
-            //                //newTarget.gameObject = gameObject;
-            //                //newTarget._gameObject = gameObject;
-            //                //newTarget.characterBody = 
-            //                ai.currentEnemy.Reset();
-            //                ai.currentEnemy.gameObject = gameObject;
-            //                ai.currentEnemy.Update();
-            //                ai.
+            Log.Debug($"Trigger Enter {collider.gameObject.name}");
 
-                            
-            //            }
-            //        }
-            //    }
-
-
-
-
-            //}
-            
+            DrawAggro(collider);
             if (!CanThrow(collider.gameObject)) return;
             if (ThrowItem(collider)) return;
             ThrowInteractable(collider);
@@ -254,6 +245,90 @@ namespace FishermanMod.Survivors.Fisherman.Components
                 
             }
 
+        }
+
+        void DrawAggro(Collider collider)
+        {
+            if (CanTaunt(collider.gameObject))
+            {
+                Log.Debug($"-Can Taunt {collider.gameObject.name}");
+                TeamComponent team = collider.GetComponent<TeamComponent>();
+                if (team != null)
+                {
+                   // if (hookHurtBox == null) return;
+                    Log.Debug($"{collider.gameObject.name}'s Team =  {team.teamIndex}");
+                    if (team.teamIndex != controller.owner.GetComponent<TeamComponent>().teamIndex)
+                    {
+                        CharacterBody body = collider.gameObject.GetComponent<CharacterBody>();
+                        body.AddTimedBuff(FishermanBuffs.hookTauntDebuff, maxTauntTime);
+                        body.healthComponent.dontShowHealthbar = false;
+                        //body.healt
+                        Log.Debug($"{collider.gameObject.name} is on a different team than hook owner");
+                        //RoR2.UI.CombatHealthBarViewer. need to see about making this force show health bars
+                        //that or make an effect similiar to death mark
+                        foreach (RoR2.CharacterAI.BaseAI ai in body.master.aiComponents)
+                        {
+                            if (ai != null)
+                            {
+                                Log.Debug($"{collider.gameObject.name} Ai located, setting target");
+                                //RoR2.CharacterAI.BaseAI.Target newTarget = new RoR2.CharacterAI.BaseAI.Target(controller.owner.GetComponent<CharacterBody>().master.GetComponent<RoR2.CharacterAI.BaseAI>());
+                                //newTarget.gameObject = gameObject;
+                                //newTarget._gameObject = gameObject;
+                                //newTarget.characterBody = 
+                                //ai.currentEnemy.Reset();
+                                ai.currentEnemy.gameObject = gameObject;
+                                ai.currentEnemy.bestHurtBox = null;
+                                ai.enemyAttention = ai.enemyAttentionDuration;
+                                ai.targetRefreshTimer = 1;
+                                ai.BeginSkillDriver(ai.EvaluateSkillDrivers());
+                                tauntedAITimers.Add(ai, Time.time);
+                                
+                            }
+
+
+                        }
+
+
+
+                    }
+                }
+
+
+
+
+            }
+        }
+
+        void ClearAgrro()
+        {
+            if (tauntedAITimers.Count <= 0) return;
+            List<RoR2.CharacterAI.BaseAI> aisToRemove = new List<RoR2.CharacterAI.BaseAI>();
+            foreach (var aiTimer in tauntedAITimers)
+            {
+                if (Time.time - aiTimer.Value > maxTauntTime)
+                {
+                    if(aiTimer.Key == null)
+                    {
+                        aisToRemove.Add(aiTimer.Key);
+                        continue;
+                    }
+                    Log.Debug($"Releasing: {aiTimer.Key.gameObject.name}");
+                    aiTimer.Key.currentEnemy.gameObject = controller.owner.gameObject;
+                    aiTimer.Key.currentEnemy.bestHurtBox = controller.owner.GetComponent<CharacterBody>().mainHurtBox;
+                    aiTimer.Key.BeginSkillDriver(aiTimer.Key.EvaluateSkillDrivers());
+                    //aiTimer.Key.gameObject.GetComponent<CharacterBody>().RemoveBuff(FishermanBuffs.hookTauntDebuff);
+                    aisToRemove.Add(aiTimer.Key);
+                }
+                else
+                {
+                    //aiTimer.Key.gameObject.GetComponent<CharacterBody>().AddTimedBuff(FishermanBuffs.hookTauntDebuff, maxTauntTime);
+                }
+            }
+            foreach (var ai in aisToRemove)
+            {
+                tauntedAITimers.Remove(ai);
+            }
+            canPollTauntedEnemiesForRelease = false;
         }
     }
 }

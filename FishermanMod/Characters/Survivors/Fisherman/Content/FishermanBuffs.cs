@@ -8,6 +8,7 @@ namespace FishermanMod.Survivors.Fisherman
         // armor buff gained during roll
         public static BuffDef armorBuff;
         public static BuffDef hookImmunityBuff;
+        public static BuffDef hookTauntDebuff;
 
         public static void Init(AssetBundle assetBundle)
         {
@@ -20,6 +21,11 @@ namespace FishermanMod.Survivors.Fisherman
             hookImmunityBuff = Modules.Content.CreateAndAddBuff("HookImmunityBuff",
                 LegacyResourcesAPI.Load<BuffDef>("BuffDefs/HiddenInvincibility").iconSprite,
                 Color.white,
+                false,
+                false);
+            hookTauntDebuff = Modules.Content.CreateAndAddBuff("HookTauntDebuff",
+                LegacyResourcesAPI.Load<BuffDef>("BuffDefs/HiddenInvincibility").iconSprite,
+                Color.red,
                 false,
                 true);
         }
