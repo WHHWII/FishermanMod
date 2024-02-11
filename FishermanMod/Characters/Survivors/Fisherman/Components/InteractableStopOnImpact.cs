@@ -18,7 +18,7 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Components
         public void OnCollisionEnter(Collision collision) 
         {
             if (!canStop) return;
-            Log.Debug($"Thrown Interactable colldided with {collision.gameObject.name}");
+            //Log.Debug($"Thrown Interactable colldided with {collision.gameObject.name}");
             if (collision.gameObject.name.Contains("Terrain"))
             {
                 rb.useGravity = false;

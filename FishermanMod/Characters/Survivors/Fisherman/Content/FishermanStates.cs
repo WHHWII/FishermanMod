@@ -18,6 +18,8 @@ namespace FishermanMod.Survivors.Fisherman
             Modules.Content.AddEntityState(typeof(AimHook));
 
             Modules.Content.AddEntityState(typeof(RecallHook));
+
+            Modules.Content.AddEntityState(typeof(SummonPlatform));
         }
     }
 }

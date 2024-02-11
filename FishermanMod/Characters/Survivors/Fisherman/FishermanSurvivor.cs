@@ -139,6 +139,7 @@ namespace FishermanMod.Survivors.Fisherman
             //example of how to create a hitbox
             Transform swipeHitBoxTransform = childLocator.FindChild("SwipeHitbox");
             Transform stabHitBoxTransform = childLocator.FindChild("StabHitbox");
+            
             Prefabs.SetupHitBoxGroup(characterModelObject, "SwipeGroup", swipeHitBoxTransform);
             Prefabs.SetupHitBoxGroup(characterModelObject, "StabGroup", stabHitBoxTransform);
         }
@@ -211,7 +212,7 @@ namespace FishermanMod.Survivors.Fisherman
                 activationStateMachineName = "Weapon2",
                 interruptPriority = EntityStates.InterruptPriority.Skill,
 
-                baseRechargeInterval = 1f, // change
+                baseRechargeInterval = 4f, // change
                 baseMaxStock = 1,
 
                 rechargeStock = 1,
@@ -278,7 +279,7 @@ namespace FishermanMod.Survivors.Fisherman
                 skillIcon = assetBundle.LoadAsset<Sprite>("texUtilityIcon"),
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(Roll)),
-                activationStateMachineName = "Body",
+                activationStateMachineName = "Weapon2",
                 interruptPriority = EntityStates.InterruptPriority.PrioritySkill,
 
                 baseMaxStock = 1,
@@ -290,7 +291,41 @@ namespace FishermanMod.Survivors.Fisherman
                 cancelSprintingOnActivation = false,
             });
 
-            Skills.AddUtilitySkills(bodyPrefab, utilitySkillDef1);
+            SkillDef utilitySummonPlatform = Skills.CreateSkillDef(new SkillDefInfo
+            {
+                skillName = "F135 Mobile Shanty Platfrom",
+                skillNameToken = FISHERMAN_PREFIX + "UTILITY_ROLL_NAME",
+                skillDescriptionToken = FISHERMAN_PREFIX + "UTILITY_ROLL_DESCRIPTION",
+                keywordTokens = new string[] { "KEYWORD_AGILE" },
+                skillIcon = assetBundle.LoadAsset<Sprite>("texUtilityIcon"),
+
+                activationState = new EntityStates.SerializableEntityStateType(typeof(SkillStates.SummonPlatform)),
+                activationStateMachineName = "Body",
+                interruptPriority = EntityStates.InterruptPriority.Skill,
+
+                baseRechargeInterval = 12f,
+                baseMaxStock = 1,
+
+                rechargeStock = 1,
+                requiredStock = 1,
+                stockToConsume = 1,
+
+                resetCooldownTimerOnUse = false,
+                fullRestockOnAssign = true,
+                dontAllowPastMaxStocks = false,
+                mustKeyPress = true,
+                beginSkillCooldownOnSkillEnd = true,
+
+                isCombatSkill = false,
+                canceledFromSprinting = false,
+                cancelSprintingOnActivation = false,
+                forceSprintDuringState = false,
+
+
+            });
+            
+
+            Skills.AddUtilitySkills(bodyPrefab, utilitySummonPlatform);
         }
 
         private void AddSpecialSkills()
@@ -452,15 +487,17 @@ namespace FishermanMod.Survivors.Fisherman
 
 
 
-            Log.Debug($"\nHookInfo: " +
-                $"\n\tName: {body.name}" +
-                $"\n\tIsFlyer: {isFlyer}" +
-                $"\n\ttargetMass: {bodyMass}" +
-                $"\n\tdist: {dist}" +
-                $"\n\tdistanceVector: {distanceVector}" +
-                $"\n\tnewDistanceVector: {newDistanceVector}" +
-                $"\n\bonusPower: {bonusPower}" +
-                $"\n\t>Final Force: {force}");
+            //Log.Debug($"\nHookInfo: " +
+            //    $"\n\tName: {body.name}" +
+            //    $"\n\tIsFlyer: {isFlyer}" +
+            //    $"\n\ttargetMass: {bodyMass}" +
+            //    $"\n\tdist: {dist}" +
+            //    $"\n\tdistanceVector: {distanceVector}" +
+            //    $"\n\tnewDistanceVector: {newDistanceVector}" +
+            //    $"\n\bonusPower: {bonusPower}" +
+            //    $"\n\t>Final Force: {force}");
+
+
             /*
             
 

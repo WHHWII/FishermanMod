@@ -17,6 +17,8 @@ namespace FishermanMod.Modules.BaseStates
     {
         public int swingIndex;
 
+        protected Transform hitBoxOrienter;
+
         protected string hitboxGroupName = "SwipeGroup";
         protected string hitBoxGroupName2 = "StabGroup";
         protected DamageType damageType = DamageType.Generic;
@@ -145,7 +147,24 @@ namespace FishermanMod.Modules.BaseStates
         {
             if (isAuthority)
             {
-                
+                Vector3 direction = GetAimRay().direction;
+                direction.y = Mathf.Max(direction.y, direction.y * 0.5f);
+                //GameObject obj = 
+                //if(obj != null) { Log.Debug(" found obj"); }
+                Transform trans = characterBody.modelLocator.modelTransform;
+                if (trans != null) { 
+                    Log.Debug($" found trans { trans.gameObject.name}");
+                    ChildLocator cl = trans.gameObject.GetComponent<ChildLocator>();
+                    if (cl != null) { 
+                        Log.Debug($" found childlocator {cl.name}");
+                        Transform sp = cl.FindChild(30);
+                        if (sp != null)
+                        {
+                            sp.rotation = Util.QuaternionSafeLookRotation(direction);
+                        }
+                    }
+                }
+
                 if (attack.Fire(hitresults))
                 {
                     OnHitEnemyAuthority();

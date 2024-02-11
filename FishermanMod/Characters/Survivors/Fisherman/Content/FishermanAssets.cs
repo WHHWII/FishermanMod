@@ -6,6 +6,7 @@ using RoR2.Projectile;
 using UnityEngine.AddressableAssets;
 using UnityEngine.PlayerLoop;
 using FishermanMod.Survivors.Fisherman.Components;
+using FishermanMod.Characters.Survivors.Fisherman.Components;
 
 namespace FishermanMod.Survivors.Fisherman
 {
@@ -23,6 +24,8 @@ namespace FishermanMod.Survivors.Fisherman
         //projectiles
         public static GameObject bombProjectilePrefab;
         public static GameObject hookProjectilePrefab;
+        public static GameObject movingPlatformBlueprintPrefab;
+        public static GameObject movingPlatformPrefab;
 
         private static AssetBundle _assetBundle;
 
@@ -36,6 +39,7 @@ namespace FishermanMod.Survivors.Fisherman
             CreateEffects();
 
             CreateProjectiles();
+
         }
 
         #region effects
@@ -77,6 +81,8 @@ namespace FishermanMod.Survivors.Fisherman
             Content.AddProjectilePrefab(bombProjectilePrefab);
             CreateHookProjectile();
             Content.AddProjectilePrefab(hookProjectilePrefab);
+            CreateMovingPlatform();
+            Content.AddProjectilePrefab(movingPlatformBlueprintPrefab);
         }
 
         private static void CreateBombProjectile()
@@ -161,7 +167,7 @@ namespace FishermanMod.Survivors.Fisherman
             //UnityEngine.Object.Destroy(enemyTaunter.GetComponent<MeshFilter>());
             enemyTaunter.GetComponent<SphereCollider>().isTrigger = true;
             enemyTaunter.transform.localPosition = Vector3.zero;
-            enemyTaunter.transform.localScale = Vector3.one * 8;
+            enemyTaunter.transform.localScale = Vector3.one * 15;
             enemyTaunter.layer = 15;
             
 
@@ -186,7 +192,17 @@ namespace FishermanMod.Survivors.Fisherman
             trailEffect.endWidth = 0.01f;
 
         }
+
+        private static void CreateMovingPlatform()
+        {
+            movingPlatformBlueprintPrefab = _assetBundle.LoadAsset<GameObject>("MovingPlatformBlueprint");
+            //var bpc = movingPlatformBlueprintPrefab.AddComponent<BlueprintController>();
+            movingPlatformPrefab = _assetBundle.LoadAsset<GameObject>("MovingPlatform");
+            movingPlatformPrefab.AddComponent<MovingPlatformController>();
+           
+        }
         #endregion projectiles
+
     }
 
         

@@ -156,13 +156,13 @@ namespace FishermanMod.Survivors.Fisherman.Components
         }
         void OnCollisionExit(UnityEngine.Collision collision)
         {
-            Log.Debug($"Collision Exit {collision.gameObject.name}");
+            //Log.Debug($"Collision Exit {collision.gameObject.name}");
             if (!CanThrow(collision.gameObject)) return;
             ThrowMob(collision);
         }
         void OnCollisionEnter(UnityEngine.Collision collision)
         {
-            Log.Debug($"Collision Enter {collision.gameObject.name}");
+            //Log.Debug($"Collision Enter {collision.gameObject.name}");
             //if (hookHurtBox == null) hookHurtBox = gameObject.AddComponent<HurtBox>();
             //stickComponent.TrySticking(collision.collider, Vector3.zero);
             if (!CanThrow(collision.gameObject)) return;
@@ -170,14 +170,14 @@ namespace FishermanMod.Survivors.Fisherman.Components
         }
         void OnTriggerExit(Collider collider)
         {
-            Log.Debug($"Trigger Exit {collider.gameObject.name}");
+            //Log.Debug($"Trigger Exit {collider.gameObject.name}");
             if (!CanThrow(collider.gameObject)) return;
             if (ThrowItem(collider)) return;
             ThrowInteractable(collider);
         }
         void OnTriggerEnter(Collider collider)
         {
-            Log.Debug($"Trigger Enter {collider.gameObject.name}");
+            //Log.Debug($"Trigger Enter {collider.gameObject.name}");
 
             DrawAggro(collider);
             if (!CanThrow(collider.gameObject)) return;
@@ -187,7 +187,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
         void ThrowMob(UnityEngine.Collision collision)
         {
             //Log.Debug("Hit something");
-            Log.Debug($" Hook impacted {collision.gameObject.name}");
+            //Log.Debug($" Hook impacted {collision.gameObject.name}");
             HurtBox target = collision.gameObject.GetComponent<HurtBox>();
             if (target != null)
             {
@@ -232,11 +232,11 @@ namespace FishermanMod.Survivors.Fisherman.Components
             {
                 bool isGrabbable = FishermanSurvivor.CheckIfInteractableIsGrabable(eLoc.entity.name);
              
-                Log.Debug($"{eLoc.entity.name}: Can be grabbed?: {isGrabbable}");
+                //Log.Debug($"{eLoc.entity.name}: Can be grabbed?: {isGrabbable}");
                 if (!isGrabbable) return;
                 InteractableStopOnImpact stopper = eLoc.entity.AddComponent<InteractableStopOnImpact>();
                 stopper.rb = eLoc.entity.AddComponent<Rigidbody>();
-                stopper.rb.mass = 40;
+                stopper.rb.mass = 150;
                 
                 stopper.collider = eLoc.entity.AddComponent<SphereCollider>();
                 stopper.collider.radius = 0.5f;
@@ -251,26 +251,26 @@ namespace FishermanMod.Survivors.Fisherman.Components
         {
             if (CanTaunt(collider.gameObject))
             {
-                Log.Debug($"-Can Taunt {collider.gameObject.name}");
+                //Log.Debug($"-Can Taunt {collider.gameObject.name}");
                 TeamComponent team = collider.GetComponent<TeamComponent>();
                 if (team != null)
                 {
                    // if (hookHurtBox == null) return;
-                    Log.Debug($"{collider.gameObject.name}'s Team =  {team.teamIndex}");
+                    //Log.Debug($"{collider.gameObject.name}'s Team =  {team.teamIndex}");
                     if (team.teamIndex != controller.owner.GetComponent<TeamComponent>().teamIndex)
                     {
                         CharacterBody body = collider.gameObject.GetComponent<CharacterBody>();
                         body.AddTimedBuff(FishermanBuffs.hookTauntDebuff, maxTauntTime);
                         body.healthComponent.dontShowHealthbar = false;
                         //body.healt
-                        Log.Debug($"{collider.gameObject.name} is on a different team than hook owner");
+                        //Log.Debug($"{collider.gameObject.name} is on a different team than hook owner");
                         //RoR2.UI.CombatHealthBarViewer. need to see about making this force show health bars
                         //that or make an effect similiar to death mark
                         foreach (RoR2.CharacterAI.BaseAI ai in body.master.aiComponents)
                         {
                             if (ai != null)
                             {
-                                Log.Debug($"{collider.gameObject.name} Ai located, setting target");
+                                //Log.Debug($"{collider.gameObject.name} Ai located, setting target");
                                 //RoR2.CharacterAI.BaseAI.Target newTarget = new RoR2.CharacterAI.BaseAI.Target(controller.owner.GetComponent<CharacterBody>().master.GetComponent<RoR2.CharacterAI.BaseAI>());
                                 //newTarget.gameObject = gameObject;
                                 //newTarget._gameObject = gameObject;
@@ -312,7 +312,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
                         aisToRemove.Add(aiTimer.Key);
                         continue;
                     }
-                    Log.Debug($"Releasing: {aiTimer.Key.gameObject.name}");
+                    //Log.Debug($"Releasing: {aiTimer.Key.gameObject.name}");
                     aiTimer.Key.currentEnemy.gameObject = controller.owner.gameObject;
                     aiTimer.Key.currentEnemy.bestHurtBox = controller.owner.GetComponent<CharacterBody>().mainHurtBox;
                     aiTimer.Key.BeginSkillDriver(aiTimer.Key.EvaluateSkillDrivers());
