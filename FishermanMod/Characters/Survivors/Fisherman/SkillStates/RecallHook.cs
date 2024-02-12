@@ -21,7 +21,9 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
                 base.skillLocator.secondary.DeductStock(1); // may change this to deduct all stocks if all hooks are fired at once.
                 if(FishermanSurvivor.deployedHook != null) FishermanSurvivor.deployedHook.FlyBack(); // this is a bandaid fix for projectile getting destoryed on initial impact
             }
+            
             outer.SetNextStateToMain();
+            base.OnEnter();
         }
         public override void OnExit()
         {

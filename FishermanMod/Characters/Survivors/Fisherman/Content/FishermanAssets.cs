@@ -7,6 +7,9 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.PlayerLoop;
 using FishermanMod.Survivors.Fisherman.Components;
 using FishermanMod.Characters.Survivors.Fisherman.Components;
+using IL.RoR2.Orbs;
+using R2API;
+using IL.RoR2.EntityLogic;
 
 namespace FishermanMod.Survivors.Fisherman
 {
@@ -26,6 +29,10 @@ namespace FishermanMod.Survivors.Fisherman
         public static GameObject hookProjectilePrefab;
         public static GameObject movingPlatformBlueprintPrefab;
         public static GameObject movingPlatformPrefab;
+        public static GameObject hookBombProjectilePrefab;
+
+        //materials
+        public static Material chainMat;
 
         private static AssetBundle _assetBundle;
 
@@ -40,6 +47,7 @@ namespace FishermanMod.Survivors.Fisherman
 
             CreateProjectiles();
 
+            CreateMaterials();
         }
 
         #region effects
@@ -83,6 +91,8 @@ namespace FishermanMod.Survivors.Fisherman
             Content.AddProjectilePrefab(hookProjectilePrefab);
             CreateMovingPlatform();
             Content.AddProjectilePrefab(movingPlatformBlueprintPrefab);
+            CreateJellyfishProjectile();
+            Content.AddProjectilePrefab(hookBombProjectilePrefab);
         }
 
         private static void CreateBombProjectile()
@@ -167,7 +177,7 @@ namespace FishermanMod.Survivors.Fisherman
             //UnityEngine.Object.Destroy(enemyTaunter.GetComponent<MeshFilter>());
             enemyTaunter.GetComponent<SphereCollider>().isTrigger = true;
             enemyTaunter.transform.localPosition = Vector3.zero;
-            enemyTaunter.transform.localScale = Vector3.one * 15;
+            enemyTaunter.transform.localScale = Vector3.one * 30;
             enemyTaunter.layer = 15;
             
 
@@ -201,7 +211,63 @@ namespace FishermanMod.Survivors.Fisherman
             movingPlatformPrefab.AddComponent<MovingPlatformController>();
            
         }
+
+        private static void CreateJellyfishProjectile()
+        {
+            hookBombProjectilePrefab = Assets.CloneProjectilePrefab("LoaderPylon", "FishermanJellyfish");
+
+            //UnityEngine.Object.Destroy(hookBombProjectilePrefab.GetComponent<AntiGravityForce>());
+            UnityEngine.Object.Destroy(hookBombProjectilePrefab.GetComponent<AwakeEvent>());
+
+            var antiGrav = hookBombProjectilePrefab.GetComponent<AntiGravityForce>();
+            antiGrav.antiGravityCoefficient = 0.5f;
+
+            var beamController = hookBombProjectilePrefab.GetComponent<ProjectileProximityBeamController>();
+            beamController.damageCoefficient = 0.01f;
+            beamController.previousTargets = new System.Collections.Generic.List<HealthComponent>();
+            beamController.procCoefficient = 1;
+            beamController.listClearTimer = 99999;
+            beamController.listClearInterval = 99999;
+            beamController.attackInterval = 0.1f;
+            beamController.attackFireCount = 1;
+
+            var damageTypeComp = hookBombProjectilePrefab.AddComponent<DamageAPI.ModdedDamageTypeHolderComponent>();
+            damageTypeComp.Add(DamageTypes.TetherHook);
+
+            var startEvent = hookBombProjectilePrefab.GetComponent<RoR2.EntityLogic.DelayedEvent>();
+            startEvent.CallDelayed(0.5f);
+
+            var bomb = hookBombProjectilePrefab.AddComponent<ProjectileImpactExplosion>();
+            bomb.blastRadius = 25;
+            bomb.blastDamageCoefficient = 1;
+            bomb.blastProcCoefficient = 1;
+            bomb.lifetime = 99999;
+            bomb.destroyOnEnemy = false;
+            bomb.impactOnWorld = false;
+            bomb.explosionEffect = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Commando/OmniExplosionVFXCommandoGrenade.prefab").WaitForCompletion();
+            bomb.transformSpace = ProjectileImpactExplosion.TransformSpace.World;
+
+            var stick = hookBombProjectilePrefab.AddComponent<ProjectileStickOnImpact>();
+            
+
+            var controller = hookBombProjectilePrefab.GetComponent<ProjectileController>();
+            var pDamageComp = hookBombProjectilePrefab.GetComponent<ProjectileDamage>();
+
+            var hookBomb = hookBombProjectilePrefab.AddComponent<HookBombController>();
+            hookBomb.beamController = beamController;
+            hookBomb.controller = controller;
+            hookBomb.damageComponent = pDamageComp;
+            hookBomb.explosionComponent = bomb;
+
+            
+        }
         #endregion projectiles
+
+        private static void CreateMaterials()
+        {
+            chainMat = Addressables.LoadAssetAsync<Material>("RoR2/Base/Gravekeeper/matGravekeeperHookChain.mat").WaitForCompletion();
+        }
+        
 
     }
 

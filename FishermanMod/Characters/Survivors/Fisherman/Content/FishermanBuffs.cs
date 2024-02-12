@@ -9,6 +9,7 @@ namespace FishermanMod.Survivors.Fisherman
         public static BuffDef armorBuff;
         public static BuffDef hookImmunityBuff;
         public static BuffDef hookTauntDebuff;
+        public static BuffDef hookTetherDebuff;
 
         public static void Init(AssetBundle assetBundle)
         {
@@ -26,6 +27,11 @@ namespace FishermanMod.Survivors.Fisherman
             hookTauntDebuff = Modules.Content.CreateAndAddBuff("HookTauntDebuff",
                 LegacyResourcesAPI.Load<BuffDef>("BuffDefs/HiddenInvincibility").iconSprite,
                 Color.red,
+                false,
+                true);
+            hookTetherDebuff = Modules.Content.CreateAndAddBuff("HookTauntDebuff",
+                LegacyResourcesAPI.Load<BuffDef>("BuffDefs/HiddenInvincibility").iconSprite,
+                Color.gray,
                 false,
                 true);
         }

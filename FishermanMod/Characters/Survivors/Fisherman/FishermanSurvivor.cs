@@ -39,6 +39,8 @@ namespace FishermanMod.Survivors.Fisherman
 
         public static SkillDef secondaryRecallFishHook;
         public static SkillDef secondaryFireFishHook;
+        public static SkillDef specialRecallHookBomb;
+        public static SkillDef specialThrowHookBomb;
         public override BodyInfo bodyInfo => new BodyInfo
         {
             bodyName = bodyName,
@@ -106,7 +108,7 @@ namespace FishermanMod.Survivors.Fisherman
             FishermanUnlockables.Init();
 
             base.InitializeCharacter();
-
+            DamageTypes.RegisterDamageTypes(); // TODO probably re organize this somehow
             FishermanConfig.Init();
             FishermanStates.Init();
             FishermanTokens.Init();
@@ -331,7 +333,7 @@ namespace FishermanMod.Survivors.Fisherman
         private void AddSpecialSkills()
         {
             //a basic skill
-            SkillDef specialSkilLDef1 = Skills.CreateSkillDef(new SkillDefInfo
+            specialThrowHookBomb = Skills.CreateSkillDef(new SkillDefInfo
             {
                 skillName = "HenryBomb",
                 skillNameToken = FISHERMAN_PREFIX + "SPECIAL_BOMB_NAME",
@@ -346,10 +348,40 @@ namespace FishermanMod.Survivors.Fisherman
                 baseRechargeInterval = 10f,
 
                 isCombatSkill = true,
-                mustKeyPress = false,
+                mustKeyPress = true,
+            });
+            specialRecallHookBomb = Skills.CreateSkillDef(new SkillDefInfo
+            {
+                skillName = "RecallFishHook",
+                skillNameToken = FISHERMAN_PREFIX + "SECONDARY_GUN_NAME",
+                skillDescriptionToken = FISHERMAN_PREFIX + "SECONDARY_GUN_DESCRIPTION",
+                keywordTokens = new string[] { "KEYWORD_AGILE" },
+                skillIcon = assetBundle.LoadAsset<Sprite>("texUtilityIcon"),
+
+                activationState = new EntityStates.SerializableEntityStateType(typeof(SkillStates.RecallHookBomb)),
+                activationStateMachineName = "Weapon2",
+                interruptPriority = EntityStates.InterruptPriority.Skill,
+
+                baseRechargeInterval = 0.5f,
+                baseMaxStock = 1,
+
+                rechargeStock = 1,
+                requiredStock = 1,
+                stockToConsume = 1,
+
+                resetCooldownTimerOnUse = false,
+                fullRestockOnAssign = true,
+                dontAllowPastMaxStocks = true,
+                mustKeyPress = true,
+                beginSkillCooldownOnSkillEnd = false,
+
+                isCombatSkill = false,
+                canceledFromSprinting = false,
+                cancelSprintingOnActivation = false,
+                forceSprintDuringState = false,
             });
 
-            Skills.AddSpecialSkills(bodyPrefab, specialSkilLDef1);
+            Skills.AddSpecialSkills(bodyPrefab, specialThrowHookBomb, specialRecallHookBomb);
         }
         #endregion skills
         
@@ -451,6 +483,11 @@ namespace FishermanMod.Survivors.Fisherman
             if (sender.HasBuff(FishermanBuffs.armorBuff))
             {
                 args.armorAdd += 300;
+            }
+
+            if (sender.HasBuff(FishermanBuffs.hookTetherDebuff))
+            {
+                args.moveSpeedReductionMultAdd += 0.3f;
             }
         }
 
@@ -623,23 +660,28 @@ namespace FishermanMod.Survivors.Fisherman
             {
                 //play hook success sound effect
                 //show hook success decal on enemy
-                Log.Debug("Hook Succeeded");
+                //Log.Debug("Hook Succeeded");
                 body.AddTimedBuff(FishermanBuffs.hookImmunityBuff, 0.3f);
                 enemyHurtBox.healthComponent.TakeDamage(damageInfo);
             }
             else
             {
-                Log.Debug("Enemy has hookImmunity, hook failed");
+                //Log.Debug("Enemy has hookImmunity, hook failed");
             }
 
         }
 
         //should probably make this use a list
-        //also should probably not rely on static members as it may break in MP
+        //also should probably not rely on static members as it may break in MP (apperently this should be fine)
         public static FishHookController deployedHook;
+        public static HookBombController deployedHookBomb;
         public static void SetDeployedHook(FishHookController fishHookInstance)
         {
             deployedHook = fishHookInstance;
+        }
+        public static void SetDeployedHookBomb(HookBombController bombInstance)
+        {
+            deployedHookBomb = bombInstance;
         }
         static HashSet<String> GrabableInteractablesWhitelist = new HashSet<String>();
         static HashSet<String> GrabableInteractablesBlacklist = new HashSet<String>();

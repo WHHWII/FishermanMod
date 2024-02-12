@@ -1,6 +1,7 @@
 ﻿using EntityStates;
 using FishermanMod.Survivors.Fisherman;
 using On.RoR2.CharacterAI;
+using R2API;
 using RoR2;
 using RoR2.Audio;
 using RoR2.Skills;
@@ -17,7 +18,7 @@ namespace FishermanMod.Modules.BaseStates
     {
         public int swingIndex;
 
-        protected Transform hitBoxOrienter;
+        protected static Transform hitBoxOrienter;
 
         protected string hitboxGroupName = "SwipeGroup";
         protected string hitBoxGroupName2 = "StabGroup";
@@ -76,7 +77,7 @@ namespace FishermanMod.Modules.BaseStates
             attack.hitEffectPrefab = hitEffectPrefab;
             attack.forceVector = bonusForce;
             attack.pushAwayForce = pushForce;
-            if(swingIndex < 2)
+            if (swingIndex > 0)
             {
                 attack.hitBoxGroup = FindHitBoxGroup(hitboxGroupName);
             }
@@ -90,7 +91,7 @@ namespace FishermanMod.Modules.BaseStates
 
         protected virtual void PlayAttackAnimation()
         {
-            PlayCrossfade("Gesture, Override", "Slash" + (1 + swingIndex), playbackRateParam, duration, 0.05f);
+            PlayCrossfade("Gesture, Override", "Slash" + (1 + Mathf.Clamp01(swingIndex)), playbackRateParam, duration, 0.05f);
         }
 
         public override void OnExit()
@@ -119,7 +120,7 @@ namespace FishermanMod.Modules.BaseStates
 
                 hasHopped = true;
             }
-            if(swingIndex == 2)
+            if(swingIndex == 0)
             {
                 foreach (HurtBox hitResult in hitresults)
                 {
@@ -147,23 +148,11 @@ namespace FishermanMod.Modules.BaseStates
         {
             if (isAuthority)
             {
+                if(hitBoxOrienter == null) hitBoxOrienter = characterBody.modelLocator.modelTransform.gameObject.GetComponent<ChildLocator>().FindChild(30);
                 Vector3 direction = GetAimRay().direction;
                 direction.y = Mathf.Max(direction.y, direction.y * 0.5f);
-                //GameObject obj = 
-                //if(obj != null) { Log.Debug(" found obj"); }
-                Transform trans = characterBody.modelLocator.modelTransform;
-                if (trans != null) { 
-                    Log.Debug($" found trans { trans.gameObject.name}");
-                    ChildLocator cl = trans.gameObject.GetComponent<ChildLocator>();
-                    if (cl != null) { 
-                        Log.Debug($" found childlocator {cl.name}");
-                        Transform sp = cl.FindChild(30);
-                        if (sp != null)
-                        {
-                            sp.rotation = Util.QuaternionSafeLookRotation(direction);
-                        }
-                    }
-                }
+                hitBoxOrienter.rotation = Util.QuaternionSafeLookRotation(direction);
+
 
                 if (attack.Fire(hitresults))
                 {

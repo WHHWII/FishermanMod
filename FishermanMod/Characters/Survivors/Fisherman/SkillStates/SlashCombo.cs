@@ -1,4 +1,5 @@
 ﻿using FishermanMod.Modules.BaseStates;
+using R2API;
 using RoR2;
 using UnityEngine;
 
@@ -9,7 +10,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
         public override void OnEnter()
         {
             damageType = DamageType.Generic;
-            damageCoefficient = FishermanStaticValues.swordDamageCoefficient;
+            damageCoefficient = FishermanStaticValues.swipeDamageCoefficient;
             procCoefficient = 1f;
             pushForce = 300f;
             bonusForce = Vector3.zero;
@@ -31,14 +32,18 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
             hitSoundString = "";
             switch (swingIndex)
             {
+                case 0:
+                    damageCoefficient = FishermanStaticValues.stabDamageCoefficient;
+                    muzzleString = "Muzzle";
+                    break;
+
                 case 1:
+                    damageCoefficient = FishermanStaticValues.swipeDamageCoefficient;
                     muzzleString = "SwingLeft";
                     break;
                 case 2:
+                    damageCoefficient = FishermanStaticValues.swipeDamageCoefficient;
                     muzzleString = "SwingRight";
-                    break;
-                case 3:
-                    muzzleString = "Muzzle";
                     break;
             }
             playbackRateParam = "Slash.playbackRate";
@@ -52,14 +57,18 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
 
         protected override void PlayAttackAnimation()
         {
-            if(swingIndex == 2)
+            if(swingIndex == 0)
             {
                 EffectManager.SimpleMuzzleFlash(EntityStates.Commando.CommandoWeapon.FirePistol2.muzzleEffectPrefab, gameObject, muzzleString, false);
                 PlayAnimation("LeftArm, Override", "ShootGun", "ShootGun.playbackRate", 1.8f);
             }
+            else if(swingIndex == 1)
+            {
+                PlayCrossfade("Gesture, Override", "Slash" + (1), playbackRateParam, duration, 0.1f * duration);
+            }
             else
             {
-                PlayCrossfade("Gesture, Override", "Slash" + (1 + swingIndex), playbackRateParam, duration, 0.1f * duration);
+                PlayCrossfade("Gesture, Override", "Slash" + (2), playbackRateParam, duration, 0.1f * duration);
             }
            
         }

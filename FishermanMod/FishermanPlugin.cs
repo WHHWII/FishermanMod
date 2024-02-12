@@ -41,8 +41,13 @@ namespace FishermanMod
             // character initialization
             new FishermanSurvivor().Initialize();
 
+            
             // make a content pack and add it. this has to be last
             new Modules.ContentPacks().Initialize();
+        }
+        void Start()
+        {
+            
         }
     }
 }

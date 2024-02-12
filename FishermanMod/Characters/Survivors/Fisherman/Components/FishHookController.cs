@@ -78,7 +78,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
                     }
                     else
                     {
-
+                        //TODO refund stock if nothing grabbed.
                         Destroy(gameObject);
                     }
                 }
@@ -207,7 +207,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
                 GlobalEventManager.instance.OnHitEnemy(FlyAttackDamage, target.gameObject);
                 GlobalEventManager.instance.OnHitAll(FlyAttackDamage, target.gameObject);
                 //Log.Debug("\t a mob!");
-                FishermanSurvivor.ApplyFishermanPassiveFishHookEffect(ownerTransform.gameObject, ownerTransform.gameObject, projectileDamage.damage, ownerTransform.position, target);
+                FishermanSurvivor.ApplyFishermanPassiveFishHookEffect(ownerTransform.gameObject, gameObject, projectileDamage.damage, ownerTransform.position, target);
             }
         }
         bool ThrowItem(Collider collider)
@@ -301,6 +301,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
 
         void ClearAgrro()
         {
+            //TODO properly clear debuff
             if (tauntedAITimers.Count <= 0) return;
             List<RoR2.CharacterAI.BaseAI> aisToRemove = new List<RoR2.CharacterAI.BaseAI>();
             foreach (var aiTimer in tauntedAITimers)
