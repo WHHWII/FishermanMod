@@ -24,11 +24,11 @@ namespace FishermanMod.Survivors.Fisherman
                 Color.white,
                 false,
                 false);
-            hookTauntDebuff = Modules.Content.CreateAndAddBuff("HookTauntDebuff",
-                LegacyResourcesAPI.Load<BuffDef>("BuffDefs/HiddenInvincibility").iconSprite,
-                Color.red,
-                false,
-                true);
+            //hookTauntDebuff = Modules.Content.CreateAndAddBuff("HookTauntDebuff",
+            //    LegacyResourcesAPI.Load<BuffDef>("BuffDefs/HiddenInvincibility").iconSprite,
+            //    Color.red,
+            //    false,
+            //    true);
             hookTetherDebuff = Modules.Content.CreateAndAddBuff("HookTauntDebuff",
                 LegacyResourcesAPI.Load<BuffDef>("BuffDefs/HiddenInvincibility").iconSprite,
                 Color.gray,

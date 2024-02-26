@@ -158,16 +158,16 @@ namespace FishermanMod.Survivors.Fisherman
             ItemInteractor.layer = 15;
 
 
-
-            TeamComponent teamComp = hookProjectilePrefab.AddComponent<TeamComponent>();
-            teamComp.teamIndex = TeamIndex.Player;
-            CharacterBody hookBody = hookProjectilePrefab.AddComponent<CharacterBody>();
-            hookBody.baseRegen = int.MaxValue;
-            hookBody.baseMaxHealth = int.MaxValue;
-            hookBody.baseArmor = int.MinValue;
-            HealthComponent healthComp = hookProjectilePrefab.AddComponent<HealthComponent>();
-            healthComp.health = int.MaxValue;
-            healthComp.dontShowHealthbar = true;
+            //this was used for taunt
+            //TeamComponent teamComp = hookProjectilePrefab.AddComponent<TeamComponent>();
+            //teamComp.teamIndex = TeamIndex.Player;
+            //CharacterBody hookBody = hookProjectilePrefab.AddComponent<CharacterBody>();
+            //hookBody.baseRegen = int.MaxValue;
+            //hookBody.baseMaxHealth = int.MaxValue;
+            //hookBody.baseArmor = int.MinValue;
+            //HealthComponent healthComp = hookProjectilePrefab.AddComponent<HealthComponent>();
+            //healthComp.health = int.MaxValue;
+            //healthComp.dontShowHealthbar = true;
 
             
 
@@ -188,7 +188,8 @@ namespace FishermanMod.Survivors.Fisherman
             fishHook.projectileDamage = projectileDamage;
             fishHook.collider = collider;
             //fishHook.enemyTaunter = enemyTaunter;
-            fishHook.hookBody = hookBody;
+            //fishHook.hookBody = hookBody;
+
             //fishHook.pstImpact = pstImpact;
 
             GameObject ghostPrefab = pc.ghostPrefab;

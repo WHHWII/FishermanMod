@@ -1,21 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Networking;
-using EntityStates;
-using EntityStates.Toolbot;
-using FishermanMod.Survivors.Fisherman;
-using R2API;
 using RoR2;
 using RoR2.Projectile;
-using UnityEngine.XR.WSA;
-using static UnityEngine.UI.GridLayoutGroup;
-using static UnityEngine.ParticleSystem.PlaybackState;
 using FishermanMod.Characters.Survivors.Fisherman.Components;
-using IL.RoR2.CharacterAI;
-using On.RoR2.CharacterAI;
-using System.Collections;
 
 namespace FishermanMod.Survivors.Fisherman.Components
 {
@@ -27,8 +14,8 @@ namespace FishermanMod.Survivors.Fisherman.Components
         public ProjectileDamage projectileDamage;
         public CapsuleCollider collider;
         //public GameObject enemyTaunter;
-        public HurtBox hookHurtBox;
-        public CharacterBody hookBody;
+        //public HurtBox hookHurtBox;
+        //public CharacterBody hookBody;
 
         bool isFlying = false;
         float distanceToOwner;
