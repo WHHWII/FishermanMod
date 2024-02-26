@@ -28,10 +28,10 @@ namespace FishermanMod.Survivors.Fisherman.Components
 
         void FixedUpdate()
         {
-            foreach (var target in beamController.previousTargets)
-            {
+            //foreach (var target in beamController.previousTargets)
+            //{
                 
-            }
+            //}
         }
 
         public void HookAllTethers()
