@@ -171,14 +171,14 @@ namespace FishermanMod.Survivors.Fisherman
 
             
 
-            GameObject enemyTaunter = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            enemyTaunter.transform.parent = hookProjectilePrefab.transform;
-            //UnityEngine.Object.Destroy(enemyTaunter.GetComponent<MeshRenderer>());
-            //UnityEngine.Object.Destroy(enemyTaunter.GetComponent<MeshFilter>());
-            enemyTaunter.GetComponent<SphereCollider>().isTrigger = true;
-            enemyTaunter.transform.localPosition = Vector3.zero;
-            enemyTaunter.transform.localScale = Vector3.one * 30;
-            enemyTaunter.layer = 15;
+            //GameObject enemyTaunter = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            //enemyTaunter.transform.parent = hookProjectilePrefab.transform;
+            ////UnityEngine.Object.Destroy(enemyTaunter.GetComponent<MeshRenderer>());
+            ////UnityEngine.Object.Destroy(enemyTaunter.GetComponent<MeshFilter>());
+            //enemyTaunter.GetComponent<SphereCollider>().isTrigger = true;
+            //enemyTaunter.transform.localPosition = Vector3.zero;
+            //enemyTaunter.transform.localScale = Vector3.one * 30;
+            //enemyTaunter.layer = 15;
             
 
             FishHookController fishHook = hookProjectilePrefab.AddComponent<FishHookController>();
@@ -187,7 +187,7 @@ namespace FishermanMod.Survivors.Fisherman
             fishHook.controller = pc;
             fishHook.projectileDamage = projectileDamage;
             fishHook.collider = collider;
-            fishHook.enemyTaunter = enemyTaunter;
+            //fishHook.enemyTaunter = enemyTaunter;
             fishHook.hookBody = hookBody;
             //fishHook.pstImpact = pstImpact;
 
