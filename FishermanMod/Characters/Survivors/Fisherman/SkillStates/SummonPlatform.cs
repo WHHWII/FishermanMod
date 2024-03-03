@@ -3,8 +3,10 @@ using FishermanMod.Characters.Survivors.Fisherman.Components;
 using FishermanMod.Survivors.Fisherman;
 using FishermanMod.Survivors.Fisherman.Components;
 using RoR2;
+using RoR2.CharacterAI;
 using RoR2.Projectile;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace FishermanMod.Survivors.Fisherman.SkillStates
 {
@@ -62,17 +64,41 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
 
         private PlacementInfo currentPlacementInfo;
 
+        private static float baseDuration = 1;
+
+        private float earlyExitTime;
+        private float duration;
+
         public override void OnEnter()
         {
             base.OnEnter();
+            duration = baseDuration / attackSpeedStat;
+            earlyExitTime = duration * 0.3f;
+
             if (base.isAuthority)
             {
-                MovingPlatformController mpc = UnityEngine.Object.Instantiate(platformPrefab, gameObject.transform.position,gameObject.transform.rotation).GetComponent<MovingPlatformController>(); ;
-                Vector3 direction = (inputBank.moveVector == Vector3.zero ? characterDirection.forward : inputBank.moveVector).normalized;
-                direction.y = 0f;
-                mpc.direction = direction;
-                mpc.team = teamComponent.teamIndex; 
-                outer.SetNextStateToMain();
+                Vector3 spawnPos = gameObject.transform.position;
+                spawnPos.y -= 10;
+
+                MasterSummon masterSummon = new MasterSummon();
+                masterSummon.masterPrefab = FishermanAssets.movingPlatformMasterPrefab;
+                masterSummon.ignoreTeamMemberLimit = true;
+                masterSummon.teamIndexOverride = TeamIndex.Player;
+                masterSummon.summonerBodyObject = base.gameObject;
+                masterSummon.position = spawnPos;
+                masterSummon.rotation = Util.QuaternionSafeLookRotation(base.characterDirection.forward);
+
+                //MovingPlatformController mpc = drone.GetComponent<MovingPlatformController>(); ;
+                //Vector3 direction = (inputBank.moveVector == Vector3.zero ? characterDirection.forward : inputBank.moveVector).normalized;
+                //direction.y = 0f;
+                //mpc.direction = direction;
+
+                if (NetworkServer.active)
+                {
+                    masterSummon.Perform();
+                }
+                //mpc.team = teamComponent.teamIndex;
+                
             }
         }
         public override void OnExit()
@@ -89,13 +115,20 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
 
         public override void FixedUpdate()
         {
+
+            
             base.FixedUpdate();
+
+            if(fixedAge > exitDelay && isAuthority)
+            {
+                outer.SetNextStateToMain();
+            }
 
         }
 
         public override InterruptPriority GetMinimumInterruptPriority()
         {
-            return InterruptPriority.PrioritySkill;
+            return fixedAge >= earlyExitTime ? InterruptPriority.Any : InterruptPriority.PrioritySkill;
         }
     }
 }

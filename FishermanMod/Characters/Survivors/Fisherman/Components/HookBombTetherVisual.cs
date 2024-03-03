@@ -9,11 +9,13 @@ namespace FishermanMod.Survivors.Fisherman.Components
     internal class HookBombTetherVisual : MonoBehaviour
     {
         LineRenderer lineRenderer;
+        GameObject lineContainer;
         public HookBombController hookBomb = FishermanSurvivor.deployedHookBomb;
 
         void Start ()
         {
-            lineRenderer = gameObject.AddComponent<LineRenderer>();
+            lineContainer = Instantiate(new GameObject("Fisherman HookBomb TetherVisual"), transform);
+            lineRenderer = lineContainer.AddComponent<LineRenderer>();
             lineRenderer.positionCount = 2;
             lineRenderer.material = FishermanAssets.chainMat;
             lineRenderer.startWidth = 0.1f;
@@ -24,8 +26,10 @@ namespace FishermanMod.Survivors.Fisherman.Components
         {
             if (hookBomb == null)
             {
-                Destroy(lineRenderer);
+                Destroy(lineContainer);
+                //Destroy(lineRenderer);
                 Destroy(this);
+                return;
             }
             lineRenderer.SetPosition(0, transform.position);
             lineRenderer.SetPosition(1, hookBomb.transform.position);

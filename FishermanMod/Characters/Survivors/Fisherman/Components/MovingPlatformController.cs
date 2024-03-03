@@ -1,5 +1,6 @@
 ﻿
 using RoR2;
+using RoR2.CharacterAI;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -21,7 +22,9 @@ namespace FishermanMod.Survivors.Fisherman.Components
         void Start()
         {
             StartCoroutine(DestroyPlatform());
-            gameObject.layer = 11;
+            //AISkillDriver driver;
+            //driver.requireEquipmentReady
+            //gameObject.layer = 11;
             //something somehting euler angles cross productud vector3 up 
         }
         void FixedUpdate()
@@ -37,25 +40,25 @@ namespace FishermanMod.Survivors.Fisherman.Components
 
         void OnCollisionEnter(Collision collision)
         {
-            Log.Debug($"Passenger Detected: {collision.gameObject.name} \n parent : {collision.gameObject.transform.parent} ");
-            TeamComponent teamComp = collision.gameObject.GetComponent<TeamComponent>();
-            if(teamComp.teamIndex == team)
-            {
+            //Log.Debug($"Passenger Detected: {collision.gameObject.name} \n parent : {collision.gameObject.transform.parent} ");
+            //TeamComponent teamComp = collision.gameObject.GetComponent<TeamComponent>();
+            //if(teamComp.teamIndex == team)
+            //{
                
-                passengersOriginalParents.Add(collision.transform, collision.transform.parent);
-                collision.gameObject.transform.parent = transform;
-            }
+            //    passengersOriginalParents.Add(collision.transform, collision.transform.parent);
+            //    collision.gameObject.transform.parent = transform;
+            //}
         }
         void OnCollisionExit(Collision collision)
         {
-            Log.Debug($"Passenger Detected: {collision.gameObject.name} \n parent : {collision.gameObject.transform.parent} ");
-            TeamComponent teamComp = collision.gameObject.GetComponent<TeamComponent>();
-            if (teamComp.teamIndex == team)
-            {
+            //Log.Debug($"Passenger Detected: {collision.gameObject.name} \n parent : {collision.gameObject.transform.parent} ");
+            //TeamComponent teamComp = collision.gameObject.GetComponent<TeamComponent>();
+            //if (teamComp.teamIndex == team)
+            //{
                 
-                collision.gameObject.transform.parent = passengersOriginalParents[collision.gameObject.transform];
-                passengersOriginalParents.Remove(collision.gameObject.transform);
-            }
+            //    collision.gameObject.transform.parent = passengersOriginalParents[collision.gameObject.transform];
+            //    passengersOriginalParents.Remove(collision.gameObject.transform);
+            //}
         }
         
     }

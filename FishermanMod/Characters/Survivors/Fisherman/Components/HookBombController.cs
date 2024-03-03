@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using IL.RoR2.Orbs;
@@ -18,20 +19,42 @@ namespace FishermanMod.Survivors.Fisherman.Components
         public ProjectileProximityBeamController beamController;
         public GameObject owner;
         public ProjectileImpactExplosion explosionComponent;
+        public ProjectileStickOnImpact stickComponent;
+        public Rigidbody body;
+        public AntiGravityForce antiGrav;
+        public Vector3 lastVelocity;
         //public ProjectileExplosion explosionComponent;
+        float origAntiGravCoef;
+        float origDrag;
+        
 
         void Start()
         {
             FishermanSurvivor.SetDeployedHookBomb(this);
             owner = controller.owner;
+            body = controller.rigidbody;
+            origAntiGravCoef = antiGrav.antiGravityCoefficient;
+            origDrag = body.drag;
+            //stickComponent.stickEvent.AddListener(UnStickFromHook);
+            stickComponent.stickEvent.AddListener(ResetDragAndGrav);
+        }
+
+        public IEnumerator ResetStickyComponent()
+        {
+            yield return new WaitForSeconds(0.5f);
+            stickComponent.enabled = true;
+            yield return new WaitForSeconds(0.5f);
+            ResetDragAndGrav();
+        }
+        void ResetDragAndGrav()
+        {
+            antiGrav.antiGravityCoefficient = origAntiGravCoef;
+            body.drag = origDrag;
         }
 
         void FixedUpdate()
         {
-            //foreach (var target in beamController.previousTargets)
-            //{
-                
-            //}
+            lastVelocity = body.velocity;
         }
 
         public void HookAllTethers()
@@ -39,6 +62,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
             
             foreach (var target in beamController.previousTargets)
             {
+                if(!target) continue;
                 FishermanSurvivor.ApplyFishermanPassiveFishHookEffect(
                     owner, gameObject,
                     damageComponent.damage,

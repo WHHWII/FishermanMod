@@ -3,6 +3,9 @@ using UnityEngine;
 using RoR2;
 using RoR2.Projectile;
 using FishermanMod.Characters.Survivors.Fisherman.Components;
+using System.Collections;
+using UnityEngine.UIElements;
+using Rewired.Utils;
 
 namespace FishermanMod.Survivors.Fisherman.Components
 {
@@ -143,16 +146,34 @@ namespace FishermanMod.Survivors.Fisherman.Components
         //}
         void OnCollisionExit(UnityEngine.Collision collision)
         {
-            //Log.Debug($"Collision Exit {collision.gameObject.name}");
+            Log.Debug($"Collision Exit {collision.gameObject.name}");
+            rb.isKinematic = false;
             if (!CanThrow(collision.gameObject)) return;
+            Log.Debug("Can throw");
+            ThrowHookBomb(collision);
             ThrowMob(collision);
         }
         void OnCollisionEnter(UnityEngine.Collision collision)
         {
-            //Log.Debug($"Collision Enter {collision.gameObject.name}");
+            Log.Debug($"Collision Enter {collision.gameObject.name}");
             //if (hookHurtBox == null) hookHurtBox = gameObject.AddComponent<HurtBox>();
             //stickComponent.TrySticking(collision.collider, Vector3.zero);
+            if (FishermanSurvivor.deployedHookBomb && collision.gameObject == FishermanSurvivor.deployedHookBomb.gameObject)
+            {
+                var bombStick = FishermanSurvivor.deployedHookBomb.gameObject.GetComponent<ProjectileStickOnImpact>();//.Detach();
+                if(bombStick.stuckTransform == transform)
+                {
+                    rb.velocity = Vector3.zero;
+                    bombStick.Detach();
+                    rb.isKinematic = true;
+                    //FishermanSurvivor.deployedHookBomb.body.AddForce(FishermanSurvivor.deployedHookBomb.lastVelocity, ForceMode.VelocityChange);
+                    //FishermanSurvivor.deployedHookBomb.body.isKinematic = false;
+                    //FishermanSurvivor.deployedHookBomb.body.freezeRotation = false;
+                }
+            }
             if (!CanThrow(collision.gameObject)) return;
+            Log.Debug("Can throw");
+            ThrowHookBomb(collision);
             ThrowMob(collision);
         }
         void OnTriggerExit(Collider collider)
@@ -233,6 +254,39 @@ namespace FishermanMod.Survivors.Fisherman.Components
             }
 
         }
+
+
+        void ThrowHookBomb(UnityEngine.Collision collision)
+        {
+            if (!FishermanSurvivor.deployedHookBomb) return;
+            if (collision.gameObject == FishermanSurvivor.deployedHookBomb.gameObject)
+            {
+                Log.Debug(" hookbomb hit");
+                Rigidbody body = collision.gameObject.GetComponent<Rigidbody>();
+                if (body)
+                {
+                    Log.Debug("Try throw hookbomb");
+                    var stickcomp = collision.gameObject.GetComponent<ProjectileStickOnImpact>();
+                    var gravResistor = collision.gameObject.GetComponent<AntiGravityForce>();
+                    stickcomp.Detach();
+                    stickcomp.enabled = false;
+                    body.freezeRotation = false;
+                    body.isKinematic = false;
+                    body.drag = 0;
+                    gravResistor.antiGravityCoefficient = 0;
+                    FishermanSurvivor.deployedHookBomb.StartCoroutine(FishermanSurvivor.deployedHookBomb.ResetStickyComponent());
+
+
+                    body.AddForce(CalculateReturnForce(returnForceBase, body), ForceMode.Impulse);
+
+                }
+            }
+            else
+            {
+                Log.Debug("HookBomb Comp not detected");
+            }     
+        }
+
 
         //void DrawAggro(Collider collider)
         //{

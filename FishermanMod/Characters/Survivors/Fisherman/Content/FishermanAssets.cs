@@ -10,6 +10,9 @@ using FishermanMod.Characters.Survivors.Fisherman.Components;
 using IL.RoR2.Orbs;
 using R2API;
 using IL.RoR2.EntityLogic;
+using RoR2.CharacterAI;
+using RoR2.EntityLogic;
+using On.RoR2.Orbs;
 
 namespace FishermanMod.Survivors.Fisherman
 {
@@ -29,6 +32,7 @@ namespace FishermanMod.Survivors.Fisherman
         public static GameObject hookProjectilePrefab;
         public static GameObject movingPlatformBlueprintPrefab;
         public static GameObject movingPlatformPrefab;
+        public static GameObject movingPlatformMasterPrefab;
         public static GameObject hookBombProjectilePrefab;
 
         //materials
@@ -91,6 +95,7 @@ namespace FishermanMod.Survivors.Fisherman
             Content.AddProjectilePrefab(hookProjectilePrefab);
             CreateMovingPlatform();
             Content.AddProjectilePrefab(movingPlatformBlueprintPrefab);
+            Content.AddProjectilePrefab(movingPlatformPrefab);
             CreateJellyfishProjectile();
             Content.AddProjectilePrefab(hookBombProjectilePrefab);
         }
@@ -208,9 +213,50 @@ namespace FishermanMod.Survivors.Fisherman
         {
             movingPlatformBlueprintPrefab = _assetBundle.LoadAsset<GameObject>("MovingPlatformBlueprint");
             //var bpc = movingPlatformBlueprintPrefab.AddComponent<BlueprintController>();
-            movingPlatformPrefab = _assetBundle.LoadAsset<GameObject>("MovingPlatform");
+            //movingPlatformPrefab = _assetBundle.LoadAsset<GameObject>("MovingPlatform");
+         
+            movingPlatformPrefab = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Drones/MegaDroneBody.prefab").WaitForCompletion(), "FishermanPlatform");
             movingPlatformPrefab.AddComponent<MovingPlatformController>();
-           
+            var pids = movingPlatformPrefab.GetComponents<VectorPID>();
+            foreach(var pid in pids)
+            {
+                //UnityEngine.Object.Destroy(pid);
+                pid.gain = 2;
+            }
+            var qpid = movingPlatformPrefab.GetComponent<QuaternionPID>();
+            qpid.gain = 2;
+
+            Collider col = movingPlatformPrefab.GetComponentInChildren<SphereCollider>();
+            GameObject temphurtBox = col.gameObject;
+            UnityEngine.Object.Destroy(col);
+            BoxCollider newBoxCol = temphurtBox.AddComponent<BoxCollider>();
+            newBoxCol.size = new Vector3(6, 6, 3);
+
+
+            movingPlatformMasterPrefab = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Drones/MegaDroneMaster.prefab").WaitForCompletion(), "FishermanPlatformMaster");
+            var master = movingPlatformMasterPrefab.GetComponent<CharacterMaster>();
+            master.bodyPrefab = movingPlatformPrefab;
+            var aiDrivers = movingPlatformMasterPrefab.GetComponents<RoR2.CharacterAI.AISkillDriver>();
+            //foreach(var ai in aiDrivers)
+            //{
+            //    UnityEngine.Object.Destroy(ai);
+            //}
+            //movingPlatformPrefab.AddComponent<MovingPlatformController>();
+            //if (movingPlatformPrefab == null)
+            //{
+            //    Log.Warning("Moving platfrom not foudn");
+            //    return;
+            //}
+            //var body = movingPlatformPrefab.GetComponent<CharacterBody>();
+            //if (body == null)
+            //{
+            //    Log.Warning("Moving platfrom body  not foudn");
+            //    return;
+            //}
+            //foreach(var ai in body.master.aiComponents)
+            //{
+            //    ai.enabled = false;
+            //}
         }
 
         private static void CreateJellyfishProjectile()
@@ -218,7 +264,11 @@ namespace FishermanMod.Survivors.Fisherman
             hookBombProjectilePrefab = Assets.CloneProjectilePrefab("LoaderPylon", "FishermanJellyfish");
 
             //UnityEngine.Object.Destroy(hookBombProjectilePrefab.GetComponent<AntiGravityForce>());
-            UnityEngine.Object.Destroy(hookBombProjectilePrefab.GetComponent<AwakeEvent>());
+            //UnityEngine.Object.Destroy(hookBombProjectilePrefab.GetComponent<AwakeEvent>());
+            UnityEngine.Object.Destroy(hookBombProjectilePrefab.GetComponent<BeginRapidlyActivatingAndDeactivating>());
+            //var awakeComponent = hookBombProjectilePrefab.GetComponent<AwakeEvent>();
+            //var functionComponent = hookBombProjectilePrefab.GetComponent<EventFunctions>();
+           
 
             var antiGrav = hookBombProjectilePrefab.GetComponent<AntiGravityForce>();
             antiGrav.antiGravityCoefficient = 0.5f;
@@ -252,15 +302,23 @@ namespace FishermanMod.Survivors.Fisherman
             
 
             var controller = hookBombProjectilePrefab.GetComponent<ProjectileController>();
+            var simpleProj = hookBombProjectilePrefab.GetComponent<ProjectileSimple>();
+            simpleProj.lifetime = 99999;
             var pDamageComp = hookBombProjectilePrefab.GetComponent<ProjectileDamage>();
+
 
             var hookBomb = hookBombProjectilePrefab.AddComponent<HookBombController>();
             hookBomb.beamController = beamController;
             hookBomb.controller = controller;
             hookBomb.damageComponent = pDamageComp;
             hookBomb.explosionComponent = bomb;
-
+            hookBomb.stickComponent = stick;
+            hookBomb.antiGrav = hookBombProjectilePrefab.GetComponent<AntiGravityForce>();
+            //awakeComponent.action.AddListener(hookBomb.ClearHooks);
             
+            
+
+
         }
         #endregion projectiles
 

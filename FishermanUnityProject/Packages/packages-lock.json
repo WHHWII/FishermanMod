@@ -275,6 +275,12 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "riskofthunder-ror2editorkit": {
+      "version": "file:RoR2EditorKit",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "riskofthunder-ror2importextensions": {
       "version": "file:RoR2ImportExtensions",
       "depth": 0,

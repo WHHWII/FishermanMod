@@ -21,6 +21,7 @@ namespace FishermanMod.Survivors.Fisherman
     {
         //used to load the assetbundle for this character. must be unique
         public override string assetBundleName => "fishermanassetbundle"; //if you do not change this, you are giving permission to deprecate the mod
+        public override string assetBundleName2 => "fishermanextras assetbundle";
 
         //the name of the prefab we will create. conventionally ending in "Body". must be unique
         public override string bodyName => "FishermanBody"; //if you do not change this, you get the point by now
@@ -84,6 +85,7 @@ namespace FishermanMod.Survivors.Fisherman
 
         //set in base classes
         public override AssetBundle assetBundle { get; protected set; }
+        public override AssetBundle assetBundleExtras { get; protected set; }
 
         public override GameObject bodyPrefab { get; protected set; }
         public override CharacterBody prefabCharacterBody { get; protected set; }
