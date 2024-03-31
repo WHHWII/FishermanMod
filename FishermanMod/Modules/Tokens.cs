@@ -1,4 +1,6 @@
-﻿namespace FishermanMod.Modules
+﻿using UnityEngine;
+
+namespace FishermanMod.Modules
 {
     internal static class Tokens
     {
@@ -6,7 +8,14 @@
 
         public static string HookText(string text)
         {
-            return $"<color=#d299ff>{text}</style>";
+            return $"<color=#d299ff>{text}</color>";
+        }
+
+        public static string FishermanText(string text, int i)
+        {
+            i = Mathf.Clamp(i, 0, 4);
+            string[] colors = new string[5] { "#367987", "#23677f", "#165475", "#124269", "#152f5b" };
+            return $"<color={colors[i]}>{text}</color>";
         }
         public static string DamageText(string text)
         {
