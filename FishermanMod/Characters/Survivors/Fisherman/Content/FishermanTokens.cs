@@ -41,28 +41,28 @@ namespace FishermanMod.Survivors.Fisherman
             #endregion
 
             #region Passive
-            Language.Add(prefix + "PASSIVE_NAME", "Henry passive");
-            Language.Add(prefix + "PASSIVE_DESCRIPTION", "Sample text.");
+            Language.Add(prefix + "PASSIVE_HOOK_EFFECT_NAME", Tokens.FishermanText("The Hooks!",0));
+            Language.Add(prefix + "PASSIVE_HOOK_EFFECT_DESCRIPTION", $"Fisherman's abilities can {Tokens.HookText("Hook")} fish, flinging them towards him. If a fish is too heavy to be hooked, they are instead {Tokens.RedText("inflicted with bleed")}");
             #endregion
 
             #region Primary
-            Language.Add(prefix + "PRIMARY_SLASH_NAME", "Debone");
-            Language.Add(prefix + "PRIMARY_SLASH_DESCRIPTION", Tokens.agilePrefix + $"Thwack in front for <style=cIsDamage>{100f * FishermanStaticValues.swipeDamageCoefficient}% damage.</style> Every 3rd Attack is a long range stab that <color=#d299ff>Hooks</color> fish.");
+            Language.Add(prefix + "PRIMARY_SLASH_NAME", Tokens.FishermanText("Debone",1));
+            Language.Add(prefix + "PRIMARY_SLASH_DESCRIPTION", $"Thwack in front for <style=cIsDamage>{100f * FishermanStaticValues.swipeDamageCoefficient}% damage.</style> Every 3rd Attack is a long range stab that <color=#d299ff>Hooks</color> fish for <style=cIsDamage>{100f * FishermanStaticValues.stabDamageCoefficient}% damage.</style>");
             #endregion
 
             #region Secondary
-            Language.Add(prefix + "SECONDARY_GUN_NAME", "Cast");
-            Language.Add(prefix + "SECONDARY_GUN_DESCRIPTION", Tokens.agilePrefix + $"Throw out a baited line that <style=cIsUtility>taunts</style> fish. Recall it to <color=#d299ff>Hook</color> fish for <style=cIsDamage>{100f * FishermanStaticValues.gunDamageCoefficient}% damage.</style> Can <color=#d299ff>Hook</color> all kinds of <style=cIsUtility>Treasure...</style>");
+            Language.Add(prefix + "SECONDARY_GUN_NAME", Tokens.FishermanText("Cast",2));
+            Language.Add(prefix + "SECONDARY_GUN_DESCRIPTION", $"<style=cIsUtility>Non-Lethal.</style> Charge up and Cast out an arcing hook. Recall it to <color=#d299ff>Hook</color> fish for <style=cIsDamage>{100f * FishermanStaticValues.gunDamageCoefficient}% damage.</style> Can <color=#d299ff>Hook</color> all kinds of <style=cIsUtility>Treasure...</style>");
             #endregion
 
             #region Utility
-            Language.Add(prefix + "UTILITY_ROLL_NAME", "Roll");
-            Language.Add(prefix + "UTILITY_ROLL_DESCRIPTION", "Roll a short distance, gaining <style=cIsUtility>300 armor</style>. <style=cIsUtility>You cannot be hit during the roll.</style>");
+            Language.Add(prefix + "UTILITY_ROLL_NAME", Tokens.FishermanText("F153 Mobile Shanty Platform",3));
+            Language.Add(prefix + "UTILITY_ROLL_DESCRIPTION", $"Deploy a drone that <style=cIsUtility>you can stand on.</style> It slowly fires explosive rounds for <style=cIsDamage>{100f * FishermanStaticValues.platformDamage}% damage.</style>");
             #endregion
 
             #region Special
-            Language.Add(prefix + "SPECIAL_BOMB_NAME", "Bomb");
-            Language.Add(prefix + "SPECIAL_BOMB_DESCRIPTION", $"Throw a bomb for <style=cIsDamage>{100f * FishermanStaticValues.bombDamageCoefficient}% damage</style>.");
+            Language.Add(prefix + "SPECIAL_BOMB_NAME", Tokens.FishermanText("Man o' War",4));
+            Language.Add(prefix + "SPECIAL_BOMB_DESCRIPTION", $"Launch a sticky bomb that tethers fish and <style=cIsUtility>slows them</style>. Re-Activate to {Tokens.HookText("Hook")} tethered fish inwards and detonate for <style=cIsDamage>{100f * FishermanStaticValues.bombDamageCoefficient}% damage.</style>");
             #endregion
 
             #region Achievements

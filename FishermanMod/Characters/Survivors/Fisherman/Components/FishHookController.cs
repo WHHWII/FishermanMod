@@ -148,6 +148,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
         {
             Log.Debug($"Collision Exit {collision.gameObject.name}");
             rb.isKinematic = false;
+            
             if (!CanThrow(collision.gameObject)) return;
             Log.Debug("Can throw");
             ThrowHookBomb(collision);
@@ -155,6 +156,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
         }
         void OnCollisionEnter(UnityEngine.Collision collision)
         {
+            if (collision.gameObject.name.Contains("Kill")) Log.Debug("Hit bounds box");
             Log.Debug($"Collision Enter {collision.gameObject.name}");
             //if (hookHurtBox == null) hookHurtBox = gameObject.AddComponent<HurtBox>();
             //stickComponent.TrySticking(collision.collider, Vector3.zero);

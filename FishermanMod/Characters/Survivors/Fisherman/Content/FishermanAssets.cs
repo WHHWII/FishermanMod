@@ -109,7 +109,7 @@ namespace FishermanMod.Survivors.Fisherman
             UnityEngine.Object.Destroy(bombProjectilePrefab.GetComponent<ProjectileImpactExplosion>());
             ProjectileImpactExplosion bombImpactExplosion = bombProjectilePrefab.AddComponent<ProjectileImpactExplosion>();
             
-            bombImpactExplosion.blastRadius = 16f;
+            bombImpactExplosion.blastRadius = 1f;
             bombImpactExplosion.blastDamageCoefficient = 1f;
             bombImpactExplosion.falloffModel = BlastAttack.FalloffModel.None;
             bombImpactExplosion.destroyOnEnemy = true;
@@ -118,6 +118,11 @@ namespace FishermanMod.Survivors.Fisherman
             bombImpactExplosion.lifetimeExpiredSound = Content.CreateAndAddNetworkSoundEventDef("HenryBombExplosion");
             bombImpactExplosion.timerAfterImpact = true;
             bombImpactExplosion.lifetimeAfterImpact = 0.1f;
+            bombImpactExplosion.applyDot = true;
+            var ps = bombProjectilePrefab.GetComponent<ProjectileSimple>();
+            ProjectileDamage projectileDamage = ps.GetComponent<ProjectileDamage>();
+            projectileDamage.damageType = DamageType.Stun1s;
+
 
             ProjectileController bombController = bombProjectilePrefab.GetComponent<ProjectileController>();
 
@@ -134,6 +139,7 @@ namespace FishermanMod.Survivors.Fisherman
             Rigidbody rb = hookProjectilePrefab.GetComponent<Rigidbody>();
             rb.useGravity = true;
             rb.mass = 100;
+            
 
             ProjectileSimple ps = hookProjectilePrefab.GetComponent<ProjectileSimple>();
             ps.desiredForwardSpeed = 80;

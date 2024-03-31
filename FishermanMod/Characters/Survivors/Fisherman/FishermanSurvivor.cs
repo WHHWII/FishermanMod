@@ -42,6 +42,9 @@ namespace FishermanMod.Survivors.Fisherman
         public static SkillDef secondaryFireFishHook;
         public static SkillDef specialRecallHookBomb;
         public static SkillDef specialThrowHookBomb;
+        public static SkillDef specialDrinkFlask;
+        public static SkillDef specialThrowFlask;
+
         public override BodyInfo bodyInfo => new BodyInfo
         {
             bodyName = bodyName,
@@ -49,7 +52,7 @@ namespace FishermanMod.Survivors.Fisherman
             subtitleNameToken = FISHERMAN_PREFIX + "SUBTITLE",
 
             characterPortrait = assetBundle.LoadAsset<Texture>("texHenryIcon"),
-            bodyColor = Color.white,
+            bodyColor = new Color32(198, 184, 2, 255),
             sortPosition = 100,
 
             crosshair = Assets.LoadCrosshair("Standard"),
@@ -171,12 +174,22 @@ namespace FishermanMod.Survivors.Fisherman
             Skills.ClearGenericSkills(bodyPrefab);
             //add our own
             Skills.CreateSkillFamilies(bodyPrefab);
+            AddPassiveSkill();
             AddPrimarySkills();
             AddSecondarySkills();
             AddUtiitySkills();
             AddSpecialSkills();
         }
 
+
+        private void AddPassiveSkill()
+        {
+            SkillLocator skillLocator = bodyPrefab.GetComponent<SkillLocator>();
+            skillLocator.passiveSkill.enabled = true;
+            skillLocator.passiveSkill.skillNameToken = FISHERMAN_PREFIX + "PASSIVE_HOOK_EFFECT_NAME";
+            skillLocator.passiveSkill.skillDescriptionToken = FISHERMAN_PREFIX + "PASSIVE_HOOK_EFFECT_DESCRIPTION";
+            skillLocator.passiveSkill.icon = Assets.loadedBundles["fishermanassetbundle"].LoadAsset<Sprite>("Hook Icon");
+        }
         //if this is your first look at skilldef creation, take a look at Secondary first
         private void AddPrimarySkills()
         {
@@ -187,7 +200,7 @@ namespace FishermanMod.Survivors.Fisherman
                     "Debone",
                     FISHERMAN_PREFIX + "PRIMARY_SLASH_NAME",
                     FISHERMAN_PREFIX + "PRIMARY_SLASH_DESCRIPTION",
-                    assetBundle.LoadAsset<Sprite>("texPrimaryIcon"),
+                    assetBundle.LoadAsset<Sprite>("Melee Attack Icon"),
                     new EntityStates.SerializableEntityStateType(typeof(SkillStates.SlashCombo)),
                     "Weapon",
                     true
@@ -210,7 +223,7 @@ namespace FishermanMod.Survivors.Fisherman
                 skillNameToken = FISHERMAN_PREFIX + "SECONDARY_GUN_NAME",
                 skillDescriptionToken = FISHERMAN_PREFIX + "SECONDARY_GUN_DESCRIPTION",
                 //keywordTokens = new string[] { "KEYWORD_AGILE" },
-                skillIcon = assetBundle.LoadAsset<Sprite>("texSecondaryIcon"),
+                skillIcon = assetBundle.LoadAsset<Sprite>("Hook Icon"),
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(SkillStates.AimHook)),
                 activationStateMachineName = "Weapon2",
@@ -301,7 +314,7 @@ namespace FishermanMod.Survivors.Fisherman
                 skillNameToken = FISHERMAN_PREFIX + "UTILITY_ROLL_NAME",
                 skillDescriptionToken = FISHERMAN_PREFIX + "UTILITY_ROLL_DESCRIPTION",
                 keywordTokens = new string[] { "KEYWORD_AGILE" },
-                skillIcon = assetBundle.LoadAsset<Sprite>("texUtilityIcon"),
+                skillIcon = assetBundle.LoadAsset<Sprite>("Shanty Icon"),
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(SkillStates.SummonPlatform)),
                 activationStateMachineName = "Body",
@@ -340,7 +353,7 @@ namespace FishermanMod.Survivors.Fisherman
                 skillName = "HenryBomb",
                 skillNameToken = FISHERMAN_PREFIX + "SPECIAL_BOMB_NAME",
                 skillDescriptionToken = FISHERMAN_PREFIX + "SPECIAL_BOMB_DESCRIPTION",
-                skillIcon = assetBundle.LoadAsset<Sprite>("texSpecialIcon"),
+                skillIcon = assetBundle.LoadAsset<Sprite>("Jelly Bomb Icon"),
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(SkillStates.ThrowBomb)),
                 //setting this to the "weapon2" EntityStateMachine allows us to cast this skill at the same time primary, which is set to the "weapon" EntityStateMachine
@@ -383,7 +396,62 @@ namespace FishermanMod.Survivors.Fisherman
                 forceSprintDuringState = false,
             });
 
-            Skills.AddSpecialSkills(bodyPrefab, specialThrowHookBomb, specialRecallHookBomb);
+
+            specialDrinkFlask = Skills.CreateSkillDef(new SkillDefInfo
+            {
+                skillName = "SteadyTheNerves",
+                skillNameToken = FISHERMAN_PREFIX + "SPECIAL_DRINK_NAME",
+                skillDescriptionToken = FISHERMAN_PREFIX + "SPECIAL_DRINK_DESCRIPTION",
+                skillIcon = assetBundle.LoadAsset<Sprite>("Jelly Bomb Icon"),
+
+                activationState = new EntityStates.SerializableEntityStateType(typeof(SkillStates.NervesDrinkState)),
+                //setting this to the "weapon2" EntityStateMachine allows us to cast this skill at the same time primary, which is set to the "weapon" EntityStateMachine
+                activationStateMachineName = "Weapon2",
+                interruptPriority = EntityStates.InterruptPriority.Skill,
+
+                baseMaxStock = 1,
+                baseRechargeInterval = 3f,
+
+                isCombatSkill = true,
+                mustKeyPress = true,
+            });
+            specialThrowFlask = Skills.CreateSkillDef(new SkillDefInfo
+            {
+                skillName = "DrownTheSorrows",
+                skillNameToken = FISHERMAN_PREFIX + "SPECIAL_DRINK_NAME",
+                skillDescriptionToken = FISHERMAN_PREFIX + "SPECIAL_DRINK_DESCRIPTION",
+                keywordTokens = new string[] { "KEYWORD_AGILE" },
+                skillIcon = assetBundle.LoadAsset<Sprite>("texUtilityIcon"),
+
+                activationState = new EntityStates.SerializableEntityStateType(typeof(SkillStates.NervesThrowState)),
+                activationStateMachineName = "Weapon2",
+                interruptPriority = EntityStates.InterruptPriority.Skill,
+
+                baseRechargeInterval = 0.5f,
+                baseMaxStock = 1,
+
+                rechargeStock = 1,
+                requiredStock = 1,
+                stockToConsume = 1,
+
+                resetCooldownTimerOnUse = false,
+                fullRestockOnAssign = true,
+                dontAllowPastMaxStocks = true,
+                mustKeyPress = true,
+                beginSkillCooldownOnSkillEnd = false,
+
+                isCombatSkill = false,
+                canceledFromSprinting = false,
+                cancelSprintingOnActivation = false,
+                forceSprintDuringState = false,
+            });
+
+
+
+            Skills.AddSpecialSkills(bodyPrefab, specialThrowHookBomb, specialRecallHookBomb, specialDrinkFlask, specialThrowFlask);
+
+
+
         }
         #endregion skills
         
@@ -477,7 +545,27 @@ namespace FishermanMod.Survivors.Fisherman
         private void AddHooks()
         {
             R2API.RecalculateStatsAPI.GetStatCoefficients += RecalculateStatsAPI_GetStatCoefficients;
+            On.RoR2.HealthComponent.TakeDamage += HealthComponent_TakeDamage;
         }
+
+        private void HealthComponent_TakeDamage(On.RoR2.HealthComponent.orig_TakeDamage orig, HealthComponent self, DamageInfo damageInfo)
+        {
+            if (self && self.body)
+            {
+                //ripped right from spacetime skein in tinkers satchel.
+                if (self.body.HasBuff(FishermanBuffs.SteadyNervesBuff))
+                {
+                    int buffstacks = self.body.GetBuffCount(FishermanBuffs.SteadyNervesBuff);
+                    var forceMultiplier = Mathf.Max(0, 100 - buffstacks * 20);
+                    if (damageInfo.canRejectForce)
+                        damageInfo.force *= forceMultiplier * 0.01f;
+
+                    damageInfo.damage = Mathf.Max(1, damageInfo.damage - buffstacks);
+                }
+            }
+            orig(self, damageInfo);
+        }
+
 
         private void RecalculateStatsAPI_GetStatCoefficients(CharacterBody sender, R2API.RecalculateStatsAPI.StatHookEventArgs args)
         {
@@ -490,6 +578,20 @@ namespace FishermanMod.Survivors.Fisherman
             if (sender.HasBuff(FishermanBuffs.hookTetherDebuff))
             {
                 args.moveSpeedReductionMultAdd += 0.3f;
+            }
+            if (sender.HasBuff(FishermanBuffs.SteadyNervesBuff))
+            {
+                int buffcount = sender.GetBuffCount(FishermanBuffs.SteadyNervesBuff);
+                for (int i = 0; i < buffcount; i++)
+                {
+                    args.damageMultAdd += 0.3f;
+                    args.armorAdd += 2;
+                    args.regenMultAdd += .1f;
+                    if (args.attackSpeedReductionMultAdd > -0.2f)
+                        args.attackSpeedReductionMultAdd -= 0.1f;
+                    if (args.moveSpeedReductionMultAdd > -0.2f)
+                        args.moveSpeedReductionMultAdd -= 0.1f;
+                }
             }
         }
 
@@ -537,38 +639,82 @@ namespace FishermanMod.Survivors.Fisherman
             //    $"\n\t>Final Force: {force}");
 
 
+
+
+            DamageInfo damageInfo = new DamageInfo
+            {
+                attacker = attacker,
+                inflictor = inflictor,
+                force = force,
+                position = enemyHurtBox.transform.position,
+            };
+
+
+
+            if(bodyMass > maxMass)
+            {
+                //play hook fail sound effect
+                //show hook hook fail decal on enemy
+                damageInfo.force = force * 0.1f;
+                damageInfo.procCoefficient = 1;
+                damageInfo.procChainMask = default(ProcChainMask);
+                damageInfo.damageType = DamageType.BleedOnHit;
+                enemyHurtBox.healthComponent.TakeDamageForce(damageInfo); // apply weak pull no damage to prevent double hit
+                damageInfo.damage = hookFailDamage;  //add damage for bleed calcution
+                GlobalEventManager.instance.OnHitEnemy(damageInfo, body.gameObject);
+                GlobalEventManager.instance.OnHitAll(damageInfo, body.gameObject);
+                Log.Debug($"Mass too large, hook failed. New force: { damageInfo.force}"); 
+
+            }
+            else if(!isHookImmune)
+            {
+                //play hook success sound effect
+                //show hook success decal on enemy
+                //Log.Debug("Hook Succeeded");
+                body.AddTimedBuff(FishermanBuffs.hookImmunityBuff, 0.3f);
+                //enemyHurtBox.healthComponent.TakeDamage(damageInfo);
+                enemyHurtBox.healthComponent.TakeDamageForce(damageInfo);
+            }
+            else
+            {
+                //Log.Debug("Enemy has hookImmunity, hook failed");
+            }
+            #region Your Mother
+
+
+
             /*
-            
 
 
-            Vector3 flyPointDir = targetPos;
-            flyPointDir.x = -distanceVector.y;
-            flyPointDir.y = distanceVector.x;
-            flyPointDir = flyPointDir.normalized;
-            Vector3 flyPoint = -flyPointDir * dist + centerAdjEPos;
-            Vector3 flyDirection = (flyPoint - enemyPosition).normalized;
-            force = flyDirection * bodyMass * dist;
+
+Vector3 flyPointDir = targetPos;
+flyPointDir.x = -distanceVector.y;
+flyPointDir.y = distanceVector.x;
+flyPointDir = flyPointDir.normalized;
+Vector3 flyPoint = -flyPointDir * dist + centerAdjEPos;
+Vector3 flyDirection = (flyPoint - enemyPosition).normalized;
+force = flyDirection * bodyMass * dist;
 
 
-            Log.Debug(
-                $"\n" +
-                $"bodyMass......:\t{bodyMass}\n" +
-                $"targetPos.....:\t{targetPos}\n" +
-                $"enemyPosition.:\t{enemyPosition}\n" +
-                $"dist..........:\t{dist}\n" +
-                $"halfdist......:\t{halfdist}\n" +
-                $"distanceVector:\t{distanceVector}\n" +
-                $"halfDistVec...:\t{halfDistVec}\n" +
-                $"direction.....:\t{direction}\n" +
-                $"flyPointDir...:\t{flyPointDir}\n" +
-                $"centerAdjEPos.:\t{centerAdjEPos}\n" +
-                $"flyPoint......:\t{flyPoint}\n" +
-                $"flyDirection..:\t{flyDirection}\n" +
-                $"force.........:\t{force}\n"
-            //$"rotation......:\t{rotation}\n" +
-            //$"rotatedVector.:\t{rotatedVector}\n"
-            );
-            */
+Log.Debug(
+    $"\n" +
+    $"bodyMass......:\t{bodyMass}\n" +
+    $"targetPos.....:\t{targetPos}\n" +
+    $"enemyPosition.:\t{enemyPosition}\n" +
+    $"dist..........:\t{dist}\n" +
+    $"halfdist......:\t{halfdist}\n" +
+    $"distanceVector:\t{distanceVector}\n" +
+    $"halfDistVec...:\t{halfDistVec}\n" +
+    $"direction.....:\t{direction}\n" +
+    $"flyPointDir...:\t{flyPointDir}\n" +
+    $"centerAdjEPos.:\t{centerAdjEPos}\n" +
+    $"flyPoint......:\t{flyPoint}\n" +
+    $"flyDirection..:\t{flyDirection}\n" +
+    $"force.........:\t{force}\n"
+//$"rotation......:\t{rotation}\n" +
+//$"rotatedVector.:\t{rotatedVector}\n"
+);
+*/
             /*
             Vector3 diffs = hookTarget - enemyPosition;
             Vector3 y0 = enemyPosition;
@@ -632,45 +778,7 @@ namespace FishermanMod.Survivors.Fisherman
             //    $"\n\tdistAdjForce: {distAdjForce}" +
             //    $"\n\t>Final Force: {force}");
             //Vector3 force = Vector3.oneVector * 1000;
-
-            DamageInfo damageInfo = new DamageInfo
-            {
-                attacker = attacker,
-                inflictor = inflictor,
-                force = force,
-                position = enemyHurtBox.transform.position,
-            };
-
-
-
-            if(bodyMass > maxMass)
-            {
-                //play hook fail sound effect
-                //show hook hook fail decal on enemy
-                damageInfo.force = force * 0.1f;
-                damageInfo.procCoefficient = 1;
-                damageInfo.procChainMask = default(ProcChainMask);
-                damageInfo.damageType = DamageType.BleedOnHit;
-                enemyHurtBox.healthComponent.TakeDamage(damageInfo); // apply weak pull no damage to prevent double hit
-                damageInfo.damage = hookFailDamage;  //add damage for bleed calcution
-                GlobalEventManager.instance.OnHitEnemy(damageInfo, body.gameObject);
-                GlobalEventManager.instance.OnHitAll(damageInfo, body.gameObject);
-                Log.Debug($"Mass too large, hook failed. New force: { damageInfo.force}"); 
-
-            }
-            else if(!isHookImmune)
-            {
-                //play hook success sound effect
-                //show hook success decal on enemy
-                //Log.Debug("Hook Succeeded");
-                body.AddTimedBuff(FishermanBuffs.hookImmunityBuff, 0.3f);
-                enemyHurtBox.healthComponent.TakeDamage(damageInfo);
-            }
-            else
-            {
-                //Log.Debug("Enemy has hookImmunity, hook failed");
-            }
-
+            	#endregion
         }
 
         //should probably make this use a list

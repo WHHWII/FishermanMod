@@ -1,4 +1,5 @@
-﻿using RoR2;
+﻿using FishermanMod.Modules;
+using RoR2;
 using UnityEngine;
 
 namespace FishermanMod.Survivors.Fisherman
@@ -10,6 +11,7 @@ namespace FishermanMod.Survivors.Fisherman
         public static BuffDef hookImmunityBuff;
         public static BuffDef hookTauntDebuff;
         public static BuffDef hookTetherDebuff;
+        public static BuffDef SteadyNervesBuff;
 
         public static void Init(AssetBundle assetBundle)
         {
@@ -29,11 +31,17 @@ namespace FishermanMod.Survivors.Fisherman
             //    Color.red,
             //    false,
             //    true);
-            hookTetherDebuff = Modules.Content.CreateAndAddBuff("HookTauntDebuff",
+            hookTetherDebuff = Modules.Content.CreateAndAddBuff("HookTetherDebuff",
                 LegacyResourcesAPI.Load<BuffDef>("BuffDefs/HiddenInvincibility").iconSprite,
                 Color.gray,
                 false,
                 true);
+
+            SteadyNervesBuff = Modules.Content.CreateAndAddBuff("SteadyNervesBuff",
+                LegacyResourcesAPI.Load<BuffDef>("BuffDefs/HiddenInvincibility").iconSprite,
+                Color.blue,
+                true,
+                false);
         }
     }
 }
