@@ -567,7 +567,7 @@ namespace FishermanMod.Survivors.Fisherman
                     //change freeze to slow
                     if ((damageInfo.damageType & DamageType.Freeze2s) != DamageType.Generic)
                     {
-                        damageInfo.damageType =  damageInfo.damageType | DamageType.SlowOnHit;
+                        damageInfo.damageType = damageInfo.damageType | DamageType.SlowOnHit;
                         damageInfo.damageType = damageInfo.damageType & ~DamageType.Freeze2s;
                     }
                 }
