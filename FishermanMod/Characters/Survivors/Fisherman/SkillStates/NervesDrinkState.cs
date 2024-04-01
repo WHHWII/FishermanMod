@@ -74,12 +74,26 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
             {
                 ++debuffs;
             }
+            debuffs += characterBody.inventory.GetItemCount(RoR2.RoR2Content.Items.TonicAffliction); //lunar item debuffs?
+            debuffs += characterBody.inventory.GetTotalItemCountOfTier(ItemTier.Lunar);
+            debuffs -= characterBody.inventory.GetItemCount(RoR2.RoR2Content.Items.LunarTrinket);
             if (characterBody.HasBuff(RoR2.RoR2Content.Buffs.Nullified))
             {
                 characterBody.RemoveBuff(RoR2.RoR2Content.Buffs.Nullified);
-                characterBody.AddBuff(RoR2.RoR2Content.Buffs.Slow80);
+                if (debuffs >= 14)
+                {
+                    characterBody.AddBuff(RoR2.RoR2Content.Buffs.Slow50);
+                }
+                else if( debuffs >= 7)
+                {
+                    characterBody.AddBuff(RoR2.RoR2Content.Buffs.Slow60);
+                }
+                else
+                {
+                    characterBody.AddBuff(RoR2.RoR2Content.Buffs.Slow80);
+                }
             }
-            debuffs += characterBody.inventory.GetItemCount(RoR2.RoR2Content.Items.TonicAffliction); //lunar item debuffs?
+
             for (int i = 0; i < debuffs; i++) characterBody.AddTimedBuff(FishermanBuffs.SteadyNervesBuff, 20f * duration);
             characterBody.AddTimedBuff(RoR2Content.Buffs.HiddenInvincibility, 0.1f * duration);
 

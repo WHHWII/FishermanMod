@@ -413,7 +413,7 @@ namespace FishermanMod.Survivors.Fisherman
                 baseMaxStock = 1,
                 baseRechargeInterval = 3f,
 
-                isCombatSkill = true,
+                isCombatSkill = false,
                 mustKeyPress = true,
             });
             specialThrowFlask = Skills.CreateSkillDef(new SkillDefInfo
@@ -440,7 +440,7 @@ namespace FishermanMod.Survivors.Fisherman
                 mustKeyPress = true,
                 beginSkillCooldownOnSkillEnd = false,
 
-                isCombatSkill = false,
+                isCombatSkill = true,
                 canceledFromSprinting = false,
                 cancelSprintingOnActivation = false,
                 forceSprintDuringState = false,
@@ -565,9 +565,10 @@ namespace FishermanMod.Survivors.Fisherman
                     damageInfo.damage = Mathf.Max(1, damageInfo.damage - buffstacks);
 
                     //change freeze to slow
-                    if (damageInfo.damageType == DamageType.Freeze2s)
+                    if ((damageInfo.damageType & DamageType.Freeze2s) != DamageType.Generic)
                     {
-                        damageInfo.damageType = DamageType.SlowOnHit;
+                        damageInfo.damageType =  damageInfo.damageType | DamageType.SlowOnHit;
+                        damageInfo.damageType = damageInfo.damageType & ~DamageType.Freeze2s;
                     }
                 }
             }
@@ -599,6 +600,8 @@ namespace FishermanMod.Survivors.Fisherman
                         args.attackSpeedReductionMultAdd -= (Mathf.Max(0,args.attackSpeedReductionMultAdd) * buffcount * 0.2f) + 0.1f;
                     if (args.moveSpeedReductionMultAdd > -0.2f)
                         args.moveSpeedReductionMultAdd -= (Mathf.Max(0, args.moveSpeedReductionMultAdd) * buffcount * 0.2f) + 0.1f;
+                    if (sender.cursePenalty > 1f && args.baseCurseAdd > -.8f)
+                        args.baseCurseAdd -= .1f;
                 }
             }
         }
