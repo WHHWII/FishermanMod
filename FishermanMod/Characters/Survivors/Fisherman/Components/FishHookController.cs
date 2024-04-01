@@ -6,6 +6,7 @@ using FishermanMod.Characters.Survivors.Fisherman.Components;
 using System.Collections;
 using UnityEngine.UIElements;
 using Rewired.Utils;
+using static UnityEngine.ParticleSystem.PlaybackState;
 
 namespace FishermanMod.Survivors.Fisherman.Components
 {
@@ -146,6 +147,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
         //}
         void OnCollisionExit(UnityEngine.Collision collision)
         {
+            if (collision.gameObject.GetComponent<MapZone>()) Log.Debug("Hit bounds box: col exit");
             Log.Debug($"Collision Exit {collision.gameObject.name}");
             rb.isKinematic = false;
             
@@ -156,7 +158,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
         }
         void OnCollisionEnter(UnityEngine.Collision collision)
         {
-            if (collision.gameObject.name.Contains("Kill")) Log.Debug("Hit bounds box");
+            if (collision.gameObject.GetComponent<MapZone>()) Log.Debug("Hit bounds box: col enter");
             Log.Debug($"Collision Enter {collision.gameObject.name}");
             //if (hookHurtBox == null) hookHurtBox = gameObject.AddComponent<HurtBox>();
             //stickComponent.TrySticking(collision.collider, Vector3.zero);
@@ -180,6 +182,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
         }
         void OnTriggerExit(Collider collider)
         {
+            if (collider.gameObject.GetComponent<MapZone>()) Log.Debug("Hit bounds box: trig exit");
             //Log.Debug($"Trigger Exit {collider.gameObject.name}");
             if (!CanThrow(collider.gameObject)) return;
             if (ThrowItem(collider)) return;
@@ -187,6 +190,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
         }
         void OnTriggerEnter(Collider collider)
         {
+            if (collider.gameObject.GetComponent<MapZone>()) Log.Debug("Hit bounds box: trig enter");
             //Log.Debug($"Trigger Enter {collider.gameObject.name}");
 
             //DrawAggro(collider);
@@ -233,7 +237,6 @@ namespace FishermanMod.Survivors.Fisherman.Components
             return false;
 
         } 
-
         void ThrowInteractable(Collider collider)
         {
 
@@ -256,8 +259,6 @@ namespace FishermanMod.Survivors.Fisherman.Components
             }
 
         }
-
-
         void ThrowHookBomb(UnityEngine.Collision collision)
         {
             if (!FishermanSurvivor.deployedHookBomb) return;

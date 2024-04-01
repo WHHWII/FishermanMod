@@ -19,7 +19,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
 
         public override void OnEnter()
         {
-            projectilePrefab = FishermanAssets.bombProjectilePrefab;
+            projectilePrefab = FishermanAssets.bottleProjectilePrefab;
             //base.effectPrefab = Modules.Assets.SomeMuzzleEffect;
             //targetmuzzle = "muzzleThrow"
             attackSoundString = "HenryBombThrow";

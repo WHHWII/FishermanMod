@@ -12,6 +12,8 @@ namespace FishermanMod.Survivors.Fisherman
         public const float platformDamage = 3.5f;
 
         public const float bombDamageCoefficient = 8f;
+
         public const float bottleDamageCoefficient = 4f;
+        public const float bottleDamageBuff = 0.3f;
     }
 }

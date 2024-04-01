@@ -65,6 +65,11 @@ namespace FishermanMod.Survivors.Fisherman
             Language.Add(prefix + "SPECIAL_BOMB_DESCRIPTION", $"Launch a sticky bomb that tethers fish and <style=cIsUtility>slows them</style>. Re-Activate to {Tokens.HookText("Hook")} tethered fish inwards and detonate for <style=cIsDamage>{100f * FishermanStaticValues.bombDamageCoefficient}% damage.</style>");
             #endregion
 
+            #region Special
+            Language.Add(prefix + "SPECIAL_DRINK_NAME", Tokens.FishermanText("Steady The Nerves", 4));
+            Language.Add(prefix + "SPECIAL_DRINK_DESCRIPTION", $"<style=cIsDamage>Stunning</style>. Take a drink. Resist most negative effects and gain <style=cIsDamage>{100 * FishermanStaticValues.bottleDamageBuff}%</style> damage for each debuff on you. Recast to throw the bottle for <style=cIsDamage>{100f * FishermanStaticValues.bottleDamageCoefficient}% damage.</style>");
+            #endregion
+
             #region Achievements
             Language.Add(Tokens.GetAchievementNameToken(FishermanMasteryAchievement.identifier), "Fisherman: Mastery");
             Language.Add(Tokens.GetAchievementDescriptionToken(FishermanMasteryAchievement.identifier), "As Fisherman, beat the game or obliterate on Monsoon.");

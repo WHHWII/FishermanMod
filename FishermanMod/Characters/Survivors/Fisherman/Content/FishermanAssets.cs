@@ -28,7 +28,7 @@ namespace FishermanMod.Survivors.Fisherman
         public static NetworkSoundEventDef swordHitSoundEvent;
 
         //projectiles
-        public static GameObject bombProjectilePrefab;
+        public static GameObject bottleProjectilePrefab;
         public static GameObject hookProjectilePrefab;
         public static GameObject movingPlatformBlueprintPrefab;
         public static GameObject movingPlatformPrefab;
@@ -90,7 +90,7 @@ namespace FishermanMod.Survivors.Fisherman
         private static void CreateProjectiles()
         {
             CreateBombProjectile();
-            Content.AddProjectilePrefab(bombProjectilePrefab);
+            Content.AddProjectilePrefab(bottleProjectilePrefab);
             CreateHookProjectile();
             Content.AddProjectilePrefab(hookProjectilePrefab);
             CreateMovingPlatform();
@@ -103,11 +103,11 @@ namespace FishermanMod.Survivors.Fisherman
         private static void CreateBombProjectile()
         {
             //highly recommend setting up projectiles in editor, but this is a quick and dirty way to prototype if you want
-            bombProjectilePrefab = Assets.CloneProjectilePrefab("CommandoGrenadeProjectile", "HenryBombProjectile");
+            bottleProjectilePrefab = Assets.CloneProjectilePrefab("CommandoGrenadeProjectile", "HenryBombProjectile");
 
             //remove their ProjectileImpactExplosion component and start from default values
-            UnityEngine.Object.Destroy(bombProjectilePrefab.GetComponent<ProjectileImpactExplosion>());
-            ProjectileImpactExplosion bombImpactExplosion = bombProjectilePrefab.AddComponent<ProjectileImpactExplosion>();
+            UnityEngine.Object.Destroy(bottleProjectilePrefab.GetComponent<ProjectileImpactExplosion>());
+            ProjectileImpactExplosion bombImpactExplosion = bottleProjectilePrefab.AddComponent<ProjectileImpactExplosion>();
             
             bombImpactExplosion.blastRadius = 1f;
             bombImpactExplosion.blastDamageCoefficient = 1f;
@@ -117,14 +117,14 @@ namespace FishermanMod.Survivors.Fisherman
             bombImpactExplosion.impactEffect = bombExplosionEffect;
             bombImpactExplosion.lifetimeExpiredSound = Content.CreateAndAddNetworkSoundEventDef("HenryBombExplosion");
             bombImpactExplosion.timerAfterImpact = true;
-            bombImpactExplosion.lifetimeAfterImpact = 0.1f;
+            bombImpactExplosion.lifetimeAfterImpact = 0.0f;
             bombImpactExplosion.applyDot = true;
-            var ps = bombProjectilePrefab.GetComponent<ProjectileSimple>();
+            var ps = bottleProjectilePrefab.GetComponent<ProjectileSimple>();
             ProjectileDamage projectileDamage = ps.GetComponent<ProjectileDamage>();
             projectileDamage.damageType = DamageType.Stun1s;
 
 
-            ProjectileController bombController = bombProjectilePrefab.GetComponent<ProjectileController>();
+            ProjectileController bombController = bottleProjectilePrefab.GetComponent<ProjectileController>();
 
             if (_assetBundle.LoadAsset<GameObject>("HenryBombGhost") != null)
                 bombController.ghostPrefab = _assetBundle.CreateProjectileGhostPrefab("HenryBombGhost");

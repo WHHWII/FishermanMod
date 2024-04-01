@@ -3,6 +3,7 @@ using FishermanMod.Survivors.Fisherman;
 using RoR2;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.UIElements;
 
 namespace FishermanMod.Survivors.Fisherman.SkillStates
 {
@@ -11,6 +12,8 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
         public static float duration = 0.5f;
 
         public static string dodgeSoundString = "HenryRoll";
+
+
 
         public override void OnEnter()
         {
@@ -41,6 +44,12 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
 
         private void AddBuffForeachDebuff()
         {
+            //BuffDef[] allbuffs = BuffCatalog.buffDefs;
+            //foreach(var buff in allbuffs)
+            //{
+            //    Log.Debug($"{buff.name}: {buff.buffIndex}");
+            //}
+
             int debuffs = 1; //always gives one stack
             BuffIndex[] debuffBuffIndices = BuffCatalog.debuffBuffIndices;
             foreach (BuffIndex buffType in debuffBuffIndices)
@@ -61,7 +70,16 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
                     }
                 }
             }
-            //characterBody.inventory.GetItemCount() //lunar item debuffs?
+            if(characterBody.HasBuff(RoR2.RoR2Content.Buffs.VoidFogMild) || characterBody.HasBuff(RoR2.RoR2Content.Buffs.VoidFogStrong))
+            {
+                ++debuffs;
+            }
+            if (characterBody.HasBuff(RoR2.RoR2Content.Buffs.Nullified))
+            {
+                characterBody.RemoveBuff(RoR2.RoR2Content.Buffs.Nullified);
+                characterBody.AddBuff(RoR2.RoR2Content.Buffs.Slow80);
+            }
+            debuffs += characterBody.inventory.GetItemCount(RoR2.RoR2Content.Items.TonicAffliction); //lunar item debuffs?
             for (int i = 0; i < debuffs; i++) characterBody.AddTimedBuff(FishermanBuffs.SteadyNervesBuff, 20f * duration);
             characterBody.AddTimedBuff(RoR2Content.Buffs.HiddenInvincibility, 0.1f * duration);
 

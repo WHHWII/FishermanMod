@@ -282,7 +282,7 @@ namespace FishermanMod.Survivors.Fisherman
             });
 
             InitValidInteractableGrabs();
-            Skills.AddSecondarySkills(bodyPrefab, secondaryFireFishHook, secondaryRecallFishHook);
+            Skills.AddSecondarySkills(bodyPrefab, secondaryFireFishHook);
         }
 
         private void AddUtiitySkills()
@@ -402,6 +402,7 @@ namespace FishermanMod.Survivors.Fisherman
                 skillName = "SteadyTheNerves",
                 skillNameToken = FISHERMAN_PREFIX + "SPECIAL_DRINK_NAME",
                 skillDescriptionToken = FISHERMAN_PREFIX + "SPECIAL_DRINK_DESCRIPTION",
+                keywordTokens = new string[] { "KEYWORD_STUNNING" },
                 skillIcon = assetBundle.LoadAsset<Sprite>("Jelly Bomb Icon"),
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(SkillStates.NervesDrinkState)),
@@ -420,7 +421,6 @@ namespace FishermanMod.Survivors.Fisherman
                 skillName = "DrownTheSorrows",
                 skillNameToken = FISHERMAN_PREFIX + "SPECIAL_DRINK_NAME",
                 skillDescriptionToken = FISHERMAN_PREFIX + "SPECIAL_DRINK_DESCRIPTION",
-                keywordTokens = new string[] { "KEYWORD_AGILE" },
                 skillIcon = assetBundle.LoadAsset<Sprite>("texUtilityIcon"),
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(SkillStates.NervesThrowState)),
@@ -448,7 +448,7 @@ namespace FishermanMod.Survivors.Fisherman
 
 
 
-            Skills.AddSpecialSkills(bodyPrefab, specialThrowHookBomb, specialRecallHookBomb, specialDrinkFlask, specialThrowFlask);
+            Skills.AddSpecialSkills(bodyPrefab, specialThrowHookBomb, specialDrinkFlask);
 
 
 
@@ -556,11 +556,19 @@ namespace FishermanMod.Survivors.Fisherman
                 if (self.body.HasBuff(FishermanBuffs.SteadyNervesBuff))
                 {
                     int buffstacks = self.body.GetBuffCount(FishermanBuffs.SteadyNervesBuff);
+                    //resist knockback
                     var forceMultiplier = Mathf.Max(0, 100 - buffstacks * 20);
                     if (damageInfo.canRejectForce)
                         damageInfo.force *= forceMultiplier * 0.01f;
 
+                    //reduce incoming damage
                     damageInfo.damage = Mathf.Max(1, damageInfo.damage - buffstacks);
+
+                    //change freeze to slow
+                    if (damageInfo.damageType == DamageType.Freeze2s)
+                    {
+                        damageInfo.damageType = DamageType.SlowOnHit;
+                    }
                 }
             }
             orig(self, damageInfo);
@@ -584,13 +592,13 @@ namespace FishermanMod.Survivors.Fisherman
                 int buffcount = sender.GetBuffCount(FishermanBuffs.SteadyNervesBuff);
                 for (int i = 0; i < buffcount; i++)
                 {
-                    args.damageMultAdd += 0.3f;
+                    args.damageMultAdd += FishermanStaticValues.bottleDamageBuff;
                     args.armorAdd += 2;
                     args.regenMultAdd += .1f;
                     if (args.attackSpeedReductionMultAdd > -0.2f)
-                        args.attackSpeedReductionMultAdd -= 0.1f;
+                        args.attackSpeedReductionMultAdd -= (Mathf.Max(0,args.attackSpeedReductionMultAdd) * buffcount * 0.2f) + 0.1f;
                     if (args.moveSpeedReductionMultAdd > -0.2f)
-                        args.moveSpeedReductionMultAdd -= 0.1f;
+                        args.moveSpeedReductionMultAdd -= (Mathf.Max(0, args.moveSpeedReductionMultAdd) * buffcount * 0.2f) + 0.1f;
                 }
             }
         }
