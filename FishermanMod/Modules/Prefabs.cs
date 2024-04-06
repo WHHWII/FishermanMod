@@ -282,7 +282,7 @@ namespace FishermanMod.Modules
         //private static void SetupRigidbody(GameObject prefab)
         //{
         //    Rigidbody rigidbody = prefab.GetComponent<Rigidbody>();
-        //    rigidbody.mass = 100f;
+        //    rigidbody.mass = 300f;
         //}
 
         private static void SetupCapsuleCollider(GameObject prefab)

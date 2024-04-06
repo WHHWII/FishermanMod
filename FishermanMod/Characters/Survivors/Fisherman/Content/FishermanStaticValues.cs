@@ -9,7 +9,7 @@ namespace FishermanMod.Survivors.Fisherman
 
         public const float gunDamageCoefficient = 2.5f;
 
-        public const float platformDamage = 3.5f;
+        public const float shantyCannonDamage = 3.5f;
 
         public const float bombDamageCoefficient = 8f;
 

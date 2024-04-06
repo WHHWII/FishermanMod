@@ -46,7 +46,7 @@ namespace FishermanMod.Modules.Characters
 
         protected virtual void InitializeCharacterBodyPrefab()
         {
-            characterModelObject = Prefabs.LoadCharacterModel(assetBundle, modelPrefabName);
+            characterModelObject = Prefabs.LoadCharacterModel(assetBundleExtras, modelPrefabName);
 
             bodyPrefab = Modules.Prefabs.CreateBodyPrefab(characterModelObject, bodyInfo);
             prefabCharacterBody = bodyPrefab.GetComponent<CharacterBody>();

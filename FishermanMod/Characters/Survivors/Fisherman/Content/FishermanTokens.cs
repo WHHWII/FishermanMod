@@ -56,8 +56,8 @@ namespace FishermanMod.Survivors.Fisherman
             #endregion
 
             #region Utility
-            Language.Add(prefix + "UTILITY_ROLL_NAME", Tokens.FishermanText("F153 Mobile Shanty Platform",3));
-            Language.Add(prefix + "UTILITY_ROLL_DESCRIPTION", $"Deploy a drone that <style=cIsUtility>you can stand on.</style> It slowly fires explosive rounds for <style=cIsDamage>{100f * FishermanStaticValues.platformDamage}% damage.</style>");
+            Language.Add(prefix + "UTILITY_PLATFORM_NAME", Tokens.FishermanText("F153 Mobile Shanty Platform",3));
+            Language.Add(prefix + "UTILITY_PLATFORM_DESCRIPTION", $"Deploy a drone that <style=cIsUtility>you can stand on.</style> It slowly fires explosive rounds for <style=cIsDamage>{100f * FishermanStaticValues.shantyCannonDamage}% damage.</style>");
             #endregion
 
             #region Special
@@ -67,7 +67,7 @@ namespace FishermanMod.Survivors.Fisherman
 
             #region Special
             Language.Add(prefix + "SPECIAL_DRINK_NAME", Tokens.FishermanText("Steady The Nerves", 4));
-            Language.Add(prefix + "SPECIAL_DRINK_DESCRIPTION", $"<style=cIsDamage>Stunning</style>. Take a drink. Resist most negative effects and gain <style=cIsDamage>{100 * FishermanStaticValues.bottleDamageBuff}%</style> damage for each debuff on you. Recast to throw the bottle for <style=cIsDamage>{100f * FishermanStaticValues.bottleDamageCoefficient}% damage.</style>");
+            Language.Add(prefix + "SPECIAL_DRINK_DESCRIPTION", $"<style=cIsDamage>Stunning</style>. Take a drink. Resist most negative effects and gain <style=cIsDamage>{100 * FishermanStaticValues.bottleDamageBuff}%</style> damage for each one on you. Recast to throw the bottle for <style=cIsDamage>{100f * FishermanStaticValues.bottleDamageCoefficient}% damage.</style>");
             #endregion
 
             #region Achievements

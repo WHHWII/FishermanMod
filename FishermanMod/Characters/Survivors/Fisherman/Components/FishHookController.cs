@@ -10,6 +10,12 @@ using static UnityEngine.ParticleSystem.PlaybackState;
 
 namespace FishermanMod.Survivors.Fisherman.Components
 {
+    //TODO fix chest launching terrain issues on certain maps
+    //TODO fix launch force/trajectory for all objects
+    //TODO allow grab of logbooks
+    //TODO allow grab of pickups such as ghor gold or bandolier drops
+    //TODO allow fishing out of bounds
+    //TODO grab allies (non-player)
     public class FishHookController : MonoBehaviour
     {
         public Rigidbody rb;

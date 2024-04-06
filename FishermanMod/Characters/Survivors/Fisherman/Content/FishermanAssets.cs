@@ -13,6 +13,7 @@ using IL.RoR2.EntityLogic;
 using RoR2.CharacterAI;
 using RoR2.EntityLogic;
 using On.RoR2.Orbs;
+using System.Reflection;
 
 namespace FishermanMod.Survivors.Fisherman
 {
@@ -23,6 +24,8 @@ namespace FishermanMod.Survivors.Fisherman
         public static GameObject swordHitImpactEffect;
 
         public static GameObject bombExplosionEffect;
+        public static GameObject bottleImpactEffect;
+        public static GameObject shantyShotGhost;
 
         // networked hit sounds
         public static NetworkSoundEventDef swordHitSoundEvent;
@@ -31,19 +34,21 @@ namespace FishermanMod.Survivors.Fisherman
         public static GameObject bottleProjectilePrefab;
         public static GameObject hookProjectilePrefab;
         public static GameObject movingPlatformBlueprintPrefab;
-        public static GameObject movingPlatformPrefab;
+        public static GameObject movingPlatformBodyPrefab;
         public static GameObject movingPlatformMasterPrefab;
+        public static GameObject shantyCannonShotPrefab;
         public static GameObject hookBombProjectilePrefab;
 
         //materials
         public static Material chainMat;
 
         private static AssetBundle _assetBundle;
-
-        public static void Init(AssetBundle assetBundle)
+        private static AssetBundle _assetBundleExtras;
+        public static void Init(AssetBundle assetBundle, AssetBundle assetBundle2)
         {
 
             _assetBundle = assetBundle;
+            _assetBundleExtras = assetBundle2;
 
             swordHitSoundEvent = Content.CreateAndAddNetworkSoundEventDef("HenrySwordHit");
 
@@ -52,12 +57,17 @@ namespace FishermanMod.Survivors.Fisherman
             CreateProjectiles();
 
             CreateMaterials();
+
+            CreateMinions();
+
+
         }
 
         #region effects
         private static void CreateEffects()
         {
             CreateBombExplosionEffect();
+            CreateBottleImpactEffect();
 
             swordSwingEffect = _assetBundle.LoadEffect("HenrySwordSwingEffect", true);
             swordHitImpactEffect = _assetBundle.LoadEffect("ImpactHenrySlash");
@@ -84,6 +94,15 @@ namespace FishermanMod.Survivors.Fisherman
             };
 
         }
+
+        private static void CreateBottleImpactEffect()
+        {
+            bottleImpactEffect = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Mage/MageIceExplosion.prefab").WaitForCompletion(),"bottleImpact");
+            UnityEngine.Object.Destroy(bottleImpactEffect.transform.Find("RuneRings").gameObject);
+            UnityEngine.Object.Destroy(bottleImpactEffect.transform.Find("Point Light").gameObject);
+            bottleImpactEffect.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
+            //TODO thunderkit import
+        }
         #endregion effects
 
         #region projectiles
@@ -93,11 +112,10 @@ namespace FishermanMod.Survivors.Fisherman
             Content.AddProjectilePrefab(bottleProjectilePrefab);
             CreateHookProjectile();
             Content.AddProjectilePrefab(hookProjectilePrefab);
-            CreateMovingPlatform();
-            Content.AddProjectilePrefab(movingPlatformBlueprintPrefab);
-            Content.AddProjectilePrefab(movingPlatformPrefab);
             CreateJellyfishProjectile();
             Content.AddProjectilePrefab(hookBombProjectilePrefab);
+            CreateMovePlatformProjectileAttack();
+            Content.AddProjectilePrefab(shantyCannonShotPrefab);
         }
 
         private static void CreateBombProjectile()
@@ -114,10 +132,11 @@ namespace FishermanMod.Survivors.Fisherman
             bombImpactExplosion.falloffModel = BlastAttack.FalloffModel.None;
             bombImpactExplosion.destroyOnEnemy = true;
             bombImpactExplosion.lifetime = 12f;
-            bombImpactExplosion.impactEffect = bombExplosionEffect;
+            bombImpactExplosion.destroyOnEnemy = true;
+            bombImpactExplosion.destroyOnWorld = true;
+            bombImpactExplosion.impactOnWorld = true;
+            bombImpactExplosion.impactEffect = bottleImpactEffect;
             bombImpactExplosion.lifetimeExpiredSound = Content.CreateAndAddNetworkSoundEventDef("HenryBombExplosion");
-            bombImpactExplosion.timerAfterImpact = true;
-            bombImpactExplosion.lifetimeAfterImpact = 0.0f;
             bombImpactExplosion.applyDot = true;
             var ps = bottleProjectilePrefab.GetComponent<ProjectileSimple>();
             ProjectileDamage projectileDamage = ps.GetComponent<ProjectileDamage>();
@@ -215,56 +234,44 @@ namespace FishermanMod.Survivors.Fisherman
 
         }
 
-        private static void CreateMovingPlatform()
+       
+        private static void CreateMovePlatformProjectileAttack()
         {
-            movingPlatformBlueprintPrefab = _assetBundle.LoadAsset<GameObject>("MovingPlatformBlueprint");
-            //var bpc = movingPlatformBlueprintPrefab.AddComponent<BlueprintController>();
-            //movingPlatformPrefab = _assetBundle.LoadAsset<GameObject>("MovingPlatform");
-         
-            movingPlatformPrefab = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Drones/MegaDroneBody.prefab").WaitForCompletion(), "FishermanPlatform");
-            movingPlatformPrefab.AddComponent<MovingPlatformController>();
-            var pids = movingPlatformPrefab.GetComponents<VectorPID>();
-            foreach(var pid in pids)
-            {
-                //UnityEngine.Object.Destroy(pid);
-                pid.gain = 2;
-            }
-            var qpid = movingPlatformPrefab.GetComponent<QuaternionPID>();
-            qpid.gain = 2;
+           
+            shantyCannonShotPrefab = Assets.CloneProjectilePrefab("MageFireboltBasic", "FishermanShantyCannonShot");
+            //UnityEngine.Object.Destroy(shantyCannonShotPrefab.GetComponent<ProjectileOverlapAttack>());
+            var projectileController = shantyCannonShotPrefab.GetComponent<ProjectileController>();
+            projectileController.ghostPrefab = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Commando/FMJRampingGhost.prefab").WaitForCompletion();
+            var impactExplosion = shantyCannonShotPrefab.GetComponent<ProjectileImpactExplosion>();
+            impactExplosion.blastRadius = 14;
+            impactExplosion.blastDamageCoefficient = 1f;
+            impactExplosion.blastProcCoefficient = 1f;
+            impactExplosion.bonusBlastForce = new Vector3(0, 400, 0);
+            impactExplosion.falloffModel = BlastAttack.FalloffModel.None;
+            impactExplosion.lifetime = 20f;
+            impactExplosion.impactEffect = bombExplosionEffect;
+            impactExplosion.explosionEffect = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Commando/OmniExplosionVFXCommandoGrenade.prefab").WaitForCompletion();
+            impactExplosion.lifetimeExpiredSound = Content.CreateAndAddNetworkSoundEventDef("HenryBombExplosion");
+            impactExplosion.timerAfterImpact = false;
+            impactExplosion.applyDot = true;
 
-            Collider col = movingPlatformPrefab.GetComponentInChildren<SphereCollider>();
-            GameObject temphurtBox = col.gameObject;
-            UnityEngine.Object.Destroy(col);
-            BoxCollider newBoxCol = temphurtBox.AddComponent<BoxCollider>();
-            newBoxCol.size = new Vector3(6, 6, 3);
+            var projectileSimple = shantyCannonShotPrefab.GetComponent<ProjectileSimple>();
+            projectileSimple.desiredForwardSpeed = 500;
+
+            var projectileDamage = shantyCannonShotPrefab.GetComponent<ProjectileDamage>();
+            projectileDamage.damage = FishermanStaticValues.shantyCannonDamage;
+            projectileDamage.damageType &= ~DamageType.IgniteOnHit;
+
+            var effectTrail = projectileController.ghostPrefab.GetComponentInChildren<TrailRenderer>();
+            effectTrail.time = 3f;
+
+            var flameParticles = projectileController.ghostPrefab.transform.Find("Flames").GetComponent<ParticleSystem>();
+            var flameParticle_main = flameParticles.main;
+            flameParticle_main.startLifetime = new ParticleSystem.MinMaxCurve(1.2f, 1);
 
 
-            movingPlatformMasterPrefab = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Drones/MegaDroneMaster.prefab").WaitForCompletion(), "FishermanPlatformMaster");
-            var master = movingPlatformMasterPrefab.GetComponent<CharacterMaster>();
-            master.bodyPrefab = movingPlatformPrefab;
-            var aiDrivers = movingPlatformMasterPrefab.GetComponents<RoR2.CharacterAI.AISkillDriver>();
-            //foreach(var ai in aiDrivers)
-            //{
-            //    UnityEngine.Object.Destroy(ai);
-            //}
-            //movingPlatformPrefab.AddComponent<MovingPlatformController>();
-            //if (movingPlatformPrefab == null)
-            //{
-            //    Log.Warning("Moving platfrom not foudn");
-            //    return;
-            //}
-            //var body = movingPlatformPrefab.GetComponent<CharacterBody>();
-            //if (body == null)
-            //{
-            //    Log.Warning("Moving platfrom body  not foudn");
-            //    return;
-            //}
-            //foreach(var ai in body.master.aiComponents)
-            //{
-            //    ai.enabled = false;
-            //}
+
         }
-
         private static void CreateJellyfishProjectile()
         {
             hookBombProjectilePrefab = Assets.CloneProjectilePrefab("LoaderPylon", "FishermanJellyfish");
@@ -328,13 +335,35 @@ namespace FishermanMod.Survivors.Fisherman
         }
         #endregion projectiles
 
+        #region Materials
         private static void CreateMaterials()
         {
             chainMat = Addressables.LoadAssetAsync<Material>("RoR2/Base/Gravekeeper/matGravekeeperHookChain.mat").WaitForCompletion();
         }
-        
+        #endregion
+
+        #region Minions
+        private static void CreateMinions()
+        {
+            CreateMovingPlatform();
+            Content.AddCharacterBodyPrefab(movingPlatformBodyPrefab);
+            Content.AddMasterPrefab(movingPlatformMasterPrefab);
+        }
+        private static void CreateMovingPlatform()
+        {
+            movingPlatformBlueprintPrefab = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Engi/EngiWalkerTurretBlueprints.prefab").WaitForCompletion(), "ShantyBlueprint");
+            movingPlatformBodyPrefab = _assetBundleExtras.LoadAsset<GameObject>("ShantyPlatformBody");//PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Engi/EngiWalkerTurretBody.prefab").WaitForCompletion(), "ShantyBody");//
+            movingPlatformMasterPrefab = _assetBundleExtras.LoadAsset<GameObject>("ShantyPlatformMaster");//PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Engi/EngiTurretMaster.prefab").WaitForCompletion(), "ShantyBody");//
+            movingPlatformMasterPrefab.GetComponent<CharacterMaster>().bodyPrefab = movingPlatformBodyPrefab;
+            var hc = movingPlatformBodyPrefab.GetComponent<HealthComponent>();
+            movingPlatformBodyPrefab.GetComponent<Deployable>().onUndeploy.AddListener(() =>hc.Suicide()); //// todo: do this not this way??
+            Log.Debug($"shanty body: {movingPlatformBodyPrefab} : was loaded?: {movingPlatformBodyPrefab != null}");
+            Log.Debug($"shanty master : {movingPlatformMasterPrefab} was loaded?: {movingPlatformMasterPrefab != null}");
+           
+        }
+        #endregion
 
     }
 
-        
+
 }

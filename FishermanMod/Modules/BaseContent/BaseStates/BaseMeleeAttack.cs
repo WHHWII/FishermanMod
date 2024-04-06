@@ -91,7 +91,7 @@ namespace FishermanMod.Modules.BaseStates
 
         protected virtual void PlayAttackAnimation()
         {
-            PlayCrossfade("Gesture, Override", "Slash" + (1 + Mathf.Clamp01(swingIndex)), playbackRateParam, duration, 0.05f);
+            //PlayCrossfade("Gesture, Override", "Slash" + (1 + Mathf.Clamp01(swingIndex)), playbackRateParam, duration, 0.05f);
         }
 
         public override void OnExit()
@@ -105,7 +105,7 @@ namespace FishermanMod.Modules.BaseStates
 
         protected virtual void PlaySwingEffect()
         {
-            EffectManager.SimpleMuzzleFlash(swingEffectPrefab, gameObject, muzzleString, true);
+            //EffectManager.SimpleMuzzleFlash(swingEffectPrefab, gameObject, muzzleString, true);
         }
         protected virtual void OnHitEnemyAuthority()
         {
@@ -148,7 +148,7 @@ namespace FishermanMod.Modules.BaseStates
         {
             if (isAuthority)
             {
-                if(hitBoxOrienter == null) hitBoxOrienter = characterBody.modelLocator.modelTransform.gameObject.GetComponent<ChildLocator>().FindChild(30);
+                if(hitBoxOrienter == null) hitBoxOrienter = characterBody.modelLocator.modelTransform.gameObject.GetComponent<ChildLocator>().FindChild("SwingPivot");
                 Vector3 direction = GetAimRay().direction;
                 direction.y = Mathf.Max(direction.y, direction.y * 0.5f);
                 hitBoxOrienter.rotation = Util.QuaternionSafeLookRotation(direction);

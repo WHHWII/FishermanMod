@@ -57,19 +57,19 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
 
         protected override void PlayAttackAnimation()
         {
-            if(swingIndex == 0)
-            {
-                EffectManager.SimpleMuzzleFlash(EntityStates.Commando.CommandoWeapon.FirePistol2.muzzleEffectPrefab, gameObject, muzzleString, false);
-                PlayAnimation("LeftArm, Override", "ShootGun", "ShootGun.playbackRate", 1.8f);
-            }
-            else if(swingIndex == 1)
-            {
-                PlayCrossfade("Gesture, Override", "Slash" + (1), playbackRateParam, duration, 0.1f * duration);
-            }
-            else
-            {
-                PlayCrossfade("Gesture, Override", "Slash" + (2), playbackRateParam, duration, 0.1f * duration);
-            }
+            //if(swingIndex == 0)
+            //{
+            //    EffectManager.SimpleMuzzleFlash(EntityStates.Commando.CommandoWeapon.FirePistol2.muzzleEffectPrefab, gameObject, muzzleString, false);
+            //    PlayAnimation("LeftArm, Override", "ShootGun", "ShootGun.playbackRate", 1.8f);
+            //}
+            //else if(swingIndex == 1)
+            //{
+            //    PlayCrossfade("Gesture, Override", "Slash" + (1), playbackRateParam, duration, 0.1f * duration);
+            //}
+            //else
+            //{
+            //    PlayCrossfade("Gesture, Override", "Slash" + (2), playbackRateParam, duration, 0.1f * duration);
+            //}
            
         }
 

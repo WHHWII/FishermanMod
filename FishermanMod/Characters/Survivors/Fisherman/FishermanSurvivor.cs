@@ -30,8 +30,8 @@ namespace FishermanMod.Survivors.Fisherman
         public override string masterName => "FishermanMaster"; //if you do not
 
         //the names of the prefabs you set up in unity that we will use to build your character
-        public override string modelPrefabName => "mdlHenry";
-        public override string displayPrefabName => "HenryDisplay";
+        public override string modelPrefabName => "mdlFisherman";
+        public override string displayPrefabName => "FishermanDisplay";
 
         public const string FISHERMAN_PREFIX = FishermanPlugin.DEVELOPER_PREFIX + "_FISHERMAN_";
         
@@ -40,10 +40,15 @@ namespace FishermanMod.Survivors.Fisherman
 
         public static SkillDef secondaryRecallFishHook;
         public static SkillDef secondaryFireFishHook;
+
         public static SkillDef specialRecallHookBomb;
         public static SkillDef specialThrowHookBomb;
+
         public static SkillDef specialDrinkFlask;
         public static SkillDef specialThrowFlask;
+
+        public static SkillDef primaryShantyCannon;
+        public static SkillDef utilitySummonPlatform;
 
         public override BodyInfo bodyInfo => new BodyInfo
         {
@@ -51,35 +56,40 @@ namespace FishermanMod.Survivors.Fisherman
             bodyNameToken = FISHERMAN_PREFIX + "NAME",
             subtitleNameToken = FISHERMAN_PREFIX + "SUBTITLE",
 
-            characterPortrait = assetBundle.LoadAsset<Texture>("texHenryIcon"),
+            characterPortrait = assetBundleExtras.LoadAsset<Texture>("texWIPFishermanIcon"),
             bodyColor = new Color32(198, 184, 2, 255),
             sortPosition = 100,
 
             crosshair = Assets.LoadCrosshair("Standard"),
             podPrefab = LegacyResourcesAPI.Load<GameObject>("Prefabs/NetworkedObjects/SurvivorPod"),
 
-            maxHealth = 110f,
-            healthRegen = 1.5f,
-            armor = 0f,
-          
+            maxHealth = 130,
+            healthRegen = 2.5f,
+            armor = 10f,
+            damage = 12,
+            damageGrowth = 2.2f,
+            healthGrowth = 39,
+            regenGrowth = 0.5f,
+
+
             jumpCount = 1,
         };
 
         public override CustomRendererInfo[] customRendererInfos => new CustomRendererInfo[]
         {
-                new CustomRendererInfo
-                {
-                    childName = "SwordModel",
-                    material = assetBundle.LoadMaterial("matHenry"),
-                },
-                new CustomRendererInfo
-                {
-                    childName = "GunModel",
-                },
-                new CustomRendererInfo
-                {
-                    childName = "Model",
-                }
+                //new CustomRendererInfo
+                //{
+                //    childName = "SwordModel",
+                //    material = assetBundle.LoadMaterial("matHenry"),
+                //},
+                //new CustomRendererInfo
+                //{
+                //    childName = "GunModel",
+                //},
+                //new CustomRendererInfo
+                //{
+                //    childName = "Model",
+                //}
         };
 
         public override UnlockableDef characterUnlockableDef => FishermanUnlockables.characterUnlockableDef;
@@ -118,7 +128,7 @@ namespace FishermanMod.Survivors.Fisherman
             FishermanStates.Init();
             FishermanTokens.Init();
 
-            FishermanAssets.Init(assetBundle);
+            FishermanAssets.Init(assetBundle, assetBundleExtras);
             FishermanBuffs.Init(assetBundle);
 
             InitializeEntityStateMachines();
@@ -195,7 +205,7 @@ namespace FishermanMod.Survivors.Fisherman
         {
             //the primary skill is created using a constructor for a typical primary
             //it is also a SteppedSkillDef. Custom Skilldefs are very useful for custom behaviors related to casting a skill. see ror2's different skilldefs for reference
-            SteppedSkillDef primarySkillDef1 = Skills.CreateSkillDef<SteppedSkillDef>(new SkillDefInfo
+            SteppedSkillDef primaryFishingPoleMelee = Skills.CreateSkillDef<SteppedSkillDef>(new SkillDefInfo
                 (
                     "Debone",
                     FISHERMAN_PREFIX + "PRIMARY_SLASH_NAME",
@@ -206,11 +216,32 @@ namespace FishermanMod.Survivors.Fisherman
                     true
                 ));
             //custom Skilldefs can have additional fields that you can set manually
-            primarySkillDef1.stepCount = 3;
-            primarySkillDef1.stepGraceDuration = 0.5f;
+            primaryFishingPoleMelee.stepCount = 3;
+            primaryFishingPoleMelee.stepGraceDuration = 0.5f;
 
-            Skills.AddPrimarySkills(bodyPrefab, primarySkillDef1);
+            Skills.AddPrimarySkills(bodyPrefab, primaryFishingPoleMelee);
+
+
+
+           
+            #endregion
         }
+
+        //private void CreateShantySpawnCard()
+        //{
+        //    CharacterSpawnCard card = ScriptableObject.CreateInstance<CharacterSpawnCard>();
+        //    card.name = "cscFishermanShanty";
+        //    card.prefab = FishermanAssets.movingPlatformBodyPrefab;
+        //    card.sendOverNetwork = true;
+        //    card.hullSize = HullClassification.Human;
+        //    card.nodeGraphType = RoR2.Navigation.MapNodeGroup.GraphType.Air;
+        //    card.requiredFlags = RoR2.Navigation.NodeFlags.None;
+        //    card.forbiddenFlags = RoR2.Navigation.NodeFlags.NoCharacterSpawn;
+        //    card.eliteRules = SpawnCard.EliteRules.Default;
+        //    card.occupyPosition = false;
+
+        //    GhoulMinion.ghoulSpawnCard = card;
+        //}
 
         private void AddSecondarySkills()
         {
@@ -288,11 +319,11 @@ namespace FishermanMod.Survivors.Fisherman
         private void AddUtiitySkills()
         {
             //here's a skilldef of a typical movement skill. some fields are omitted and will just have default values
-            SkillDef utilitySkillDef1 = Skills.CreateSkillDef(new SkillDefInfo
+            FishermanSurvivor.utilitySummonPlatform = Skills.CreateSkillDef(new SkillDefInfo
             {
                 skillName = "HenryRoll",
-                skillNameToken = FISHERMAN_PREFIX + "UTILITY_ROLL_NAME",
-                skillDescriptionToken = FISHERMAN_PREFIX + "UTILITY_ROLL_DESCRIPTION",
+                skillNameToken = FISHERMAN_PREFIX + "UTILITY_PLATFORM_NAME",
+                skillDescriptionToken = FISHERMAN_PREFIX + "UTILITY_PLATFORM_DESCRIPTION",
                 skillIcon = assetBundle.LoadAsset<Sprite>("texUtilityIcon"),
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(Roll)),
@@ -311,13 +342,13 @@ namespace FishermanMod.Survivors.Fisherman
             SkillDef utilitySummonPlatform = Skills.CreateSkillDef(new SkillDefInfo
             {
                 skillName = "F135 Mobile Shanty Platfrom",
-                skillNameToken = FISHERMAN_PREFIX + "UTILITY_ROLL_NAME",
-                skillDescriptionToken = FISHERMAN_PREFIX + "UTILITY_ROLL_DESCRIPTION",
+                skillNameToken = FISHERMAN_PREFIX + "UTILITY_PLATFORM_NAME",
+                skillDescriptionToken = FISHERMAN_PREFIX + "UTILITY_PLATFORM_DESCRIPTION",
                 keywordTokens = new string[] { "KEYWORD_AGILE" },
                 skillIcon = assetBundle.LoadAsset<Sprite>("Shanty Icon"),
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(SkillStates.SummonPlatform)),
-                activationStateMachineName = "Body",
+                activationStateMachineName = "Weapon",
                 interruptPriority = EntityStates.InterruptPriority.Skill,
 
                 baseRechargeInterval = 12f,
@@ -343,6 +374,51 @@ namespace FishermanMod.Survivors.Fisherman
             
 
             Skills.AddUtilitySkills(bodyPrefab, utilitySummonPlatform);
+
+            #region ShantyMinion
+            //FishermanSurvivor.primaryShantyCannon = Skills.CreateSkillDef(new SkillDefInfo
+            //{
+            //    skillName = "FireShantyCannon",
+            //    skillNameToken = "UTILITY_PLATFORM_NAME",
+            //    skillDescriptionToken = "UTILITY_PLATFORM_DESCRIPTION",
+            //    //keywordTokens = new string[] { "KEYWORD_AGILE" },
+            //    //skillIcon = assetBundle.LoadAsset<Sprite>("Shanty Icon"),
+            //    skillIcon = assetBundleExtras.LoadAsset<Sprite>("breaking bad but good"),
+            //    activationState = new EntityStates.SerializableEntityStateType(typeof(SkillStates.ShantyCannon)),
+            //    activationStateMachineName = "Weapon2",
+            //    interruptPriority = EntityStates.InterruptPriority.Skill,
+
+            //    baseRechargeInterval = 4f, // change
+            //    baseMaxStock = 1,
+
+            //    rechargeStock = 1,
+            //    requiredStock = 1,
+            //    stockToConsume = 1,
+
+            //    resetCooldownTimerOnUse = false,
+            //    fullRestockOnAssign = true,
+            //    dontAllowPastMaxStocks = false,
+            //    mustKeyPress = true,
+            //    beginSkillCooldownOnSkillEnd = true,
+
+            //    isCombatSkill = true,
+            //    canceledFromSprinting = true,
+            //    cancelSprintingOnActivation = true,
+            //    forceSprintDuringState = false,
+
+
+            //});
+            //Skills.CreateSkillFamilies(FishermanAssets.movingPlatformBodyPrefab);
+            //Skills.AddPrimarySkills(FishermanAssets.movingPlatformBodyPrefab, FishermanSurvivor.primaryShantyCannon);
+            //var shantyAI = FishermanAssets.movingPlatformMasterPrefab.GetComponent<RoR2.CharacterAI.BaseAI>();
+            //var shantySkillLocator = FishermanAssets.movingPlatformBodyPrefab.GetComponent<SkillLocator>();
+            //foreach (var driver in shantyAI.skillDrivers)
+            //{
+            //    if (driver.customName == "StrafeAndFireAtEnemy" || driver.customName == "ChaseAndFireAtEnemy")
+            //    {
+            //        driver.requiredSkill = shantySkillLocator.primary.skillDef;
+            //    }
+            //}
         }
 
         private void AddSpecialSkills()
@@ -579,9 +655,9 @@ namespace FishermanMod.Survivors.Fisherman
         private void RecalculateStatsAPI_GetStatCoefficients(CharacterBody sender, R2API.RecalculateStatsAPI.StatHookEventArgs args)
         {
 
-            if (sender.HasBuff(FishermanBuffs.armorBuff))
+            if (sender.HasBuff(FishermanBuffs.armorBuff)) // your buff
             {
-                args.armorAdd += 300;
+                args.moveSpeedReductionMultAdd -= args.moveSpeedReductionMultAdd;
             }
 
             if (sender.HasBuff(FishermanBuffs.hookTetherDebuff))
