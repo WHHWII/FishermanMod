@@ -11,6 +11,8 @@ using UnityEngine;
 
 namespace FishermanMod.Survivors.Fisherman.Components
 {
+    //TODO: Tether visual components are not properly getting cleaned up
+    //TODO: Recall hook bomb is throwing an error on activation
     public class HookBombController : MonoBehaviour
     {
         

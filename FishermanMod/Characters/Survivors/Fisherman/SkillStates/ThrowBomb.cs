@@ -8,6 +8,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
 {
     public class ThrowBomb : GenericProjectileBaseState
     {
+        //TODO: Correct overide behavior so it isnt creating a new overide each time
         public static float BaseDuration = 0.65f;
         //delays for projectiles feel absolute ass so only do this if you know what you're doing, otherwise it's best to keep it at 0
         public static float BaseDelayDuration = 0.0f;
@@ -53,14 +54,14 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
 
             if (GetModelAnimator())
             {
-                PlayAnimation("Gesture, Override", "ThrowBomb", "ThrowBomb.playbackRate", this.duration);
+                PlayAnimation("LeftArm, Override", "SpecialBomb", "SpecialBomb.playbackRate", this.duration);
             }
         }
 
         public override void OnExit()
         {
             base.OnExit();
-            PlayAnimation("Gesture, Override", "ThrowBomb", "ThrowBomb.playbackRate", 0.65f);
+            //PlayAnimation("LeftArm, Override", "SpecialBomb", "SpecialBomb.playbackRate", 0.65f);
             base.skillLocator.special.SetSkillOverride(this, FishermanSurvivor.specialRecallHookBomb, RoR2.GenericSkill.SkillOverridePriority.Upgrade);
             base.skillLocator.special.DeductStock(1);
         }

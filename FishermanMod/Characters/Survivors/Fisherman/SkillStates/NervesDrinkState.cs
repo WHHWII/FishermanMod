@@ -7,6 +7,8 @@ using UnityEngine.UIElements;
 
 namespace FishermanMod.Survivors.Fisherman.SkillStates
 {
+    //TODO: Correct overide behavior so it isnt creating a new overide each time
+    //TODO: it would be really funny if you could hold the button to drink up to your max stocks, then the throw state would throw a bottle for each
     internal class NervesDrinkState : BaseSkillState
     {
         public static float duration = 0.5f;
@@ -19,7 +21,9 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
         {
             base.OnEnter();
 
-            //PlayAnimation("FullBody, Override", "Roll", "Roll.playbackRate", duration);
+            ChildLocator childLocator = characterBody.modelLocator.modelTransform.gameObject.GetComponent<ChildLocator>();
+            childLocator.FindChild("Drink").gameObject.SetActive(true);
+            PlayAnimation("Gesture, Override", "SpecialDrink", "SpecialDrink.playbackRate", duration);
             //Util.PlaySound(dodgeSoundString, gameObject);
 
             if (NetworkServer.active)

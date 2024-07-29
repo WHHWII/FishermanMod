@@ -14,6 +14,8 @@ using RoR2.CharacterAI;
 using RoR2.EntityLogic;
 using On.RoR2.Orbs;
 using System.Reflection;
+using System.Collections.Generic;
+using UnityEngine.Networking;
 
 namespace FishermanMod.Survivors.Fisherman
 {
@@ -33,9 +35,9 @@ namespace FishermanMod.Survivors.Fisherman
         //projectiles
         public static GameObject bottleProjectilePrefab;
         public static GameObject hookProjectilePrefab;
-        public static GameObject movingPlatformBlueprintPrefab;
-        public static GameObject movingPlatformBodyPrefab;
-        public static GameObject movingPlatformMasterPrefab;
+        public static GameObject shantyBlueprintPrefab;
+        public static GameObject shantyBodyPrefab;
+        public static GameObject shantyMasterPrefab;
         public static GameObject shantyCannonShotPrefab;
         public static GameObject hookBombProjectilePrefab;
 
@@ -43,12 +45,10 @@ namespace FishermanMod.Survivors.Fisherman
         public static Material chainMat;
 
         private static AssetBundle _assetBundle;
-        private static AssetBundle _assetBundleExtras;
-        public static void Init(AssetBundle assetBundle, AssetBundle assetBundle2)
+        public static void Init(AssetBundle assetBundle)
         {
 
             _assetBundle = assetBundle;
-            _assetBundleExtras = assetBundle2;
 
             swordHitSoundEvent = Content.CreateAndAddNetworkSoundEventDef("HenrySwordHit");
 
@@ -101,6 +101,7 @@ namespace FishermanMod.Survivors.Fisherman
             UnityEngine.Object.Destroy(bottleImpactEffect.transform.Find("RuneRings").gameObject);
             UnityEngine.Object.Destroy(bottleImpactEffect.transform.Find("Point Light").gameObject);
             bottleImpactEffect.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
+            bottleImpactEffect.AddComponent<NetworkIdentity>();
             //TODO thunderkit import
         }
         #endregion effects
@@ -145,8 +146,15 @@ namespace FishermanMod.Survivors.Fisherman
 
             ProjectileController bombController = bottleProjectilePrefab.GetComponent<ProjectileController>();
 
-            if (_assetBundle.LoadAsset<GameObject>("HenryBombGhost") != null)
-                bombController.ghostPrefab = _assetBundle.CreateProjectileGhostPrefab("HenryBombGhost");
+            if (_assetBundle.LoadAsset<GameObject>("DrinkThrowGhost") != null)
+            {
+                bombController.ghostPrefab = _assetBundle.CreateProjectileGhostPrefab("DrinkThrowGhost");
+            }
+            else
+            {
+                Log.Warning("[ASSETS][Drink/Bomb] Failed to load ghost");
+            }
+                
             
             bombController.startSound = "";
         }
@@ -284,7 +292,7 @@ namespace FishermanMod.Survivors.Fisherman
            
 
             var antiGrav = hookBombProjectilePrefab.GetComponent<AntiGravityForce>();
-            antiGrav.antiGravityCoefficient = 0.5f;
+            antiGrav.antiGravityCoefficient = 0.3f;
 
             var beamController = hookBombProjectilePrefab.GetComponent<ProjectileProximityBeamController>();
             beamController.damageCoefficient = 0.01f;
@@ -346,24 +354,128 @@ namespace FishermanMod.Survivors.Fisherman
         private static void CreateMinions()
         {
             CreateMovingPlatform();
-            Content.AddCharacterBodyPrefab(movingPlatformBodyPrefab);
-            Content.AddMasterPrefab(movingPlatformMasterPrefab);
+            Content.AddCharacterBodyPrefab(shantyBodyPrefab);
+            Content.AddMasterPrefab(shantyMasterPrefab);
         }
         private static void CreateMovingPlatform()
         {
-            movingPlatformBlueprintPrefab = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Engi/EngiWalkerTurretBlueprints.prefab").WaitForCompletion(), "ShantyBlueprint");
-            movingPlatformBodyPrefab = _assetBundleExtras.LoadAsset<GameObject>("ShantyPlatformBody");//PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Engi/EngiWalkerTurretBody.prefab").WaitForCompletion(), "ShantyBody");//
-            movingPlatformMasterPrefab = _assetBundleExtras.LoadAsset<GameObject>("ShantyPlatformMaster");//PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Engi/EngiTurretMaster.prefab").WaitForCompletion(), "ShantyBody");//
-            movingPlatformMasterPrefab.GetComponent<CharacterMaster>().bodyPrefab = movingPlatformBodyPrefab;
-            var hc = movingPlatformBodyPrefab.GetComponent<HealthComponent>();
-            movingPlatformBodyPrefab.GetComponent<Deployable>().onUndeploy.AddListener(() =>hc.Suicide()); //// todo: do this not this way??
-            Log.Debug($"shanty body: {movingPlatformBodyPrefab} : was loaded?: {movingPlatformBodyPrefab != null}");
-            Log.Debug($"shanty master : {movingPlatformMasterPrefab} was loaded?: {movingPlatformMasterPrefab != null}");
-           
+            //blueprint
+            shantyBlueprintPrefab = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Engi/EngiWalkerTurretBlueprints.prefab").WaitForCompletion(), "ShantyBlueprint");
+            shantyBlueprintPrefab.AddComponent<NetworkIdentity>();
+
+
+            //body
+            shantyBodyPrefab = _assetBundle.LoadAsset<GameObject>("ShantyPlatformBody") ;//PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Drones/EmergencyDroneBody.prefab").WaitForCompletion(), "ShantyBody");
+            //var hc = shantyBodyPrefab.GetComponent<HealthComponent>();
+            //var deplyoable = shantyBodyPrefab.GetComponent<Deployable>(); //have to add for non default deployables. dont forget to change if you change your base
+            //deplyoable.onUndeploy.AddListener(() => hc.Suicide()); //// todo: do this not this way??
+
+
+            //emergency drone base version
+            //shantyBodyPrefab.transform.localScale *= 4;
+
+            //master
+            shantyMasterPrefab = _assetBundle.LoadAsset<GameObject>("ShantyPlatformMaster");//PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Drones/MegaDroneMaster.prefab").WaitForCompletion(), "ShantyMaster");//
+            shantyMasterPrefab.GetComponent<CharacterMaster>().bodyPrefab = shantyBodyPrefab;
+
+
+
+            //InitializeMinionSkins();
+            #region ShantyMinionSkills
+            FishermanSurvivor.primaryShantyCannon = Skills.CreateSkillDef(new SkillDefInfo
+            {
+                skillName = "FireShantyCannon",
+                skillNameToken = "UTILITY_PLATFORM_NAME",
+                skillDescriptionToken = "UTILITY_PLATFORM_DESCRIPTION",
+                //keywordTokens = new string[] { "KEYWORD_AGILE" },
+                //skillIcon = assetBundle.LoadAsset<Sprite>("Shanty Icon"),
+                skillIcon = _assetBundle.LoadAsset<Sprite>("breaking bad but good"),
+                activationState = new EntityStates.SerializableEntityStateType(typeof(SkillStates.ShantyCannon)),
+                activationStateMachineName = "Weapon",
+                interruptPriority = EntityStates.InterruptPriority.Skill,
+
+                baseRechargeInterval = 4f, // change
+                baseMaxStock = 1,
+
+                rechargeStock = 1,
+                requiredStock = 1,
+                stockToConsume = 1,
+
+                resetCooldownTimerOnUse = false,
+                fullRestockOnAssign = true,
+                dontAllowPastMaxStocks = false,
+                mustKeyPress = true,
+                beginSkillCooldownOnSkillEnd = true,
+
+                isCombatSkill = true,
+                canceledFromSprinting = true,
+                cancelSprintingOnActivation = true,
+                forceSprintDuringState = false,
+
+
+            });
+            RoR2.Skills.SkillFamily.Variant shantyShotVariant = new RoR2.Skills.SkillFamily.Variant();
+            shantyShotVariant.skillDef = FishermanSurvivor.primaryShantyCannon;
+            shantyBodyPrefab.GetComponent<GenericSkill>().skillFamily.variants[0] = shantyShotVariant; //FishermanSurvivor.primaryShantyCannon;
+            
+            var shantyAI = FishermanAssets.shantyMasterPrefab.GetComponent<RoR2.CharacterAI.BaseAI>();
+
+            AISkillDriver fireCannon = shantyMasterPrefab.AddComponent<AISkillDriver>();
+            fireCannon.customName = "fireCannon";
+            fireCannon.skillSlot = SkillSlot.Primary;
+            fireCannon.requireSkillReady = true;
+            fireCannon.minUserHealthFraction = float.NegativeInfinity;
+            fireCannon.maxUserHealthFraction = float.PositiveInfinity;
+            fireCannon.minTargetHealthFraction = float.NegativeInfinity;
+            fireCannon.maxTargetHealthFraction = float.PositiveInfinity;
+            fireCannon.minDistance = 0f;
+            fireCannon.maxDistance = 200f;
+            fireCannon.activationRequiresAimConfirmation = true;
+            fireCannon.activationRequiresTargetLoS = true;
+            fireCannon.selectionRequiresTargetLoS = true;
+            fireCannon.maxTimesSelected = -1;
+            fireCannon.moveTargetType = AISkillDriver.TargetType.CurrentEnemy;
+            fireCannon.movementType = AISkillDriver.MovementType.StrafeMovetarget;
+            fireCannon.aimType = AISkillDriver.AimType.AtMoveTarget;
+            fireCannon.moveInputScale = 1f;
+            fireCannon.ignoreNodeGraph = true;
+            fireCannon.buttonPressType = AISkillDriver.ButtonPressType.TapContinuous;
+
+
+
+
+            #endregion ShantyMinionSkills
+            PrefabAPI.RegisterNetworkPrefab(shantyBodyPrefab);
         }
         #endregion
+        static void InitializeMinionSkins()
+        {
+            GameObject model = shantyBodyPrefab.GetComponentInChildren<ModelLocator>().modelTransform.gameObject;
+            CharacterModel characterModel = model.GetComponent<CharacterModel>();
 
+            ModelSkinController skinController = model.GetComponent<ModelSkinController>();
+            //ChildLocator childLocator = model.GetComponent<ChildLocator>();
+
+           // SkinnedMeshRenderer mainRenderer = characterModel.mainSkinnedMeshRenderer;
+
+            CharacterModel.RendererInfo[] defaultRenderers = characterModel.baseRendererInfos;
+
+            List<SkinDef> skins = new List<SkinDef>();
+
+            #region DefaultSkin
+            SkinDef defaultSkin = Modules.Skins.CreateSkinDef(FishermanPlugin.DEVELOPER_PREFIX + "_FISHERMAN_BODY_DEFAULT_SKIN_NAME",
+                _assetBundle.LoadAsset<Sprite>("breaking bad but good"),
+                defaultRenderers,
+                model);
+
+            skins.Add(defaultSkin);
+            #endregion
+
+            skinController.skins = skins.ToArray();
+        }
     }
+
+
 
 
 }

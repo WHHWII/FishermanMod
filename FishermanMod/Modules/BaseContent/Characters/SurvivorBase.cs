@@ -29,7 +29,7 @@ namespace FishermanMod.Modules.Characters
 
         protected virtual void InitializeDisplayPrefab()
         {
-            displayPrefab = Prefabs.CreateDisplayPrefab(assetBundleExtras, displayPrefabName, bodyPrefab);
+            displayPrefab = Prefabs.CreateDisplayPrefab(assetBundle, displayPrefabName, bodyPrefab);
         }
 
         protected virtual void InitializeSurvivor()

@@ -34,16 +34,25 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
             {
                 case 0:
                     damageCoefficient = FishermanStaticValues.stabDamageCoefficient;
+                    attackStartPercentTime = 0.45f;
+                    attackEndPercentTime = 0.7f;
+                    earlyExitPercentTime = 0.8f;
                     muzzleString = "Muzzle";
                     break;
 
                 case 1:
                     damageCoefficient = FishermanStaticValues.swipeDamageCoefficient;
                     muzzleString = "SwingLeft";
+                    attackStartPercentTime = 0.2f;
+                    attackEndPercentTime = 0.4f;
+                    earlyExitPercentTime = 0.6f;
                     break;
                 case 2:
                     damageCoefficient = FishermanStaticValues.swipeDamageCoefficient;
                     muzzleString = "SwingRight";
+                    attackStartPercentTime = 0.2f;
+                    attackEndPercentTime = 0.4f;
+                    earlyExitPercentTime = 0.6f;
                     break;
             }
             playbackRateParam = "Slash.playbackRate";
@@ -57,20 +66,22 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
 
         protected override void PlayAttackAnimation()
         {
-            //if(swingIndex == 0)
-            //{
-            //    EffectManager.SimpleMuzzleFlash(EntityStates.Commando.CommandoWeapon.FirePistol2.muzzleEffectPrefab, gameObject, muzzleString, false);
-            //    PlayAnimation("LeftArm, Override", "ShootGun", "ShootGun.playbackRate", 1.8f);
-            //}
-            //else if(swingIndex == 1)
-            //{
-            //    PlayCrossfade("Gesture, Override", "Slash" + (1), playbackRateParam, duration, 0.1f * duration);
-            //}
-            //else
-            //{
-            //    PlayCrossfade("Gesture, Override", "Slash" + (2), playbackRateParam, duration, 0.1f * duration);
-            //}
-           
+            if (swingIndex == 0)
+            {
+                EffectManager.SimpleMuzzleFlash(EntityStates.Commando.CommandoWeapon.FirePistol2.muzzleEffectPrefab, gameObject, muzzleString, false);
+                PlayAnimation("Gesture, Override", "PolePrimary" + (3), "PolePrimary.playbackRate", 1.8f);
+            }
+            else if (swingIndex == 1)
+            {
+                //PlayAnimation("Gesture, Override", "PolePrimary" + (1), "PolePrimary.playbackRate", 1.8f);
+                PlayCrossfade("Gesture, Override", "PolePrimary" + (1), playbackRateParam, duration, 0.1f * duration);
+            }
+            else
+            {
+                //PlayAnimation("Gesture, Override", "PolePrimary" + (2), "PolePrimary.playbackRate", 1.8f);
+                PlayCrossfade("Gesture, Override", "PolePrimary" + (2), playbackRateParam, duration, 0.1f * duration);
+            }
+
         }
 
         protected override void PlaySwingEffect()

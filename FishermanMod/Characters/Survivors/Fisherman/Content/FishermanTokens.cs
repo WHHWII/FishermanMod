@@ -1,6 +1,7 @@
 ﻿using System;
 using FishermanMod.Modules;
 using FishermanMod.Survivors.Fisherman.Achievements;
+using R2API;
 
 namespace FishermanMod.Survivors.Fisherman
 {
@@ -20,21 +21,25 @@ namespace FishermanMod.Survivors.Fisherman
         {
             string prefix = FishermanSurvivor.FISHERMAN_PREFIX;
 
-            string desc = "Fisherman is a skilled fish who makes use of a wide arsenal of fish to take down his fish.<color=#CCD3E0>" + Environment.NewLine + Environment.NewLine
-             + "< ! > fish is a good all-rounder while Boxing Gloves are better for laying a beatdown on more powerful foes." + Environment.NewLine + Environment.NewLine
-             + "< ! > fish is a powerful anti air, with its low cooldown and high damage." + Environment.NewLine + Environment.NewLine
-             + "< ! > fish has a lingering armor buff that helps to use it aggressively." + Environment.NewLine + Environment.NewLine
-             + "< ! > fish can be used to wipe crowds with ease." + Environment.NewLine + Environment.NewLine;
+            string desc = "Fisherman is a utility focused survivor that forces enemies to fight on his terms.<color=#CCD3E0>"                                                    + Environment.NewLine + Environment.NewLine
+             + "< ! > Debone can be used to snatch enemies out of the air and throw attackers out of position"                                                                   + Environment.NewLine + Environment.NewLine
+             + "< ! > Cast can be used to grab faraway enemies, chests, drones and all sorts of things in order to clear stages quickly. It can even grab some of your abilties" + Environment.NewLine + Environment.NewLine
+             + "< ! > The F153 Mobile Shanty plaform may not help you dodge attacks, but can help you navigate large gaps, sheer cliffs, and can provide aerial support."        + Environment.NewLine + Environment.NewLine
+             + "< ! > Man o' War can be used to group up pesky flyers or throw enemies off stage while Steady the Nerves can be used to get krunked."                            + Environment.NewLine + Environment.NewLine;
 
-            string outro = "..and so he left, searching for a new fish.";
-            string outroFailure = "..and so he vanished, forever a fish.";
+            string outro = "..and so he left, with what little time he had.";
+            string outroFailure = "..and so he vanished, lost at sea.";
 
             Language.Add(prefix + "NAME", "Fisherman");
             Language.Add(prefix + "DESCRIPTION", desc);
-            Language.Add(prefix + "SUBTITLE", "Fish Guy");
+            Language.Add(prefix + "SUBTITLE", "Sickly Poacher");
             Language.Add(prefix + "LORE", "stinky");
             Language.Add(prefix + "OUTRO_FLAVOR", outro);
             Language.Add(prefix + "OUTRO_FAILURE", outroFailure);
+
+            #region Keywords
+            LanguageAPI.Add("KEYWORD_TREASURE", $"Cast can hook drones, small chests, and more...");
+            #endregion Keyowrds
 
             #region Skins
             Language.Add(prefix + "MASTERY_SKIN_NAME", "Alternate");
@@ -42,12 +47,12 @@ namespace FishermanMod.Survivors.Fisherman
 
             #region Passive
             Language.Add(prefix + "PASSIVE_HOOK_EFFECT_NAME", Tokens.FishermanText("The Hooks!",0));
-            Language.Add(prefix + "PASSIVE_HOOK_EFFECT_DESCRIPTION", $"Fisherman's abilities can {Tokens.HookText("Hook")} fish, flinging them towards him. If a fish is too heavy to be hooked, they are instead {Tokens.RedText("inflicted with bleed")}");
+            Language.Add(prefix + "PASSIVE_HOOK_EFFECT_DESCRIPTION", $"Fisherman's abilities can {Tokens.HookText("Hook")} fish, flinging them towards him. If a fish is too heavy to be {Tokens.HookText("hooked")}, they are instead {Tokens.RedText("inflicted with bleed.")}");
             #endregion
 
             #region Primary
             Language.Add(prefix + "PRIMARY_SLASH_NAME", Tokens.FishermanText("Debone",1));
-            Language.Add(prefix + "PRIMARY_SLASH_DESCRIPTION", $"Thwack in front for <style=cIsDamage>{100f * FishermanStaticValues.swipeDamageCoefficient}% damage.</style> Every 3rd Attack is a long range stab that <color=#d299ff>Hooks</color> fish for <style=cIsDamage>{100f * FishermanStaticValues.stabDamageCoefficient}% damage.</style>");
+            Language.Add(prefix + "PRIMARY_SLASH_DESCRIPTION", $"Thwack in front for <style=cIsDamage>{100f * FishermanStaticValues.swipeDamageCoefficient}% damage.</style> Every 3rd Attack is a long range stab that <color=#d299ff>Hooks</color> fish.");
             #endregion
 
             #region Secondary

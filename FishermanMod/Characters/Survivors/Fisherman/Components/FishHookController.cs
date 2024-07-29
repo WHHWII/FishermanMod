@@ -16,6 +16,8 @@ namespace FishermanMod.Survivors.Fisherman.Components
     //TODO allow grab of pickups such as ghor gold or bandolier drops
     //TODO allow fishing out of bounds
     //TODO grab allies (non-player)
+    //TODO fix crashing when recalling hook in certain conditions. (out of bounds on some maps, some entities)
+    //TODO fix sticking hook to midflight manowar causes it to fly away
     public class FishHookController : MonoBehaviour
     {
         public Rigidbody rb;

@@ -8,7 +8,6 @@ namespace FishermanMod.Modules.Characters
     public abstract class CharacterBase<T> where T : CharacterBase<T>, new()
     {
         public abstract string assetBundleName { get; }
-        public abstract string assetBundleName2 { get; }
 
         public abstract string bodyName { get; }
         public abstract string modelPrefabName { get; }
@@ -22,7 +21,6 @@ namespace FishermanMod.Modules.Characters
         public static T instance { get; private set; }
 
         public abstract AssetBundle assetBundle { get; protected set; }
-        public abstract AssetBundle assetBundleExtras { get; protected set; }
 
         public abstract GameObject bodyPrefab                 {get; protected set;}
         public abstract CharacterBody prefabCharacterBody     {get; protected set;}
@@ -33,7 +31,6 @@ namespace FishermanMod.Modules.Characters
         {
             instance = this as T;
             assetBundle = Assets.LoadAssetBundle(assetBundleName);
-            assetBundleExtras = Assets.LoadAssetBundle(assetBundleName2);
             InitializeCharacter();
         }
 
@@ -46,7 +43,7 @@ namespace FishermanMod.Modules.Characters
 
         protected virtual void InitializeCharacterBodyPrefab()
         {
-            characterModelObject = Prefabs.LoadCharacterModel(assetBundleExtras, modelPrefabName);
+            characterModelObject = Prefabs.LoadCharacterModel(assetBundle, modelPrefabName);
 
             bodyPrefab = Modules.Prefabs.CreateBodyPrefab(characterModelObject, bodyInfo);
             prefabCharacterBody = bodyPrefab.GetComponent<CharacterBody>();

@@ -10,6 +10,7 @@ using UnityEngine.XR.WSA;
 
 namespace FishermanMod.Survivors.Fisherman.SkillStates
 {
+    //TODO: Correct overide behavior so it isnt creating a new overide each time
     public class AimHook : AimThrowableBase
     {
         float hookRangeGrowRate = 0.5f;
@@ -31,18 +32,19 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
             projectileBaseSpeed = _goodState.projectileBaseSpeed;
             //comes after modification to working AimThrowableBase
             base.OnEnter();
-           
-            
+            if (base.isAuthority && !KeyIsDown() && !base.IsKeyDownAuthority()) { }
+                PlayAnimation("Gesture, Override", "SecondaryCastStart", "SecondaryCast.playbackRate", 0.65f);
 
-            
-            
+
+
+
         }
         public override void OnExit() 
         { 
             base.OnExit();
 
             if(base.isAuthority && !KeyIsDown() && !base.IsKeyDownAuthority())
-                PlayAnimation("Gesture, Override", "ThrowBomb", "ThrowBomb.playbackRate", 0.65f);
+                PlayAnimation("Gesture, Override", "SecondaryCastEnd", "SecondaryCast.playbackRate", 0.65f);
             base.skillLocator.secondary.SetSkillOverride(this, FishermanSurvivor.secondaryRecallFishHook, RoR2.GenericSkill.SkillOverridePriority.Upgrade);
             base.skillLocator.secondary.DeductStock(1);
         }

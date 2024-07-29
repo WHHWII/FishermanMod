@@ -54,10 +54,10 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
         public override void PlayAnimation(float duration)
         {
             //TODO correct anim for platform
-            if (GetModelAnimator())
-            {
-                PlayAnimation("Gesture, Override", "ThrowBomb", "ThrowBomb.playbackRate", this.duration);
-            }
+            //if (GetModelAnimator())
+            //{
+            //    PlayAnimation("Gesture, Override", "ThrowBomb", "ThrowBomb.playbackRate", this.duration);
+            //}
         }
 
         public override void OnExit()

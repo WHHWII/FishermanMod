@@ -20,8 +20,7 @@ namespace FishermanMod.Survivors.Fisherman
     public class FishermanSurvivor : SurvivorBase<FishermanSurvivor>
     {
         //used to load the assetbundle for this character. must be unique
-        public override string assetBundleName => "fishermanassetbundle"; //if you do not change this, you are giving permission to deprecate the mod
-        public override string assetBundleName2 => "fishermanextras assetbundle";
+        public override string assetBundleName => "fishermanbundleprime"; //if you do not change this, you are giving permission to deprecate the mod
 
         //the name of the prefab we will create. conventionally ending in "Body". must be unique
         public override string bodyName => "FishermanBody"; //if you do not change this, you get the point by now
@@ -56,7 +55,7 @@ namespace FishermanMod.Survivors.Fisherman
             bodyNameToken = FISHERMAN_PREFIX + "NAME",
             subtitleNameToken = FISHERMAN_PREFIX + "SUBTITLE",
 
-            characterPortrait = assetBundleExtras.LoadAsset<Texture>("texWIPFishermanIcon"),
+            characterPortrait = assetBundle.LoadAsset<Texture>("texWIPFishermanIcon"),
             bodyColor = new Color32(198, 184, 2, 255),
             sortPosition = 100,
 
@@ -77,19 +76,27 @@ namespace FishermanMod.Survivors.Fisherman
 
         public override CustomRendererInfo[] customRendererInfos => new CustomRendererInfo[]
         {
-                //new CustomRendererInfo
-                //{
-                //    childName = "SwordModel",
-                //    material = assetBundle.LoadMaterial("matHenry"),
-                //},
-                //new CustomRendererInfo
-                //{
-                //    childName = "GunModel",
-                //},
-                //new CustomRendererInfo
-                //{
-                //    childName = "Model",
-                //}
+                new CustomRendererInfo
+                {
+                    childName = "FishingPole",
+                    material = assetBundle.LoadMaterial("Fisherman_Diffuse_BaseColor"),
+                },
+                new CustomRendererInfo
+                {
+                    childName = "TackleBox",
+                    material = assetBundle.LoadMaterial("Fisherman_Diffuse_BaseColor"),
+                },
+                new CustomRendererInfo
+                {
+                    childName = "MainMesh",
+                    material = assetBundle.LoadMaterial("Fisherman_Diffuse_BaseColor"),
+                },
+                new CustomRendererInfo
+                {
+                    childName = "Drink",
+                    material = assetBundle.LoadMaterial("FishermanBottle_BaseColor"),
+                }
+
         };
 
         public override UnlockableDef characterUnlockableDef => FishermanUnlockables.characterUnlockableDef;
@@ -98,7 +105,6 @@ namespace FishermanMod.Survivors.Fisherman
 
         //set in base classes
         public override AssetBundle assetBundle { get; protected set; }
-        public override AssetBundle assetBundleExtras { get; protected set; }
 
         public override GameObject bodyPrefab { get; protected set; }
         public override CharacterBody prefabCharacterBody { get; protected set; }
@@ -115,6 +121,7 @@ namespace FishermanMod.Survivors.Fisherman
             //    return;
 
             base.Initialize();
+
         }
 
         public override void InitializeCharacter()
@@ -128,7 +135,7 @@ namespace FishermanMod.Survivors.Fisherman
             FishermanStates.Init();
             FishermanTokens.Init();
 
-            FishermanAssets.Init(assetBundle, assetBundleExtras);
+            FishermanAssets.Init(assetBundle);
             FishermanBuffs.Init(assetBundle);
 
             InitializeEntityStateMachines();
@@ -145,6 +152,8 @@ namespace FishermanMod.Survivors.Fisherman
         {
             AddHitboxes();
             bodyPrefab.AddComponent<HenryWeaponComponent>();
+            var drinkmdl = characterModelObject.GetComponent<ChildLocator>().FindChild("Drink");
+            drinkmdl.gameObject.SetActive(false);
             //bodyPrefab.AddComponent<HuntressTrackerComopnent>();
             //anything else here
         }
@@ -198,7 +207,7 @@ namespace FishermanMod.Survivors.Fisherman
             skillLocator.passiveSkill.enabled = true;
             skillLocator.passiveSkill.skillNameToken = FISHERMAN_PREFIX + "PASSIVE_HOOK_EFFECT_NAME";
             skillLocator.passiveSkill.skillDescriptionToken = FISHERMAN_PREFIX + "PASSIVE_HOOK_EFFECT_DESCRIPTION";
-            skillLocator.passiveSkill.icon = Assets.loadedBundles["fishermanassetbundle"].LoadAsset<Sprite>("Hook Icon");
+            skillLocator.passiveSkill.icon = Assets.loadedBundles["fishermanbundleprime"].LoadAsset<Sprite>("Hook Icon");
         }
         //if this is your first look at skilldef creation, take a look at Secondary first
         private void AddPrimarySkills()
@@ -224,7 +233,7 @@ namespace FishermanMod.Survivors.Fisherman
 
 
            
-            #endregion
+            
         }
 
         //private void CreateShantySpawnCard()
@@ -253,7 +262,7 @@ namespace FishermanMod.Survivors.Fisherman
                 skillName = "CastFishHook",
                 skillNameToken = FISHERMAN_PREFIX + "SECONDARY_GUN_NAME",
                 skillDescriptionToken = FISHERMAN_PREFIX + "SECONDARY_GUN_DESCRIPTION",
-                //keywordTokens = new string[] { "KEYWORD_AGILE" },
+                keywordTokens = new string[] { "KEYWORD_TREASURE" },
                 skillIcon = assetBundle.LoadAsset<Sprite>("Hook Icon"),
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(SkillStates.AimHook)),
@@ -319,32 +328,31 @@ namespace FishermanMod.Survivors.Fisherman
         private void AddUtiitySkills()
         {
             //here's a skilldef of a typical movement skill. some fields are omitted and will just have default values
-            FishermanSurvivor.utilitySummonPlatform = Skills.CreateSkillDef(new SkillDefInfo
-            {
-                skillName = "HenryRoll",
-                skillNameToken = FISHERMAN_PREFIX + "UTILITY_PLATFORM_NAME",
-                skillDescriptionToken = FISHERMAN_PREFIX + "UTILITY_PLATFORM_DESCRIPTION",
-                skillIcon = assetBundle.LoadAsset<Sprite>("texUtilityIcon"),
+            //FishermanSurvivor.utilitySummonPlatform = Skills.CreateSkillDef(new SkillDefInfo
+            //{
+            //    skillName = "HenryRoll",
+            //    skillNameToken = FISHERMAN_PREFIX + "UTILITY_PLATFORM_NAME",
+            //    skillDescriptionToken = FISHERMAN_PREFIX + "UTILITY_PLATFORM_DESCRIPTION",
+            //    skillIcon = assetBundle.LoadAsset<Sprite>("texUtilityIcon"),
 
-                activationState = new EntityStates.SerializableEntityStateType(typeof(Roll)),
-                activationStateMachineName = "Weapon2",
-                interruptPriority = EntityStates.InterruptPriority.PrioritySkill,
+            //    activationState = new EntityStates.SerializableEntityStateType(typeof(Roll)),
+            //    activationStateMachineName = "Weapon2",
+            //    interruptPriority = EntityStates.InterruptPriority.PrioritySkill,
 
-                baseMaxStock = 1,
-                baseRechargeInterval = 4f,
+            //    baseMaxStock = 1,
+            //    baseRechargeInterval = 4f,
 
-                isCombatSkill = false,
-                mustKeyPress = false,
-                forceSprintDuringState = true,
-                cancelSprintingOnActivation = false,
-            });
+            //    isCombatSkill = false,
+            //    mustKeyPress = false,
+            //    forceSprintDuringState = true,
+            //    cancelSprintingOnActivation = false,
+            //});
 
             SkillDef utilitySummonPlatform = Skills.CreateSkillDef(new SkillDefInfo
             {
                 skillName = "F135 Mobile Shanty Platfrom",
                 skillNameToken = FISHERMAN_PREFIX + "UTILITY_PLATFORM_NAME",
                 skillDescriptionToken = FISHERMAN_PREFIX + "UTILITY_PLATFORM_DESCRIPTION",
-                keywordTokens = new string[] { "KEYWORD_AGILE" },
                 skillIcon = assetBundle.LoadAsset<Sprite>("Shanty Icon"),
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(SkillStates.SummonPlatform)),
@@ -365,8 +373,8 @@ namespace FishermanMod.Survivors.Fisherman
                 beginSkillCooldownOnSkillEnd = true,
 
                 isCombatSkill = false,
-                canceledFromSprinting = false,
-                cancelSprintingOnActivation = false,
+                canceledFromSprinting = true,
+                cancelSprintingOnActivation = true,
                 forceSprintDuringState = false,
 
 
@@ -375,50 +383,7 @@ namespace FishermanMod.Survivors.Fisherman
 
             Skills.AddUtilitySkills(bodyPrefab, utilitySummonPlatform);
 
-            #region ShantyMinion
-            //FishermanSurvivor.primaryShantyCannon = Skills.CreateSkillDef(new SkillDefInfo
-            //{
-            //    skillName = "FireShantyCannon",
-            //    skillNameToken = "UTILITY_PLATFORM_NAME",
-            //    skillDescriptionToken = "UTILITY_PLATFORM_DESCRIPTION",
-            //    //keywordTokens = new string[] { "KEYWORD_AGILE" },
-            //    //skillIcon = assetBundle.LoadAsset<Sprite>("Shanty Icon"),
-            //    skillIcon = assetBundleExtras.LoadAsset<Sprite>("breaking bad but good"),
-            //    activationState = new EntityStates.SerializableEntityStateType(typeof(SkillStates.ShantyCannon)),
-            //    activationStateMachineName = "Weapon2",
-            //    interruptPriority = EntityStates.InterruptPriority.Skill,
-
-            //    baseRechargeInterval = 4f, // change
-            //    baseMaxStock = 1,
-
-            //    rechargeStock = 1,
-            //    requiredStock = 1,
-            //    stockToConsume = 1,
-
-            //    resetCooldownTimerOnUse = false,
-            //    fullRestockOnAssign = true,
-            //    dontAllowPastMaxStocks = false,
-            //    mustKeyPress = true,
-            //    beginSkillCooldownOnSkillEnd = true,
-
-            //    isCombatSkill = true,
-            //    canceledFromSprinting = true,
-            //    cancelSprintingOnActivation = true,
-            //    forceSprintDuringState = false,
-
-
-            //});
-            //Skills.CreateSkillFamilies(FishermanAssets.movingPlatformBodyPrefab);
-            //Skills.AddPrimarySkills(FishermanAssets.movingPlatformBodyPrefab, FishermanSurvivor.primaryShantyCannon);
-            //var shantyAI = FishermanAssets.movingPlatformMasterPrefab.GetComponent<RoR2.CharacterAI.BaseAI>();
-            //var shantySkillLocator = FishermanAssets.movingPlatformBodyPrefab.GetComponent<SkillLocator>();
-            //foreach (var driver in shantyAI.skillDrivers)
-            //{
-            //    if (driver.customName == "StrafeAndFireAtEnemy" || driver.customName == "ChaseAndFireAtEnemy")
-            //    {
-            //        driver.requiredSkill = shantySkillLocator.primary.skillDef;
-            //    }
-            //}
+            
         }
 
         private void AddSpecialSkills()
@@ -529,8 +494,8 @@ namespace FishermanMod.Survivors.Fisherman
 
 
         }
-        #endregion skills
-        
+
+        #endregion
         #region skins
         public override void InitializeSkins()
         {

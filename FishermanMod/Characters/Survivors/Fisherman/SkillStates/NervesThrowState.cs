@@ -9,6 +9,7 @@ using RoR2;
 
 namespace FishermanMod.Survivors.Fisherman.SkillStates
 {
+    //TODO: Correct overide behavior so it isnt creating a new overide each time
     internal class NervesThrowState : GenericProjectileBaseState
     {
         public static float BaseDuration = 0.65f;
@@ -41,7 +42,9 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
 
             if (base.isAuthority)
             {
-                PlayAnimation("Gesture, Override", "ThrowBomb", "ThrowBomb.playbackRate", -0.65f);
+                ChildLocator childLocator = characterBody.modelLocator.modelTransform.gameObject.GetComponent<ChildLocator>();
+                childLocator.FindChild("Drink").gameObject.SetActive(false);
+                PlayAnimation("LeftArm, Override", "UtilityPlatform", "UtilityPlatform.playbackRate", -0.65f);
                 base.skillLocator.special.SetSkillOverride(this, FishermanSurvivor.specialDrinkFlask, RoR2.GenericSkill.SkillOverridePriority.Upgrade);
                 base.skillLocator.special.DeductStock(1); 
                
@@ -66,7 +69,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
 
             if (GetModelAnimator())
             {
-                PlayAnimation("Gesture, Override", "ThrowBomb", "ThrowBomb.playbackRate", this.duration);
+                PlayAnimation("LeftArm, Override", "UtilityPlatform", "UtilityPlatform.playbackRate", this.duration);
             }
         }
 
