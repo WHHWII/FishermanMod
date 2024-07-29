@@ -262,7 +262,7 @@ namespace FishermanMod.Survivors.Fisherman
                 skillName = "CastFishHook",
                 skillNameToken = FISHERMAN_PREFIX + "SECONDARY_GUN_NAME",
                 skillDescriptionToken = FISHERMAN_PREFIX + "SECONDARY_GUN_DESCRIPTION",
-                keywordTokens = new string[] { "KEYWORD_TREASURE" },
+                keywordTokens = new string[] { FISHERMAN_PREFIX + "KEYWORD_NONLETHAL", FISHERMAN_PREFIX + "KEYWORD_TREASURE" },
                 skillIcon = assetBundle.LoadAsset<Sprite>("Hook Icon"),
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(SkillStates.AimHook)),
@@ -295,7 +295,7 @@ namespace FishermanMod.Survivors.Fisherman
                 skillName = "RecallFishHook",
                 skillNameToken = FISHERMAN_PREFIX + "SECONDARY_GUN_NAME",
                 skillDescriptionToken = FISHERMAN_PREFIX + "SECONDARY_GUN_DESCRIPTION",
-                keywordTokens = new string[] { "KEYWORD_AGILE" },
+                keywordTokens = new string[] { "KEYWORD_AGILE"  },
                 skillIcon = assetBundle.LoadAsset<Sprite>("texUtilityIcon"),
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(SkillStates.RecallHook)),
@@ -395,7 +395,7 @@ namespace FishermanMod.Survivors.Fisherman
                 skillNameToken = FISHERMAN_PREFIX + "SPECIAL_BOMB_NAME",
                 skillDescriptionToken = FISHERMAN_PREFIX + "SPECIAL_BOMB_DESCRIPTION",
                 skillIcon = assetBundle.LoadAsset<Sprite>("Jelly Bomb Icon"),
-
+                keywordTokens = new string[] { FISHERMAN_PREFIX + "KEYWORD_TETHER" },
                 activationState = new EntityStates.SerializableEntityStateType(typeof(SkillStates.ThrowBomb)),
                 //setting this to the "weapon2" EntityStateMachine allows us to cast this skill at the same time primary, which is set to the "weapon" EntityStateMachine
                 activationStateMachineName = "Weapon2", interruptPriority = EntityStates.InterruptPriority.Skill,
@@ -631,6 +631,7 @@ namespace FishermanMod.Survivors.Fisherman
             }
             if (sender.HasBuff(FishermanBuffs.SteadyNervesBuff))
             {
+
                 int buffcount = sender.GetBuffCount(FishermanBuffs.SteadyNervesBuff);
                 for (int i = 0; i < buffcount; i++)
                 {
@@ -640,9 +641,13 @@ namespace FishermanMod.Survivors.Fisherman
                     if (args.attackSpeedReductionMultAdd > -0.2f)
                         args.attackSpeedReductionMultAdd -= (Mathf.Max(0,args.attackSpeedReductionMultAdd) * buffcount * 0.2f) + 0.1f;
                     if (args.moveSpeedReductionMultAdd > -0.2f)
+                    {
                         args.moveSpeedReductionMultAdd -= (Mathf.Max(0, args.moveSpeedReductionMultAdd) * buffcount * 0.2f) + 0.1f;
+                        //sender.acceleration = Mathf.Max(sender.baseAcceleration / 2wf, sender.baseAcceleration / (Mathf.Max(0, args.moveSpeedReductionMultAdd) * buffcount * 0.2f) + 1f);
+                    }
                     if (sender.cursePenalty > 1f && args.baseCurseAdd > -.8f)
                         args.baseCurseAdd -= .1f;
+                    
                 }
             }
         }

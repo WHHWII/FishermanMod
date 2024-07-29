@@ -7,7 +7,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
 {
     public class Shoot : BaseSkillState
     {
-        public static float damageCoefficient = FishermanStaticValues.gunDamageCoefficient;
+        public static float damageCoefficient = FishermanStaticValues.castDamageCoefficient;
         public static float procCoefficient = 1f;
         public static float baseDuration = 0.6f;
         //delay on firing is usually ass-feeling. only set this if you know what you're doing

@@ -150,11 +150,6 @@ namespace FishermanMod.Survivors.Fisherman
             {
                 bombController.ghostPrefab = _assetBundle.CreateProjectileGhostPrefab("DrinkThrowGhost");
             }
-            else
-            {
-                Log.Warning("[ASSETS][Drink/Bomb] Failed to load ghost");
-            }
-                
             
             bombController.startSound = "";
         }

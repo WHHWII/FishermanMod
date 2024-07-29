@@ -100,7 +100,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
             //ClearAgrro();
             //enemyTaunter.SetActive(false);
             //Log.Debug("Flyback engaged");
-            projectileDamage.damage = FishermanSurvivor.instance.bodyInfo.damage * FishermanStaticValues.gunDamageCoefficient;
+            projectileDamage.damage = FishermanSurvivor.instance.bodyInfo.damage * FishermanStaticValues.castDamageCoefficient;
             collider.radius += 1f;
             rb.velocity = Vector3.zero;
             isFlying = true;

@@ -13,7 +13,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
         //delays for projectiles feel absolute ass so only do this if you know what you're doing, otherwise it's best to keep it at 0
         public static float BaseDelayDuration = 0.0f;
 
-        public static float DamageCoefficient = Fisherman.FishermanStaticValues.bombDamageCoefficient;
+        public static float DamageCoefficient = Fisherman.FishermanStaticValues.hookbombDamageCoefficient;
 
         public override void OnEnter()
         {
