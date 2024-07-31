@@ -7,6 +7,7 @@ using System.Collections;
 using UnityEngine.UIElements;
 using Rewired.Utils;
 using static UnityEngine.ParticleSystem.PlaybackState;
+using R2API;
 
 namespace FishermanMod.Survivors.Fisherman.Components
 {
@@ -25,6 +26,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
         public ProjectileController controller;
         public ProjectileDamage projectileDamage;
         public CapsuleCollider collider;
+        public ProjectileOverlapAttack projOverlap;
         //public GameObject enemyTaunter;
         //public HurtBox hookHurtBox;
         //public CharacterBody hookBody;
@@ -53,7 +55,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
             //grappleOwnerRef.enabled = false;
             ownerTransform = controller.owner.transform;
             FishermanSurvivor.SetDeployedHook(this);
-            
+            collider.enabled = true;
             
         }
         void FixedUpdate()
@@ -100,6 +102,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
             //ClearAgrro();
             //enemyTaunter.SetActive(false);
             //Log.Debug("Flyback engaged");
+            collider.enabled = false;
             projectileDamage.damage = FishermanSurvivor.instance.bodyInfo.damage * FishermanStaticValues.castDamageCoefficient;
             collider.radius += 1f;
             rb.velocity = Vector3.zero;
@@ -107,6 +110,9 @@ namespace FishermanMod.Survivors.Fisherman.Components
             stickComponent.enabled = false;
             rb.isKinematic = false;
             rb.AddForce(CalculateReturnForce(returnForceBase, rb), ForceMode.Impulse);
+            projOverlap.enabled = true;
+            projOverlap.damageCoefficient = FishermanStaticValues.castDamageCoefficient;
+            //projOverlap.ResetOverlapAttack();
         }
 
         private Vector3 CalculateReturnForce(float baseForce, Rigidbody rbody, bool dampPower = false)
@@ -208,29 +214,30 @@ namespace FishermanMod.Survivors.Fisherman.Components
         }
         void ThrowMob(UnityEngine.Collision collision)
         {
-            //Log.Debug("Hit something");
-            //Log.Debug($" Hook impacted {collision.gameObject.name}");
-            HurtBox target = collision.gameObject.GetComponent<HurtBox>();
-            if (target != null)
-            {
-                
-                DamageInfo FlyAttackDamage = new DamageInfo
-                {
-                    attacker = controller.owner,
-                    inflictor = gameObject,
-                    damage = projectileDamage.damage,
-                    damageType = DamageType.NonLethal,
-                    damageColorIndex = DamageColorIndex.Default,
-                    procCoefficient = 1,
-                    procChainMask = default(ProcChainMask),
+            ////Log.Debug("Hit something");
+            ////Log.Debug($" Hook impacted {collision.gameObject.name}");
+            //HurtBox target = collision.gameObject.GetComponent<HurtBox>();
+            //if (target != null)
+            //{
 
-                };
-                target.healthComponent.TakeDamage(FlyAttackDamage);
-                GlobalEventManager.instance.OnHitEnemy(FlyAttackDamage, target.gameObject);
-                GlobalEventManager.instance.OnHitAll(FlyAttackDamage, target.gameObject);
-                //Log.Debug("\t a mob!");
-                FishermanSurvivor.ApplyFishermanPassiveFishHookEffect(ownerTransform.gameObject, gameObject, projectileDamage.damage, ownerTransform.position, target);
-            }
+            //    DamageInfo FlyAttackDamage = new DamageInfo
+            //    {
+            //        attacker = controller.owner,
+            //        inflictor = gameObject,
+            //        damage = projectileDamage.damage,
+            //        damageType = DamageType.NonLethal,
+            //        damageColorIndex = DamageColorIndex.Default,
+            //        procChainMask = default(ProcChainMask),
+            //        procCoefficient = 1,
+
+            //    };
+            //    FlyAttackDamage.AddModdedDamageType(Modules.DamageTypes.FishermanHookPassive);
+            //    target.healthComponent.TakeDamage(FlyAttackDamage);
+            //    GlobalEventManager.instance.OnHitEnemy(FlyAttackDamage, target.gameObject);
+            //    GlobalEventManager.instance.OnHitAll(FlyAttackDamage, target.gameObject);
+            //    //Log.Debug("\t a mob!");
+            //    //FishermanSurvivor.ApplyFishermanPassiveFishHookEffect(ownerTransform.gameObject, gameObject, projectileDamage.damage, ownerTransform.position, target);
+            //}
         }
         bool ThrowItem(Collider collider)
         {

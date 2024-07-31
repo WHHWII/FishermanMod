@@ -16,6 +16,7 @@ using On.RoR2.Orbs;
 using System.Reflection;
 using System.Collections.Generic;
 using UnityEngine.Networking;
+using HarmonyLib;
 
 namespace FishermanMod.Survivors.Fisherman
 {
@@ -156,30 +157,37 @@ namespace FishermanMod.Survivors.Fisherman
 
         private static void CreateHookProjectile()
         {
+            hookProjectilePrefab = _assetBundle.LoadAndAddProjectilePrefab("FishermanHookProjectile");
             //hookProjectilePrefab = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Engi/EngiMine.prefab").WaitForCompletion();
-            hookProjectilePrefab = Assets.CloneProjectilePrefab("GravekeeperHookProjectileSimple", "FishermanHookProjectile");
+            //hookProjectilePrefab = Assets.CloneProjectilePrefab("FMJRamping", "FishermanHookProjectile");
             Rigidbody rb = hookProjectilePrefab.GetComponent<Rigidbody>();
-            rb.useGravity = true;
-            rb.mass = 100;
-            
+            //rb.useGravity = true;
+            //rb.mass = 100;
+            //hookProjectilePrefab.layer = 0;
+
+
 
             ProjectileSimple ps = hookProjectilePrefab.GetComponent<ProjectileSimple>();
-            ps.desiredForwardSpeed = 80;
-            ps.lifetime = 999999;
+            //ps.desiredForwardSpeed = 80;
+            //ps.lifetime = 999999;
             
-            ProjectileDamage projectileDamage = ps.GetComponent<ProjectileDamage>();
+            
             
 
-            ProjectileStickOnImpact stickOnImpact = hookProjectilePrefab.GetComponent <ProjectileStickOnImpact>();
-            stickOnImpact.ignoreCharacters = false;
-            stickOnImpact.alignNormals = false;
+            ProjectileStickOnImpact stickOnImpact = hookProjectilePrefab.GetComponent<ProjectileStickOnImpact>();
+            //stickOnImpact.ignoreCharacters = false;
+            //stickOnImpact.alignNormals = false;
           
-            ProjectileSingleTargetImpact pstImpact = hookProjectilePrefab.GetComponent<ProjectileSingleTargetImpact>();
-            UnityEngine.Object.Destroy(pstImpact);
+            //ProjectileSingleTargetImpact pstImpact = hookProjectilePrefab.GetComponent<ProjectileSingleTargetImpact>();
+            //if(pstImpact) UnityEngine.Object.Destroy(pstImpact);
             //pstImpact.enabled = false;
+
+
             ProjectileController pc = hookProjectilePrefab.GetComponent<ProjectileController>();
 
             CapsuleCollider collider = hookProjectilePrefab.GetComponent<CapsuleCollider>();
+            
+
 
             GameObject ItemInteractor = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             ItemInteractor.transform.parent = hookProjectilePrefab.transform;
@@ -189,6 +197,25 @@ namespace FishermanMod.Survivors.Fisherman
             ItemInteractor.transform.localPosition = Vector3.zero;
             ItemInteractor.transform.localScale = Vector3.one * 6;
             ItemInteractor.layer = 15;
+
+            ProjectileOverlapAttack piss = hookProjectilePrefab.GetComponent<ProjectileOverlapAttack>();
+            //piss.onServerHit.RemoveAllListeners();
+            //piss.enabled = false;
+            //GameObject hbobj = new GameObject();
+            //hbobj.transform.localScale = new Vector3(2, 2, 2);
+            //HitBox hb = hbobj.AddComponent<HitBox>();
+            //HitBoxGroup hbgroup = hookProjectilePrefab.AddComponent<HitBoxGroup>();
+            //hbgroup.hitBoxes.AddItem(hb);
+            //piss.damageCoefficient = FishermanStaticValues.castDamageCoefficient;
+
+
+            //hbobj.transform.parent = hookProjectilePrefab.transform;
+
+            var damageTypeComp = hookProjectilePrefab.AddComponent<DamageAPI.ModdedDamageTypeHolderComponent>();
+            damageTypeComp.Add(DamageTypes.FishermanHookPassive);
+            ProjectileDamage projectileDamage = ps.GetComponent<ProjectileDamage>();
+            //projectileDamage.damageType = DamageType.NonLethal;
+
 
 
             //this was used for taunt
@@ -202,7 +229,7 @@ namespace FishermanMod.Survivors.Fisherman
             //healthComp.health = int.MaxValue;
             //healthComp.dontShowHealthbar = true;
 
-            
+
 
             //GameObject enemyTaunter = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             //enemyTaunter.transform.parent = hookProjectilePrefab.transform;
@@ -212,7 +239,7 @@ namespace FishermanMod.Survivors.Fisherman
             //enemyTaunter.transform.localPosition = Vector3.zero;
             //enemyTaunter.transform.localScale = Vector3.one * 30;
             //enemyTaunter.layer = 15;
-            
+
 
             FishHookController fishHook = hookProjectilePrefab.AddComponent<FishHookController>();
             fishHook.rb = rb;
@@ -220,20 +247,35 @@ namespace FishermanMod.Survivors.Fisherman
             fishHook.controller = pc;
             fishHook.projectileDamage = projectileDamage;
             fishHook.collider = collider;
+            fishHook.projOverlap = piss;
+
+
+           fishHook.stickComponent.stickEvent.AddListener(() => {
+               //fishHook.collider.radius = 0.1f; ;
+               fishHook.rb.velocity = Vector3.zero;
+               ps.enabled = false;
+               }
+           );
+
             //fishHook.enemyTaunter = enemyTaunter;
             //fishHook.hookBody = hookBody;
 
             //fishHook.pstImpact = pstImpact;
 
-            GameObject ghostPrefab = pc.ghostPrefab;
-            ProjectileGhostController gpc = ghostPrefab.GetComponent<ProjectileGhostController>();
-            UnityEngine.Object.Destroy(ghostPrefab.GetComponentInChildren<ObjectScaleCurve>()); // this removes the visual disapearing
-            //want to change this to custom line renderer effect later
-            AnimateShaderAlpha trailFadeEffect = gpc.GetComponentInChildren<AnimateShaderAlpha>();
-            trailFadeEffect.timeMax = 20;
-            TrailRenderer trailEffect = gpc.GetComponentInChildren<TrailRenderer>();
-            trailEffect.startWidth = 0.2f;
-            trailEffect.endWidth = 0.01f;
+
+            //if (_assetBundle.LoadAsset<GameObject>("CastHookGhost") != null)
+            //{
+            //    pc.ghostPrefab = _assetBundle.CreateProjectileGhostPrefab("CastHookGhost");
+            //}
+            //GameObject ghostPrefab = pc.ghostPrefab;
+            //ProjectileGhostController gpc = ghostPrefab.GetComponent<ProjectileGhostController>();
+            //UnityEngine.Object.Destroy(ghostPrefab.GetComponentInChildren<ObjectScaleCurve>()); // this removes the visual disapearing
+            ////want to change this to custom line renderer effect later
+            //AnimateShaderAlpha trailFadeEffect = gpc.GetComponentInChildren<AnimateShaderAlpha>();
+            //trailFadeEffect.timeMax = 20;
+            //TrailRenderer trailEffect = gpc.GetComponentInChildren<TrailRenderer>();
+            //trailEffect.startWidth = 0.2f;
+            //trailEffect.endWidth = 0.01f;
 
         }
 

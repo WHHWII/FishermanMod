@@ -653,8 +653,10 @@ namespace FishermanMod.Survivors.Fisherman
         }
 
 
-        public static void ApplyFishermanPassiveFishHookEffect(GameObject attacker, GameObject inflictor, float hookFailDamage, Vector3 targetPos, HurtBox enemyHurtBox)
+        public static int ApplyFishermanPassiveFishHookEffect(GameObject attacker, GameObject inflictor, float hookFailDamage, Vector3 targetPos, HurtBox enemyHurtBox)
         {
+
+            #region calculuateThrowingArc 
             float maxMass = 700;
             CharacterBody body = enemyHurtBox.healthComponent.body;
             Vector3 enemyPosition = enemyHurtBox.transform.position;
@@ -662,7 +664,7 @@ namespace FishermanMod.Survivors.Fisherman
             float bodyMass = (bodyRB ? bodyRB.mass : maxMass+1); // no rigid body = too heavy to hook 
             bool isHookImmune = body.HasBuff(FishermanBuffs.hookImmunityBuff);
 
-            if (bodyMass < maxMass && isHookImmune) return; // stop early if target is unhookable and unbleedable
+            if (bodyMass < maxMass && isHookImmune) return -1; // stop early if target is unhookable and unbleedable
             Vector3 force;
             //flying vermin seems to be the only flyer in the game that doesnt use a VectorPID to fly.
             bool isFlyer = body.gameObject.GetComponent<VectorPID>() != null  || body.name == "FlyingVerminBody(Clone)"? true: false;
@@ -682,21 +684,7 @@ namespace FishermanMod.Survivors.Fisherman
             float bonusPower = Mathf.Clamp(Mathf.Log(-dist + 312, 1.1f) - 57.2f, 1, 5);
             // if (isFlyer) { bonusPower += 0.1f; }
             force = newDistanceVector * bodyMass * bonusPower;
-
-
-
-            //Log.Debug($"\nHookInfo: " +
-            //    $"\n\tName: {body.name}" +
-            //    $"\n\tIsFlyer: {isFlyer}" +
-            //    $"\n\ttargetMass: {bodyMass}" +
-            //    $"\n\tdist: {dist}" +
-            //    $"\n\tdistanceVector: {distanceVector}" +
-            //    $"\n\tnewDistanceVector: {newDistanceVector}" +
-            //    $"\n\bonusPower: {bonusPower}" +
-            //    $"\n\t>Final Force: {force}");
-
-
-
+            #endregion 
 
             DamageInfo damageInfo = new DamageInfo
             {
@@ -710,6 +698,7 @@ namespace FishermanMod.Survivors.Fisherman
 
             if(bodyMass > maxMass)
             {
+                Log.Info($"Attacker: {attacker.name} Inflictor { inflictor.name}");
                 //play hook fail sound effect
                 //show hook hook fail decal on enemy
                 damageInfo.force = force * 0.1f;
@@ -718,10 +707,12 @@ namespace FishermanMod.Survivors.Fisherman
                 damageInfo.damageType = DamageType.BleedOnHit;
                 enemyHurtBox.healthComponent.TakeDamageForce(damageInfo); // apply weak pull no damage to prevent double hit
                 damageInfo.damage = hookFailDamage;  //add damage for bleed calcution
+                //enemyHurtBox.healthComponent.TakeDamage(damageInfo); // apply weak pull no damage to prevent double hit
+
                 GlobalEventManager.instance.OnHitEnemy(damageInfo, body.gameObject);
                 GlobalEventManager.instance.OnHitAll(damageInfo, body.gameObject);
-                Log.Debug($"Mass too large, hook failed. New force: { damageInfo.force}"); 
-
+                Log.Debug($"Mass too large, hook failed. New force: { damageInfo.force} HookfailDamage: {hookFailDamage}");
+                return 0;
             }
             else if(!isHookImmune)
             {
@@ -731,14 +722,20 @@ namespace FishermanMod.Survivors.Fisherman
                 body.AddTimedBuff(FishermanBuffs.hookImmunityBuff, 0.3f);
                 //enemyHurtBox.healthComponent.TakeDamage(damageInfo);
                 enemyHurtBox.healthComponent.TakeDamageForce(damageInfo);
+                return 1;
             }
-            else
-            {
-                //Log.Debug("Enemy has hookImmunity, hook failed");
-            }
+            return -1;
             #region Your Mother
 
-
+            //Log.Debug($"\nHookInfo: " +
+            //    $"\n\tName: {body.name}" +
+            //    $"\n\tIsFlyer: {isFlyer}" +
+            //    $"\n\ttargetMass: {bodyMass}" +
+            //    $"\n\tdist: {dist}" +
+            //    $"\n\tdistanceVector: {distanceVector}" +
+            //    $"\n\tnewDistanceVector: {newDistanceVector}" +
+            //    $"\n\bonusPower: {bonusPower}" +
+            //    $"\n\t>Final Force: {force}");
 
             /*
 
@@ -835,7 +832,9 @@ Log.Debug(
             //    $"\n\tdistAdjForce: {distAdjForce}" +
             //    $"\n\t>Final Force: {force}");
             //Vector3 force = Vector3.oneVector * 1000;
-            	#endregion
+            #endregion
+
+
         }
 
         //should probably make this use a list

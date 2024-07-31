@@ -55,7 +55,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
                     earlyExitPercentTime = 0.6f;
                     break;
             }
-            playbackRateParam = "Slash.playbackRate";
+            playbackRateParam = "PolePrimary.playbackRate";
             swingEffectPrefab = FishermanAssets.swordSwingEffect;
             hitEffectPrefab = FishermanAssets.swordHitImpactEffect;
 
@@ -69,7 +69,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
             if (swingIndex == 0)
             {
                 EffectManager.SimpleMuzzleFlash(EntityStates.Commando.CommandoWeapon.FirePistol2.muzzleEffectPrefab, gameObject, muzzleString, false);
-                PlayAnimation("Gesture, Override", "PolePrimary" + (3), "PolePrimary.playbackRate", 1.8f);
+                PlayAnimation("Gesture, Override", "PolePrimary" + (3), playbackRateParam, 1.8f);
             }
             else if (swingIndex == 1)
             {
