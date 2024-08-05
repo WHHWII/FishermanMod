@@ -1,4 +1,5 @@
 ﻿using EntityStates;
+using FishermanMod.Modules;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,7 +16,11 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
                 PlayAnimation("LeftArm, Override", "UtilityPlatform", "UtilityPlatform.playbackRate", 0.65f);
                 base.skillLocator.special.SetSkillOverride(this, FishermanSurvivor.specialThrowHookBomb, RoR2.GenericSkill.SkillOverridePriority.Upgrade);
                 base.skillLocator.special.DeductStock(1); // may change this to deduct all stocks if all stocks are fired at once.
-                if (FishermanSurvivor.deployedHookBomb != null) FishermanSurvivor.deployedHookBomb.HookAllTethers();
+                if (FishermanSurvivor.deployedHookBomb != null)
+                {
+                    FishermanSurvivor.deployedHookBomb.moddedDamageComp.Remove(DamageTypes.FishermanTether);
+                    FishermanSurvivor.deployedHookBomb.HookAllTethers();
+                }
                 
             }
             outer.SetNextStateToMain();

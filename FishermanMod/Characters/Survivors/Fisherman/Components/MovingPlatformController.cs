@@ -13,8 +13,8 @@ namespace FishermanMod.Survivors.Fisherman.Components
 {
     public class MovingPlatformController : MonoBehaviour
     {
-        public float duration = 30;
-        public float speed = 5;
+        public bool wasStuckByHook;
+        public CharacterBody characterBody;
         public Vector3 direction;
         public TeamIndex team;
         BaseAI baseAi;
@@ -36,45 +36,6 @@ namespace FishermanMod.Survivors.Fisherman.Components
             {
                 baseAi.skillDrivers[i].ignoreNodeGraph = true;
             }
-        }
-
-        void FixedUpdate()
-        {
-            //transform.position += direction * speed * Time.fixedDeltaTime;
-            //rb.MovePosition(transform.position + direction * speed * Time.fixedDeltaTime);
-        }
-
-        IEnumerator DestroyPlatform()
-        {
-            yield return new WaitForSeconds(duration);
-            Destroy(gameObject);
-        }
-
-        void OnCollisionEnter(Collision collision)
-        {
-            //Log.Debug($"Passenger Detected: {collision.gameObject.name} \n parent : {collision.gameObject.transform.parent} ");
-            //TeamComponent teamComp = collision.gameObject.GetComponent<TeamComponent>();
-            //if(teamComp.teamIndex == team)
-            //{
-               
-            //    passengersOriginalParents.Add(collision.transform, collision.transform.parent);
-            //    collision.gameObject.transform.parent = transform;
-            //}
-        }
-        void OnCollisionExit(Collision collision)
-        {
-            //Log.Debug($"Passenger Detected: {collision.gameObject.name} \n parent : {collision.gameObject.transform.parent} ");
-            //TeamComponent teamComp = collision.gameObject.GetComponent<TeamComponent>();
-            //if (teamComp.teamIndex == team)
-            //{
-                
-            //    collision.gameObject.transform.parent = passengersOriginalParents[collision.gameObject.transform];
-            //    passengersOriginalParents.Remove(collision.gameObject.transform);
-            //}
-        }
-        void OnDestroy()
-        {
-            FishermanSurvivor.SetDeployedPlatform(null);
         }
         
     }

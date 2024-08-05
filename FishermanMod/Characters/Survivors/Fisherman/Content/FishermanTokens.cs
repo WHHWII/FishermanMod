@@ -43,6 +43,8 @@ namespace FishermanMod.Survivors.Fisherman
             LanguageAPI.Add(prefix + "KEYWORD_TETHER", $" <style=cKeywordName>Tether</style><style=cSub> Reduces movement speed by <style=cIsDamage>30%.</style>");
             #endregion Keyowrds
 
+
+
             #region Skins
             Language.Add(prefix + "MASTERY_SKIN_NAME", "Alternate");
             #endregion
@@ -65,6 +67,7 @@ namespace FishermanMod.Survivors.Fisherman
             #region Utility
             Language.Add(prefix + "UTILITY_PLATFORM_NAME", Tokens.FishermanText("F153 Mobile Shanty Platform",3));
             Language.Add(prefix + "UTILITY_PLATFORM_DESCRIPTION", $"Deploy a drone that <style=cIsUtility>you can stand on.</style> It slowly fires explosive rounds for <style=cIsDamage>{100f * FishermanStaticValues.shantyCannonDamage}% damage.</style>");
+            Language.Add(prefix + "UTILITY_MINION_NAME", "Chris");
             #endregion
 
             #region Special

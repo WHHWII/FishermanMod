@@ -4,6 +4,7 @@ using IL.RoR2.CharacterAI;
 using UnityEngine;
 using FishermanMod.Survivors.Fisherman;
 using FishermanMod.Characters.Survivors.Fisherman.Content;
+using On.RoR2;
 
 namespace FishermanMod.Survivors.Fisherman.SkillStates
 {
@@ -20,10 +21,14 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
 
                 RaycastHit hitInfo;
                 Ray aimray = GetAimRay();
-                bool result = Physics.Raycast(aimray,out hitInfo);
+                aimray.origin = transform.position + Vector3.up + aimray.direction;
+
+
+
+                bool result = Physics.Raycast(aimray, out hitInfo, 500, RoR2.LayerIndex.world.mask | ~RoR2.LayerIndex.entityPrecise.mask, QueryTriggerInteraction.Ignore);
                 if (!FishermanSurvivor.platformTarget)
                 {
-                    FishermanSurvivor.platformTarget = UnityEngine.GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                    FishermanSurvivor.platformTarget = UnityEngine.GameObject.Instantiate(FishermanAssets.shantyBlueprintPrefab);
                 }
                 if (result)
                 {

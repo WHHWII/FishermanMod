@@ -49,12 +49,12 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Content
             base.OnEnter();
             base.OnEnter();
             activeSoundTimer = UnityEngine.Random.Range(3f, 8f);
-            if ((bool)base.ai)
-            {
-                lastPathUpdate = base.ai.broadNavigationAgent.output.lastPathUpdate;
-                base.ai.broadNavigationAgent.InvalidatePath();
-            }
-            fallbackNodeStartAge = float.NegativeInfinity;
+            //if ((bool)base.ai)
+            //{
+            //    lastPathUpdate = base.ai.broadNavigationAgent.output.lastPathUpdate;
+            //    base.ai.broadNavigationAgent.InvalidatePath();
+            //}
+            //fallbackNodeStartAge = float.NegativeInfinity;
         }
 
         public override void FixedUpdate()
@@ -131,8 +131,14 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Content
                 //}
                 Vector3 targetPosition = position;
 
+
+
+                //move to target - my code
                 targetPosition = CommandTarget;
                 if (Vector3.Distance(position, CommandTarget) < 1.5) targetPosition = position;
+
+
+
 
                 base.ai.localNavigator.targetPosition = targetPosition;
                 base.ai.localNavigator.allowWalkOffCliff = true;

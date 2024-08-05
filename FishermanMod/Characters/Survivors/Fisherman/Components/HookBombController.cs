@@ -25,6 +25,9 @@ namespace FishermanMod.Survivors.Fisherman.Components
         public Rigidbody body;
         public AntiGravityForce antiGrav;
         public Vector3 lastVelocity;
+        public DamageAPI.ModdedDamageTypeHolderComponent moddedDamageComp;
+        public SphereCollider[] bombColliders;
+        public bool wasStuckByHook;
         //public ProjectileExplosion explosionComponent;
         float origAntiGravCoef;
         float origDrag;
@@ -41,17 +44,29 @@ namespace FishermanMod.Survivors.Fisherman.Components
             stickComponent.stickEvent.AddListener(ResetDragAndGrav);
         }
 
+        public void DisableAllColliders()
+        {
+            foreach (var collider in bombColliders)  collider.enabled = false; 
+        }
+        public void EnableAllColliders()
+        {
+            foreach(var collider in bombColliders) collider.enabled = true; 
+        }
+
         public IEnumerator ResetStickyComponent()
         {
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(0.05f);
+            EnableAllColliders();
+            yield return new WaitForSeconds(0.1f);
             stickComponent.enabled = true;
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(1f);
             ResetDragAndGrav();
         }
         void ResetDragAndGrav()
         {
             antiGrav.antiGravityCoefficient = origAntiGravCoef;
             body.drag = origDrag;
+            body.angularDrag = 3;
         }
 
         void FixedUpdate()

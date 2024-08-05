@@ -21,6 +21,7 @@ namespace FishermanMod.Modules
             Log.Debug("Damage registered");
             FishermanTether = DamageAPI.ReserveDamageType();
             FishermanHookPassive = DamageAPI.ReserveDamageType();
+            FishermanKnockup = DamageAPI.ReserveDamageType();
             SetHooks();
         }
         private static void SetHooks()
@@ -41,12 +42,17 @@ namespace FishermanMod.Modules
 
             if (damageInfo.HasModdedDamageType(FishermanTether))
             {
+                Log.Info("TetherDamageTypeInvoked");
+                if (!victim.body) return;
                 victim.body.AddBuff(FishermanBuffs.hookTetherDebuff);
                 victim.gameObject.AddComponent<HookBombTetherVisual>();
             }
 
             if (damageInfo.HasModdedDamageType(FishermanHookPassive))
             {
+                Log.Info("HookDamageTypeInvoked");
+
+                if (!victim.body) return;
                 FishermanSurvivor.ApplyFishermanPassiveFishHookEffect(
                     damageReport.attacker,
                     damageInfo.inflictor,
@@ -58,10 +64,12 @@ namespace FishermanMod.Modules
 
             if (damageInfo.HasModdedDamageType(FishermanKnockup))
             {
+                Log.Info("KnockupDamageTypeInvoked");
+                if (!victim.body) return;
                 //apply knockup scaled with mass if victim has rigidbody. Do not apply knockup if victim is airborne.
                 damageInfo.force = damageReport.victimBody.characterMotor.isGrounded ? (damageReport.victimBody.rigidbody && damageReport.victimBody.rigidbody.mass < 700 ? damageReport.victimBody.rigidbody.mass : 0.1f)* damageInfo.force : Vector3.zero;
                 Log.Info($"[DamageTypes][Knockup] Damageinfo force: {damageInfo.force}");
-                damageReport.victim.TakeDamageForce(damageInfo.force);
+                damageReport.victim?.TakeDamageForce(damageInfo.force);
             }
         }
 

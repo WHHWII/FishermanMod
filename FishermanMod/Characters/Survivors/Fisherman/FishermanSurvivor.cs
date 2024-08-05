@@ -621,8 +621,31 @@ namespace FishermanMod.Survivors.Fisherman
             R2API.RecalculateStatsAPI.GetStatCoefficients += RecalculateStatsAPI_GetStatCoefficients;
             On.RoR2.HealthComponent.TakeDamage += HealthComponent_TakeDamage;
             On.RoR2.CharacterBody.RecalculateStats += CharacterBody_RecalculateStats;
+            On.RoR2.CharacterMaster.OnBodyStart += CharacterMaster_OnBodyStart;
         }
-
+        private void CharacterMaster_OnBodyStart(On.RoR2.CharacterMaster.orig_OnBodyStart orig, CharacterMaster self, CharacterBody body)
+        {
+            orig(self, body);
+            if (self && self.GetBody() && self.GetBody().isPlayerControlled)
+            {
+                MinionOwnership.MinionGroup minionGroup = MinionOwnership.MinionGroup.FindGroup(body.master.netId);
+                if (minionGroup != null)
+                {
+                    var members = minionGroup.members;
+                    foreach (var member in members)
+                    {
+                        CharacterMaster master = member?.GetComponent<CharacterMaster>();
+                        CharacterBody minionBody = master?.GetBody();
+                        if (master.name.Contains("ShantyMaster") && body.skillLocator.utility != FishermanSurvivor.utilityDirectPlatform)
+                        {
+                            body.skillLocator.utility.SetSkillOverride(this, FishermanSurvivor.utilityDirectPlatform, RoR2.GenericSkill.SkillOverridePriority.Upgrade);
+                            body.skillLocator.utility.DeductStock(1); // may change this to deduct all stocks if all hooks are fired at once.
+                            break;
+                        }
+                    }
+                }
+            }
+        }
         private void HealthComponent_TakeDamage(On.RoR2.HealthComponent.orig_TakeDamage orig, HealthComponent self, DamageInfo damageInfo)
         {
             if (self && self.body)
@@ -744,15 +767,15 @@ namespace FishermanMod.Survivors.Fisherman
                 position = enemyHurtBox.transform.position,
             };
 
-            Log.Debug($"\nHookInfo: " +
-                $"\n\tName: {body.name}" +
-                $"\n\tIsFlyer: {isFlyer}" +
-                $"\n\ttargetMass: {bodyMass}" +
-                $"\n\tdist: {dist}" +
-                $"\n\tdistanceVector: {distanceVector}" +
-                $"\n\tnewDistanceVector: {newDistanceVector}" +
-                $"\n\bonusPower: {bonusPower}" +
-                $"\n\t>Final Force: {force}");
+            //Log.Debug($"\nHookInfo: " +
+            //    $"\n\tName: {body.name}" +
+            //    $"\n\tIsFlyer: {isFlyer}" +
+            //    $"\n\ttargetMass: {bodyMass}" +
+            //    $"\n\tdist: {dist}" +
+            //    $"\n\tdistanceVector: {distanceVector}" +
+            //    $"\n\tnewDistanceVector: {newDistanceVector}" +
+            //    $"\n\bonusPower: {bonusPower}" +
+            //    $"\n\t>Final Force: {force}");
 
             if (bodyMass > maxMass)
             {

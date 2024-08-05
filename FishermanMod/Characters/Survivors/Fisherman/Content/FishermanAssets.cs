@@ -246,7 +246,7 @@ namespace FishermanMod.Survivors.Fisherman
             fishHook.stickComponent = stickOnImpact;
             fishHook.controller = pc;
             fishHook.projectileDamage = projectileDamage;
-            fishHook.collider = collider;
+            fishHook.hookCollider = collider;
             fishHook.projOverlap = piss;
             fishHook.projSimple = ps;
 
@@ -336,7 +336,7 @@ namespace FishermanMod.Survivors.Fisherman
             UnityEngine.Object.Destroy(hookBombProjectilePrefab.GetComponent<BeginRapidlyActivatingAndDeactivating>());
             //var awakeComponent = hookBombProjectilePrefab.GetComponent<AwakeEvent>();
             //var functionComponent = hookBombProjectilePrefab.GetComponent<EventFunctions>();
-           
+
 
             var antiGrav = hookBombProjectilePrefab.GetComponent<AntiGravityForce>();
             antiGrav.antiGravityCoefficient = 0.3f;
@@ -355,6 +355,8 @@ namespace FishermanMod.Survivors.Fisherman
 
             var startEvent = hookBombProjectilePrefab.GetComponent<RoR2.EntityLogic.DelayedEvent>();
             startEvent.CallDelayed(0.5f);
+
+
 
             var bomb = hookBombProjectilePrefab.AddComponent<ProjectileImpactExplosion>();
             bomb.blastRadius = 25;
@@ -382,9 +384,11 @@ namespace FishermanMod.Survivors.Fisherman
             hookBomb.explosionComponent = bomb;
             hookBomb.stickComponent = stick;
             hookBomb.antiGrav = hookBombProjectilePrefab.GetComponent<AntiGravityForce>();
+            hookBomb.moddedDamageComp = damageTypeComp;
+            hookBomb.bombColliders = hookBombProjectilePrefab.GetComponentsInChildren<SphereCollider>();
             //awakeComponent.action.AddListener(hookBomb.ClearHooks);
-            
-            
+
+
 
 
         }
@@ -407,13 +411,18 @@ namespace FishermanMod.Survivors.Fisherman
         private static void CreateMovingPlatform()
         {
             //blueprint
-            shantyBlueprintPrefab = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Engi/EngiWalkerTurretBlueprints.prefab").WaitForCompletion(), "ShantyBlueprint");
+            shantyBlueprintPrefab = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Captain/CaptainSupplyDropBlueprint.prefab").WaitForCompletion(), "ShantyBlueprint");
             shantyBlueprintPrefab.AddComponent<NetworkIdentity>();
-
+            shantyBlueprintPrefab.transform.localScale = new Vector3(0.2f, 0.05f, 0.2f);
+            AkEvent[] soundEmitters = shantyBlueprintPrefab.GetComponents<AkEvent>();
+            foreach (var soundEmitter in soundEmitters)
+            {
+                UnityEngine.Object.Destroy(soundEmitter);
+            }
 
             //body
             shantyBodyPrefab = _assetBundle.LoadAsset<GameObject>("ShantyPlatformBody") ;//PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Drones/EmergencyDroneBody.prefab").WaitForCompletion(), "ShantyBody");
-            shantyBodyPrefab.gameObject.layer = LayerIndex.playerBody.intVal;
+            shantyBodyPrefab.gameObject.layer = LayerIndex.entityPrecise.intVal;
            // LayerIndex.entityPrecise
             //var hc = shantyBodyPrefab.GetComponent<HealthComponent>();
             //var deplyoable = shantyBodyPrefab.GetComponent<Deployable>(); //have to add for non default deployables. dont forget to change if you change your base
@@ -421,7 +430,8 @@ namespace FishermanMod.Survivors.Fisherman
 
             //emergency drone base version
             //shantyBodyPrefab.transform.localScale *= 4;
-            shantyBodyPrefab.AddComponent<MovingPlatformController>();
+            var mpc = shantyBodyPrefab.AddComponent<MovingPlatformController>();
+            mpc.characterBody = shantyBodyPrefab.GetComponent<CharacterBody>();
 
             //master
             shantyMasterPrefab = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Drones/MegaDroneMaster.prefab").WaitForCompletion(), "ShantyMaster");//_assetBundle.LoadAsset<GameObject>("ShantyPlatformMaster");//
@@ -443,7 +453,7 @@ namespace FishermanMod.Survivors.Fisherman
                 activationStateMachineName = "Weapon",
                 interruptPriority = EntityStates.InterruptPriority.Skill,
 
-                baseRechargeInterval = 4f, // change
+                baseRechargeInterval = 5f, // change
                 baseMaxStock = 1,
 
                 rechargeStock = 1,
