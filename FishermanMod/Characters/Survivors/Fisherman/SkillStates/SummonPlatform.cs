@@ -40,6 +40,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
         private float exitCountdown;
 
         private bool exitPending;
+        private bool exitedFromUse;
 
         private float entryCountdown;
 
@@ -133,6 +134,11 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
                 if (exitCountdown <= 0f)
                 {
                     Log.Debug("Exiting platform placement");
+                    if(exitedFromUse)
+                    {
+                        base.skillLocator.utility.SetSkillOverride(this, FishermanSurvivor.utilityDirectPlatform, RoR2.GenericSkill.SkillOverridePriority.Upgrade);
+                        base.skillLocator.utility.DeductStock(1); // may change this to deduct all stocks if all hooks are fired at once.
+                    }
                     outer.SetNextStateToMain();
                 }
             }
@@ -152,7 +158,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
                             if (skill)
                             {
                                 Log.Debug("Deducting Stock");
-                                skill.DeductStock(1);
+                                //skill.DeductStock(1);
                                 Log.Debug("Attempting Spawn");
                                 //base.characterBody.SendConstructTurret(base.characterBody, currentPlacementInfo.position, currentPlacementInfo.rotation, MasterCatalog.FindMasterIndex(platformMasterPrefab));
                                 MasterSummon masterSummon = new MasterSummon();
@@ -169,11 +175,19 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
                                 }
                             }
                         }
+                        base.transform.rotation = Util.QuaternionSafeLookRotation(base.characterDirection.forward);
+
+                        //MovingPlatformController mpc = base.GetComponent<MovingPlatformController>(); ;
+                        //Vector3 direction = (inputBank.moveVector == Vector3.zero ? characterDirection.forward : inputBank.moveVector).normalized;
+                        //mpc.direction = direction;
+                      
                     }
                     Log.Debug("exiting skill from use");
                     Util.PlaySound(placeSoundString, base.gameObject);
                     DestroyBlueprints();
                     exitPending = true;
+                    exitedFromUse = true;
+
                 }
                 if (base.inputBank.skill2.justPressed || base.inputBank.skill4.justPressed)
                 {

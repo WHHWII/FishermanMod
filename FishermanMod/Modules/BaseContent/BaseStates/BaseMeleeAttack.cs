@@ -20,6 +20,8 @@ namespace FishermanMod.Modules.BaseStates
 
         protected static Transform hitBoxOrienter;
 
+
+
         protected string hitboxGroupName = "SwipeGroup";
         protected string hitBoxGroupName2 = "StabGroup";
         protected DamageType damageType = DamageType.Generic;
@@ -61,6 +63,9 @@ namespace FishermanMod.Modules.BaseStates
         public override void OnEnter()
         {
             base.OnEnter();
+
+
+
             duration = baseDuration / attackSpeedStat;
             animator = GetModelAnimator();
             StartAimMode(0.5f + duration, false);

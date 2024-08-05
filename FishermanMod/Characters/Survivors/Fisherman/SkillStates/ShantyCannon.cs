@@ -30,8 +30,6 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
             damageCoefficient = DamageCoefficient;
 
             //proc coefficient is set on the components of the projectile prefab
-            force = 30f;
-
             //base.projectilePitchBonus = 0;
             //base.minSpread = 0;
             //base.maxSpread = 0;

@@ -11,25 +11,37 @@ using UnityEngine.XR.WSA;
 
 namespace FishermanMod.Survivors.Fisherman.Components
 {
-    internal class MovingPlatformController : MonoBehaviour
+    public class MovingPlatformController : MonoBehaviour
     {
         public float duration = 30;
         public float speed = 5;
         public Vector3 direction;
         public TeamIndex team;
+        BaseAI baseAi;
         private Dictionary<Transform, Transform> passengersOriginalParents = new Dictionary<Transform, Transform>();
+
+        Rigidbody rb;
 
         void Start()
         {
-            StartCoroutine(DestroyPlatform());
+            FishermanSurvivor.SetDeployedPlatform(this);
+            //StartCoroutine(DestroyPlatform());
+            rb = GetComponent<Rigidbody>();
             //AISkillDriver driver;
             //driver.requireEquipmentReady
             //gameObject.layer = 11;
             //something somehting euler angles cross productud vector3 up 
+            baseAi = GetComponent<CharacterBody>().master.GetComponent<RoR2.CharacterAI.BaseAI>();
+            for (int i = 0; i < baseAi.skillDrivers.Length; i++)
+            {
+                baseAi.skillDrivers[i].ignoreNodeGraph = true;
+            }
         }
+
         void FixedUpdate()
         {
-            transform.position += direction * speed * Time.fixedDeltaTime;
+            //transform.position += direction * speed * Time.fixedDeltaTime;
+            //rb.MovePosition(transform.position + direction * speed * Time.fixedDeltaTime);
         }
 
         IEnumerator DestroyPlatform()
@@ -59,6 +71,10 @@ namespace FishermanMod.Survivors.Fisherman.Components
             //    collision.gameObject.transform.parent = passengersOriginalParents[collision.gameObject.transform];
             //    passengersOriginalParents.Remove(collision.gameObject.transform);
             //}
+        }
+        void OnDestroy()
+        {
+            FishermanSurvivor.SetDeployedPlatform(null);
         }
         
     }

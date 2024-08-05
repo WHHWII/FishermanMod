@@ -1,5 +1,4 @@
 ﻿using FishermanMod.Modules.BaseStates;
-using R2API;
 using RoR2;
 using UnityEngine;
 
@@ -7,14 +6,21 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
 {
     public class SlashCombo : BaseMeleeAttack
     {
+        public float drunkDeviation = 0;
+        public int drunkBuffCnt = 0;
         public override void OnEnter()
         {
+            if (characterBody.HasBuff(FishermanBuffs.SteadyNervesBuff))
+            {
+                drunkBuffCnt = characterBody.GetBuffCount(FishermanBuffs.SteadyNervesBuff);
+                drunkDeviation = Mathf.Clamp(UnityEngine.Random.Range(-drunkBuffCnt * 0.001f, drunkBuffCnt * 0.001f), -0.5f, 0.5f);
+            }
             damageType = DamageType.Generic;
-            damageCoefficient = FishermanStaticValues.swipeDamageCoefficient;
-            procCoefficient = 1f;
-            pushForce = 300f;
-            bonusForce = Vector3.zero;
-            baseDuration = 1f;
+            damageCoefficient = FishermanStaticValues.swipeDamageCoefficient + drunkDeviation;
+            procCoefficient = 1f + drunkDeviation;
+            pushForce = 300f + drunkDeviation;
+            bonusForce = Vector3.zero + drunkDeviation * Vector3.one;
+            baseDuration = 1f + drunkDeviation;
 
             //0-1 multiplier of baseduration, used to time when the hitbox is out (usually based on the run time of the animation)
             //for example, if attackStartPercentTime is 0.5, the attack will start hitting halfway through the ability. if baseduration is 3 seconds, the attack will start happening at 1.5 seconds
@@ -24,9 +30,12 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
             //this is the point at which the attack can be interrupted by itself, continuing a combo
             earlyExitPercentTime = 0.6f;
 
-            hitStopDuration = 0.012f;
-            attackRecoil = 0.5f;
-            hitHopVelocity = 4f;
+
+
+
+            hitStopDuration = 0.012f + drunkDeviation;
+            attackRecoil = 0.5f + drunkDeviation;
+            hitHopVelocity = 4f + drunkDeviation;
 
             swingSoundString = "HenrySwordSwing";
             hitSoundString = "";
@@ -34,25 +43,25 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
             {
                 case 0:
                     damageCoefficient = FishermanStaticValues.stabDamageCoefficient;
-                    attackStartPercentTime = 0.45f;
-                    attackEndPercentTime = 0.7f;
-                    earlyExitPercentTime = 0.8f;
+                    attackStartPercentTime = 0.3f + drunkDeviation;
+                    attackEndPercentTime = 0.7f + drunkDeviation;
+                    earlyExitPercentTime = 0.8f + drunkDeviation;
                     muzzleString = "Muzzle";
                     break;
 
                 case 1:
                     damageCoefficient = FishermanStaticValues.swipeDamageCoefficient;
                     muzzleString = "SwingLeft";
-                    attackStartPercentTime = 0.2f;
-                    attackEndPercentTime = 0.4f;
-                    earlyExitPercentTime = 0.6f;
+                    attackStartPercentTime = 0.2f + drunkDeviation;
+                    attackEndPercentTime = 0.4f + drunkDeviation;
+                    earlyExitPercentTime = 0.6f + drunkDeviation;
                     break;
                 case 2:
                     damageCoefficient = FishermanStaticValues.swipeDamageCoefficient;
                     muzzleString = "SwingRight";
-                    attackStartPercentTime = 0.2f;
-                    attackEndPercentTime = 0.4f;
-                    earlyExitPercentTime = 0.6f;
+                    attackStartPercentTime = 0.2f + drunkDeviation;
+                    attackEndPercentTime = 0.4f + drunkDeviation;
+                    earlyExitPercentTime = 0.6f + drunkDeviation;
                     break;
             }
             playbackRateParam = "PolePrimary.playbackRate";

@@ -164,7 +164,7 @@ namespace FishermanMod.Survivors.Fisherman
             //rb.useGravity = true;
             //rb.mass = 100;
             //hookProjectilePrefab.layer = 0;
-
+            hookProjectilePrefab.layer = LayerIndex.projectile.intVal;
 
 
             ProjectileSimple ps = hookProjectilePrefab.GetComponent<ProjectileSimple>();
@@ -248,14 +248,16 @@ namespace FishermanMod.Survivors.Fisherman
             fishHook.projectileDamage = projectileDamage;
             fishHook.collider = collider;
             fishHook.projOverlap = piss;
+            fishHook.projSimple = ps;
 
 
-           fishHook.stickComponent.stickEvent.AddListener(() => {
-               //fishHook.collider.radius = 0.1f; ;
-               fishHook.rb.velocity = Vector3.zero;
-               ps.enabled = false;
-               }
-           );
+           //fishHook.stickComponent.stickEvent.AddListener(() => {
+           //    Log.Info("=-----------------HOOK IMPACT EVENT CALLED");
+           //    //fishHook.collider.radius = 0.1f; ;
+           //    fishHook.rb.velocity = Vector3.zero;
+           //    ps.enabled = false;
+           //    }
+           //);
 
             //fishHook.enemyTaunter = enemyTaunter;
             //fishHook.hookBody = hookBody;
@@ -291,7 +293,7 @@ namespace FishermanMod.Survivors.Fisherman
             impactExplosion.blastRadius = 14;
             impactExplosion.blastDamageCoefficient = 1f;
             impactExplosion.blastProcCoefficient = 1f;
-            impactExplosion.bonusBlastForce = new Vector3(0, 400, 0);
+            impactExplosion.bonusBlastForce = new Vector3(0, 10, 0);
             impactExplosion.falloffModel = BlastAttack.FalloffModel.None;
             impactExplosion.lifetime = 20f;
             impactExplosion.impactEffect = bombExplosionEffect;
@@ -300,12 +302,20 @@ namespace FishermanMod.Survivors.Fisherman
             impactExplosion.timerAfterImpact = false;
             impactExplosion.applyDot = true;
 
+            Rigidbody rb = shantyCannonShotPrefab.GetComponent<Rigidbody>();
+            rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+            rb.interpolation = RigidbodyInterpolation.Interpolate;
+            
             var projectileSimple = shantyCannonShotPrefab.GetComponent<ProjectileSimple>();
             projectileSimple.desiredForwardSpeed = 500;
 
             var projectileDamage = shantyCannonShotPrefab.GetComponent<ProjectileDamage>();
             projectileDamage.damage = FishermanStaticValues.shantyCannonDamage;
             projectileDamage.damageType &= ~DamageType.IgniteOnHit;
+
+            var damageTypeComp = shantyCannonShotPrefab.AddComponent<DamageAPI.ModdedDamageTypeHolderComponent>();
+            damageTypeComp.Add(DamageTypes.FishermanKnockup);
+
 
             var effectTrail = projectileController.ghostPrefab.GetComponentInChildren<TrailRenderer>();
             effectTrail.time = 3f;
@@ -341,7 +351,7 @@ namespace FishermanMod.Survivors.Fisherman
             beamController.attackFireCount = 1;
 
             var damageTypeComp = hookBombProjectilePrefab.AddComponent<DamageAPI.ModdedDamageTypeHolderComponent>();
-            damageTypeComp.Add(DamageTypes.TetherHook);
+            damageTypeComp.Add(DamageTypes.FishermanTether);
 
             var startEvent = hookBombProjectilePrefab.GetComponent<RoR2.EntityLogic.DelayedEvent>();
             startEvent.CallDelayed(0.5f);
@@ -403,16 +413,18 @@ namespace FishermanMod.Survivors.Fisherman
 
             //body
             shantyBodyPrefab = _assetBundle.LoadAsset<GameObject>("ShantyPlatformBody") ;//PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Drones/EmergencyDroneBody.prefab").WaitForCompletion(), "ShantyBody");
+            shantyBodyPrefab.gameObject.layer = LayerIndex.playerBody.intVal;
+           // LayerIndex.entityPrecise
             //var hc = shantyBodyPrefab.GetComponent<HealthComponent>();
             //var deplyoable = shantyBodyPrefab.GetComponent<Deployable>(); //have to add for non default deployables. dont forget to change if you change your base
             //deplyoable.onUndeploy.AddListener(() => hc.Suicide()); //// todo: do this not this way??
 
-
             //emergency drone base version
             //shantyBodyPrefab.transform.localScale *= 4;
+            shantyBodyPrefab.AddComponent<MovingPlatformController>();
 
             //master
-            shantyMasterPrefab = _assetBundle.LoadAsset<GameObject>("ShantyPlatformMaster");//PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Drones/MegaDroneMaster.prefab").WaitForCompletion(), "ShantyMaster");//
+            shantyMasterPrefab = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Drones/MegaDroneMaster.prefab").WaitForCompletion(), "ShantyMaster");//_assetBundle.LoadAsset<GameObject>("ShantyPlatformMaster");//
             shantyMasterPrefab.GetComponent<CharacterMaster>().bodyPrefab = shantyBodyPrefab;
 
 
@@ -477,10 +489,6 @@ namespace FishermanMod.Survivors.Fisherman
             fireCannon.moveInputScale = 1f;
             fireCannon.ignoreNodeGraph = true;
             fireCannon.buttonPressType = AISkillDriver.ButtonPressType.TapContinuous;
-
-
-
-
             #endregion ShantyMinionSkills
             PrefabAPI.RegisterNetworkPrefab(shantyBodyPrefab);
         }

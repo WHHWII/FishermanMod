@@ -5,6 +5,7 @@ using FishermanMod.Modules.Characters;
 using FishermanMod.Survivors.Fisherman.Components;
 using FishermanMod.Survivors.Fisherman.SkillStates;
 using HG;
+using R2API.Networking;
 using RoR2;
 using RoR2.Skills;
 using System;
@@ -13,6 +14,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.UIElements;
+using UnityEngine.XR;
 using static UnityEngine.GridBrushBase;
 
 namespace FishermanMod.Survivors.Fisherman
@@ -48,6 +50,7 @@ namespace FishermanMod.Survivors.Fisherman
 
         public static SkillDef primaryShantyCannon;
         public static SkillDef utilitySummonPlatform;
+        public static SkillDef utilityDirectPlatform;
 
         public override BodyInfo bodyInfo => new BodyInfo
         {
@@ -348,7 +351,7 @@ namespace FishermanMod.Survivors.Fisherman
             //    cancelSprintingOnActivation = false,
             //});
 
-            SkillDef utilitySummonPlatform = Skills.CreateSkillDef(new SkillDefInfo
+            FishermanSurvivor.utilitySummonPlatform = Skills.CreateSkillDef(new SkillDefInfo
             {
                 skillName = "F135 Mobile Shanty Platfrom",
                 skillNameToken = FISHERMAN_PREFIX + "UTILITY_PLATFORM_NAME",
@@ -379,7 +382,37 @@ namespace FishermanMod.Survivors.Fisherman
 
 
             });
-            
+            FishermanSurvivor.utilityDirectPlatform = Skills.CreateSkillDef(new SkillDefInfo
+            {
+                skillName = "Command Boat",
+                skillNameToken = FISHERMAN_PREFIX + "UTILITY_PLATFORM_NAME",
+                skillDescriptionToken = FISHERMAN_PREFIX + "UTILITY_PLATFORM_DESCRIPTION",
+                skillIcon = assetBundle.LoadAsset<Sprite>("texUtilityIcon"),
+
+                activationState = new EntityStates.SerializableEntityStateType(typeof(SkillStates.DirectPlatform)),
+                activationStateMachineName = "Weapon2",
+                interruptPriority = EntityStates.InterruptPriority.Skill,
+
+                baseRechargeInterval = 0.5f,
+                baseMaxStock = 1,
+
+                rechargeStock = 1,
+                requiredStock = 1,
+                stockToConsume = 1,
+
+                resetCooldownTimerOnUse = false,
+                fullRestockOnAssign = true,
+                dontAllowPastMaxStocks = true,
+                mustKeyPress = true,
+                beginSkillCooldownOnSkillEnd = false,
+
+                isCombatSkill = false,
+                canceledFromSprinting = false,
+                cancelSprintingOnActivation = false,
+                forceSprintDuringState = false,
+
+
+            });
 
             Skills.AddUtilitySkills(bodyPrefab, utilitySummonPlatform);
 
@@ -587,6 +620,7 @@ namespace FishermanMod.Survivors.Fisherman
         {
             R2API.RecalculateStatsAPI.GetStatCoefficients += RecalculateStatsAPI_GetStatCoefficients;
             On.RoR2.HealthComponent.TakeDamage += HealthComponent_TakeDamage;
+            On.RoR2.CharacterBody.RecalculateStats += CharacterBody_RecalculateStats;
         }
 
         private void HealthComponent_TakeDamage(On.RoR2.HealthComponent.orig_TakeDamage orig, HealthComponent self, DamageInfo damageInfo)
@@ -652,10 +686,26 @@ namespace FishermanMod.Survivors.Fisherman
             }
         }
 
+        private void CharacterBody_RecalculateStats(On.RoR2.CharacterBody.orig_RecalculateStats orig, CharacterBody self)
+        {
+            orig(self);
+            
+
+            int buffcount = self.GetBuffCount(FishermanBuffs.SteadyNervesBuff);
+            //float temp = self.baseAcceleration * Mathf.Max(self.baseAcceleration * 0.33f, 1f / (buffcount * 0.2f + 1f));
+            //temp = self.baseAcceleration - temp;
+            //self.acceleration -= self.acceleration > self.baseAcceleration * .3f ? temp : 0;
+            self.acceleration -= self.acceleration > 10 ? self.baseAcceleration * Mathf.Min(25, buffcount) * 0.05f : 0;
+
+
+        }
+
 
         public static int ApplyFishermanPassiveFishHookEffect(GameObject attacker, GameObject inflictor, float hookFailDamage, Vector3 targetPos, HurtBox enemyHurtBox)
         {
-
+            //TODO Re-work hook Arc
+            //TODO Prevent super mega multihit from behemoth.
+            if (!attacker || !inflictor || !enemyHurtBox) return -1;
             #region calculuateThrowingArc 
             float maxMass = 700;
             CharacterBody body = enemyHurtBox.healthComponent.body;
@@ -694,27 +744,37 @@ namespace FishermanMod.Survivors.Fisherman
                 position = enemyHurtBox.transform.position,
             };
 
+            Log.Debug($"\nHookInfo: " +
+                $"\n\tName: {body.name}" +
+                $"\n\tIsFlyer: {isFlyer}" +
+                $"\n\ttargetMass: {bodyMass}" +
+                $"\n\tdist: {dist}" +
+                $"\n\tdistanceVector: {distanceVector}" +
+                $"\n\tnewDistanceVector: {newDistanceVector}" +
+                $"\n\bonusPower: {bonusPower}" +
+                $"\n\t>Final Force: {force}");
 
-
-            if(bodyMass > maxMass)
+            if (bodyMass > maxMass)
             {
-                Log.Info($"Attacker: {attacker.name} Inflictor { inflictor.name}");
+                Log.Info($"Attacker: {attacker.name} Inflictor {inflictor.name}");
                 //play hook fail sound effect
                 //show hook hook fail decal on enemy
                 damageInfo.force = force * 0.1f;
                 damageInfo.procCoefficient = 1;
-                damageInfo.procChainMask = default(ProcChainMask);
+                damageInfo.procChainMask = new ProcChainMask();
+                damageInfo.procChainMask.AddProc(ProcType.Behemoth);
+                damageInfo.procChainMask.RemoveProc(ProcType.BleedOnHit);
                 damageInfo.damageType = DamageType.BleedOnHit;
                 enemyHurtBox.healthComponent.TakeDamageForce(damageInfo); // apply weak pull no damage to prevent double hit
                 damageInfo.damage = hookFailDamage;  //add damage for bleed calcution
                 //enemyHurtBox.healthComponent.TakeDamage(damageInfo); // apply weak pull no damage to prevent double hit
-
-                GlobalEventManager.instance.OnHitEnemy(damageInfo, body.gameObject);
-                GlobalEventManager.instance.OnHitAll(damageInfo, body.gameObject);
-                Log.Debug($"Mass too large, hook failed. New force: { damageInfo.force} HookfailDamage: {hookFailDamage}");
+                enemyHurtBox.healthComponent.ApplyDot(attacker, DotController.DotIndex.Bleed, 8, attacker.GetComponent<CharacterBody>().baseDamage * 0.1f);
+                //GlobalEventManager.instance.OnHitEnemy(damageInfo, body.gameObject);
+                //GlobalEventManager.instance.OnHitAll(damageInfo, body.gameObject);
+                Log.Debug($"Mass too large, hook failed. New force: {damageInfo.force} HookfailDamage: {hookFailDamage}");
                 return 0;
             }
-            else if(!isHookImmune)
+            else if (!isHookImmune)
             {
                 //play hook success sound effect
                 //show hook success decal on enemy
@@ -727,15 +787,7 @@ namespace FishermanMod.Survivors.Fisherman
             return -1;
             #region Your Mother
 
-            //Log.Debug($"\nHookInfo: " +
-            //    $"\n\tName: {body.name}" +
-            //    $"\n\tIsFlyer: {isFlyer}" +
-            //    $"\n\ttargetMass: {bodyMass}" +
-            //    $"\n\tdist: {dist}" +
-            //    $"\n\tdistanceVector: {distanceVector}" +
-            //    $"\n\tnewDistanceVector: {newDistanceVector}" +
-            //    $"\n\bonusPower: {bonusPower}" +
-            //    $"\n\t>Final Force: {force}");
+
 
             /*
 
@@ -841,6 +893,8 @@ Log.Debug(
         //also should probably not rely on static members as it may break in MP (apperently this should be fine)
         public static FishHookController deployedHook;
         public static HookBombController deployedHookBomb;
+        public static MovingPlatformController deployedPlatform;
+        public static UnityEngine.GameObject platformTarget;
         public static void SetDeployedHook(FishHookController fishHookInstance)
         {
             deployedHook = fishHookInstance;
@@ -849,22 +903,27 @@ Log.Debug(
         {
             deployedHookBomb = bombInstance;
         }
+        public static void SetDeployedPlatform(MovingPlatformController platformInstance)
+        {
+            deployedPlatform = platformInstance;
+        }
         static HashSet<String> GrabableInteractablesWhitelist = new HashSet<String>();
         static HashSet<String> GrabableInteractablesBlacklist = new HashSet<String>();
         static void InitValidInteractableGrabs()
         {
             GrabableInteractablesWhitelist.UnionWith(new[] {
                 "Turret1Broken",
+                "mdlNewtStatue",
 
             });
             GrabableInteractablesBlacklist.UnionWith(new[] {
                 "MegaDroneBroken",
-                "Chest2",
+                //"Chest2",
                 "LunarChest",
                 "GoldChest",
-                "CategoryChest2Damage",
-                "CategoryChest2Utility",
-                "CategoryChest2Healing",
+                //"CategoryChest2Damage",
+                //"CategoryChest2Utility",
+                //"CategoryChest2Healing",
 
 
             });

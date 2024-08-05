@@ -27,6 +27,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
         public ProjectileDamage projectileDamage;
         public CapsuleCollider collider;
         public ProjectileOverlapAttack projOverlap;
+        public ProjectileSimple projSimple;
         //public GameObject enemyTaunter;
         //public HurtBox hookHurtBox;
         //public CharacterBody hookBody;
@@ -56,8 +57,23 @@ namespace FishermanMod.Survivors.Fisherman.Components
             ownerTransform = controller.owner.transform;
             FishermanSurvivor.SetDeployedHook(this);
             collider.enabled = true;
+            stickComponent.stickEvent.AddListener(OnStickEvent);
+            projectileDamage.force = 0;
             
+
         }
+        void OnStickEvent()
+        {
+            //remove motion and collision in order to prevent enemy sliding
+            collider.enabled = false;
+            rb.velocity = Vector3.zero;
+            rb.drag = 0;
+            rb.angularDrag = 0;
+            rb.mass = 0;
+            rb.useGravity = false;
+            projSimple.SetForwardSpeed(0);
+        }
+
         void FixedUpdate()
         {
             if (controller.owner == null) Destroy(gameObject);
@@ -104,8 +120,15 @@ namespace FishermanMod.Survivors.Fisherman.Components
             //Log.Debug("Flyback engaged");
             collider.enabled = false;
             projectileDamage.damage = FishermanSurvivor.instance.bodyInfo.damage * FishermanStaticValues.castDamageCoefficient;
+
             collider.radius += 1f;
             rb.velocity = Vector3.zero;
+
+            rb.drag = 0;
+            rb.angularDrag = 0.05f;
+            rb.mass = 100;
+            rb.useGravity = true;
+
             isFlying = true;
             stickComponent.enabled = false;
             rb.isKinematic = false;
@@ -163,7 +186,6 @@ namespace FishermanMod.Survivors.Fisherman.Components
         {
             if (collision.gameObject.GetComponent<MapZone>()) Log.Debug("Hit bounds box: col exit");
             Log.Debug($"Collision Exit {collision.gameObject.name}");
-            rb.isKinematic = false;
             
             if (!CanThrow(collision.gameObject)) return;
             Log.Debug("Can throw");
@@ -173,6 +195,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
         void OnCollisionEnter(UnityEngine.Collision collision)
         {
             if (collision.gameObject.GetComponent<MapZone>()) Log.Debug("Hit bounds box: col enter");
+            collision.rigidbody.velocity = Vector3.zero;
             Log.Debug($"Collision Enter {collision.gameObject.name}");
             //if (hookHurtBox == null) hookHurtBox = gameObject.AddComponent<HurtBox>();
             //stickComponent.TrySticking(collision.collider, Vector3.zero);
@@ -182,6 +205,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
                 if(bombStick.stuckTransform == transform)
                 {
                     rb.velocity = Vector3.zero;
+
                     bombStick.Detach();
                     rb.isKinematic = true;
                     //FishermanSurvivor.deployedHookBomb.body.AddForce(FishermanSurvivor.deployedHookBomb.lastVelocity, ForceMode.VelocityChange);
@@ -193,6 +217,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
             Log.Debug("Can throw");
             ThrowHookBomb(collision);
             ThrowMob(collision);
+            
         }
         void OnTriggerExit(Collider collider)
         {
@@ -264,7 +289,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
                 if (!isGrabbable) return;
                 InteractableStopOnImpact stopper = eLoc.entity.AddComponent<InteractableStopOnImpact>();
                 stopper.rb = eLoc.entity.AddComponent<Rigidbody>();
-                stopper.rb.mass = 150;
+                stopper.rb.mass = 300;
                 
                 stopper.collider = eLoc.entity.AddComponent<SphereCollider>();
                 stopper.collider.radius = 0.5f;
@@ -304,7 +329,10 @@ namespace FishermanMod.Survivors.Fisherman.Components
                 Log.Debug("HookBomb Comp not detected");
             }     
         }
-
+        void OnDestroy()
+        {
+            FishermanSurvivor.SetDeployedHook(null);
+        }
 
         //void DrawAggro(Collider collider)
         //{
@@ -381,4 +409,5 @@ namespace FishermanMod.Survivors.Fisherman.Components
         //    canPollTauntedEnemiesForRelease = false;
         //}
     }
+
 }

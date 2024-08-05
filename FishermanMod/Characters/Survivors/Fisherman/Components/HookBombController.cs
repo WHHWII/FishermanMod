@@ -98,6 +98,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
                     target.body.RemoveBuff(FishermanBuffs.hookTetherDebuff);
                 }
             }
+            FishermanSurvivor.SetDeployedHookBomb(null);
         }
 
 

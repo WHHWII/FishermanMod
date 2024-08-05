@@ -14,6 +14,8 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Components
         void Start()
         {
             StartCoroutine("SetStop");
+            rb.interpolation = RigidbodyInterpolation.Interpolate;
+            rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
         }
         public void OnCollisionEnter(Collision collision) 
         {
