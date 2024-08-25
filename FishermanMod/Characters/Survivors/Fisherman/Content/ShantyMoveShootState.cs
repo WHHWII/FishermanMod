@@ -13,7 +13,10 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Content
     public class ShantyMoveShootState : BaseAIState
     {
 
-        public Vector3 CommandTarget;
+        public  Vector3 commandTarget;
+        public  Vector3 startPosition;
+
+        public GameObject commanderObj;
 
         private float strafeDirection;
 
@@ -99,10 +102,10 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Content
             currentSkillMeetsActivationConditions = false;
             bodyInputs.moveVector = Vector3.zero;
             AISkillDriver.MovementType movementType = AISkillDriver.MovementType.Stop;
-            float num = 1f;
-            bool flag = false;
-            bool flag2 = false;
-            bool flag3 = false;
+            float moveinputScale = 1f;
+            bool requiresTargetLos = false;
+            bool requiresAimLos = false;
+            bool requiresAimConfirmation = false;
             if (!base.body || !base.bodyInputBank)
             {
                 return;
@@ -111,10 +114,10 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Content
             {
                 movementType = dominantSkillDriver.movementType;
                 currentSkillSlot = dominantSkillDriver.skillSlot;
-                flag = dominantSkillDriver.activationRequiresTargetLoS;
-                flag2 = dominantSkillDriver.activationRequiresAimTargetLoS;
-                flag3 = dominantSkillDriver.activationRequiresAimConfirmation;
-                num = dominantSkillDriver.moveInputScale;
+                requiresTargetLos = dominantSkillDriver.activationRequiresTargetLoS;
+                requiresAimLos = dominantSkillDriver.activationRequiresAimTargetLoS;
+                requiresAimConfirmation = dominantSkillDriver.activationRequiresAimConfirmation;
+                moveinputScale = dominantSkillDriver.moveInputScale;
             }
             Vector3 position = base.bodyTransform.position;
             _ = base.bodyInputBank.aimOrigin;
@@ -134,8 +137,23 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Content
 
 
                 //move to target - my code
-                targetPosition = CommandTarget;
-                if (Vector3.Distance(position, CommandTarget) < 1.5) targetPosition = position;
+                targetPosition = commandTarget;
+                float distToCommander = commanderObj ? Vector3.Distance(position, commanderObj.transform.position) : 0;
+                if (commanderObj && distToCommander > 60) targetPosition = commanderObj.transform.position + (Vector3.up * 15) + (Vector3.one * UnityEngine.Random.Range(-3, -3));
+                
+                float distToTarg = Vector3.Distance(position, targetPosition);
+                if (distToTarg < 1.5) targetPosition = position;
+                if(distToTarg <= body.moveSpeed)
+                {
+                    targetPosition = Vector3.Lerp(targetPosition, position, 0.5f * deltaTime);
+                    body.baseMoveSpeed = Mathf.Lerp(body.baseMoveSpeed, 0, 0.5f * deltaTime);
+                    moveinputScale = Mathf.Lerp(moveinputScale, 0.1f, 0.5f * deltaTime);
+                }
+                else
+                {
+                    body.baseMoveSpeed = 8; // fix hardcoding later
+                }
+                //if(distToCommander > 10 && distToTarg > 10)  body.isSprinting = true;
 
 
 
@@ -148,19 +166,19 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Content
                 //    strafeDirection *= -1f;
                 //}
                 bodyInputs.moveVector = base.ai.localNavigator.moveVector;
-                bodyInputs.moveVector *= num;
-                if (!flag3 || base.ai.hasAimConfirmation)
+                bodyInputs.moveVector *= moveinputScale;
+                if (!requiresAimConfirmation || base.ai.hasAimConfirmation)
                 {
                     bool flag4 = true;
-                    if (skillDriverEvaluation.target == skillDriverEvaluation.aimTarget && flag && flag2)
+                    if (skillDriverEvaluation.target == skillDriverEvaluation.aimTarget && requiresTargetLos && requiresAimLos)
                     {
-                        flag2 = false;
+                        requiresAimLos = false;
                     }
-                    if (flag4 && flag)
+                    if (flag4 && requiresTargetLos)
                     {
                         flag4 = skillDriverEvaluation.target.TestLOSNow();
                     }
-                    if (flag4 && flag2)
+                    if (flag4 && requiresAimLos)
                     {
                         flag4 = skillDriverEvaluation.aimTarget.TestLOSNow();
                     }

@@ -22,8 +22,8 @@ namespace FishermanMod.Modules.BaseStates
 
 
 
-        protected string hitboxGroupName = "SwipeGroup";
-        protected string hitBoxGroupName2 = "StabGroup";
+        protected string swipeGroupName = "SwipeGroup";
+        protected string stabGroupName = "StabGroup";
         protected DamageType damageType = DamageType.Generic;
         protected float damageCoefficient = 3.5f;
         protected float procCoefficient = 1f;
@@ -84,11 +84,12 @@ namespace FishermanMod.Modules.BaseStates
             attack.pushAwayForce = pushForce;
             if (swingIndex > 0)
             {
-                attack.hitBoxGroup = FindHitBoxGroup(hitboxGroupName);
+                attack.hitBoxGroup = FindHitBoxGroup(swipeGroupName);
             }
             else
             {
-                attack.hitBoxGroup = FindHitBoxGroup(hitBoxGroupName2);
+                attack.hitBoxGroup = FindHitBoxGroup(stabGroupName);
+                attack.AddModdedDamageType(DamageTypes.FishermanHookPassive);
             }
             attack.isCrit = RollCrit();
             attack.impactSound = impactSound;
@@ -110,7 +111,7 @@ namespace FishermanMod.Modules.BaseStates
 
         protected virtual void PlaySwingEffect()
         {
-            //EffectManager.SimpleMuzzleFlash(swingEffectPrefab, gameObject, muzzleString, true);
+            EffectManager.SimpleMuzzleFlash(swingEffectPrefab, gameObject, muzzleString, true);
         }
         protected virtual void OnHitEnemyAuthority()
         {
@@ -125,13 +126,13 @@ namespace FishermanMod.Modules.BaseStates
 
                 hasHopped = true;
             }
-            if(swingIndex == 0)
-            {
-                foreach (HurtBox hitResult in hitresults)
-                {
-                    FishermanSurvivor.ApplyFishermanPassiveFishHookEffect(attack.attacker,attack.inflictor, attack.damage, gameObject.transform.position, hitResult);
-                }
-            }
+            //if(swingIndex == 0)
+            //{
+            //    foreach (HurtBox hitResult in hitresults)
+            //    {
+            //        FishermanSurvivor.ApplyFishermanPassiveFishHookEffect(attack.attacker,attack.inflictor, attack.damage, gameObject.transform.position, hitResult);
+            //    }
+            //}
             
             ApplyHitstop();
         }

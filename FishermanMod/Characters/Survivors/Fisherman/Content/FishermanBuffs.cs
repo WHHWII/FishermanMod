@@ -1,6 +1,8 @@
 ﻿using FishermanMod.Modules;
+using R2API;
 using RoR2;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 
 namespace FishermanMod.Survivors.Fisherman
 {
@@ -11,7 +13,11 @@ namespace FishermanMod.Survivors.Fisherman
         public static BuffDef hookImmunityBuff;
         public static BuffDef hookTauntDebuff;
         public static BuffDef hookTetherDebuff;
-        public static BuffDef SteadyNervesBuff;
+        public static BuffDef steadyNervesBuff;
+
+        public static BuffDef fishermanWhaleFogDebuff;
+        public static DotController.DotIndex fishermanWhaleFogDot;
+
 
         public static void Init(AssetBundle assetBundle)
         {
@@ -37,11 +43,27 @@ namespace FishermanMod.Survivors.Fisherman
                 false,
                 true);
 
-            SteadyNervesBuff = Modules.Content.CreateAndAddBuff("SteadyNervesBuff",
+            steadyNervesBuff = Modules.Content.CreateAndAddBuff("SteadyNervesBuff",
                 LegacyResourcesAPI.Load<BuffDef>("BuffDefs/HiddenInvincibility").iconSprite,
                 Color.blue,
                 true,
                 false);
-        }
+            fishermanWhaleFogDebuff = Modules.Content.CreateAndAddBuff("FishermanWhaleFogDebuff",
+                LegacyResourcesAPI.Load<BuffDef>("BuffDefs/HiddenInvincibility").iconSprite, //Addressables.LoadAssetAsync<BuffDef>("RoR2/DLC1/VoidRaidCrab/texVoidRaidcrabWardWipeFog.png").WaitForCompletion().iconSprite, 
+                Color.magenta,// RoR2/DLC1/VoidRaidCrab/texVoidRaidcrabWardWipeFog.png
+                true,
+                true
+                );
+            fishermanWhaleFogDot =             
+                DotAPI.RegisterDotDef(new DotController.DotDef
+                {
+                    interval = FishermanStaticValues.whaleMissleDotInterval,
+                    damageCoefficient = FishermanStaticValues.whaleMissleDotDamage,
+                    damageColorIndex = DamageColorIndex.Void,
+                    associatedBuff = fishermanWhaleFogDebuff,
+                    resetTimerOnAdd = true
+                });
+
+          }
     }
 }

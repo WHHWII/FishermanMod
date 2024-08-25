@@ -1,5 +1,6 @@
 ﻿using EntityStates;
 using EntityStates.Toolbot;
+using FishermanMod.Characters.Survivors.Fisherman.Components;
 using FishermanMod.Survivors.Fisherman;
 using IL.RoR2;
 using R2API;
@@ -20,7 +21,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
                 PlayAnimation("Gesture, Override", "SecondaryCastRecall", "SecondaryCast.playbackRate", 0.65f);
                 base.skillLocator.secondary.SetSkillOverride(this, FishermanSurvivor.secondaryFireFishHook, RoR2.GenericSkill.SkillOverridePriority.Upgrade);
                 base.skillLocator.secondary.DeductStock(1); // may change this to deduct all stocks if all hooks are fired at once.
-                if(FishermanSurvivor.deployedHook != null) FishermanSurvivor.deployedHook.FlyBack(); // this is a bandaid fix for projectile getting destoryed on initial impact
+                characterBody.GetComponent<FishermanSkillObjectTracker>()?.RecallAllHooks(); 
             }
             
             outer.SetNextStateToMain();

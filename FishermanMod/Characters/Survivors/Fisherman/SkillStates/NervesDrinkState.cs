@@ -98,7 +98,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
                 }
             }
 
-            for (int i = 0; i < debuffs; i++) characterBody.AddTimedBuff(FishermanBuffs.SteadyNervesBuff, 20f * duration);
+            for (int i = 0; i < debuffs; i++) characterBody.AddTimedBuff(FishermanBuffs.steadyNervesBuff, 20f * duration);
             characterBody.AddTimedBuff(RoR2Content.Buffs.HiddenInvincibility, 0.1f * duration);
 
             

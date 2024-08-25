@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using FishermanMod.Characters.Survivors.Fisherman.Components;
+using FishermanMod.Modules;
 using IL.RoR2.Orbs;
 using R2API;
 using Rewired.UI.ControlMapper;
@@ -35,8 +37,8 @@ namespace FishermanMod.Survivors.Fisherman.Components
 
         void Start()
         {
-            FishermanSurvivor.SetDeployedHookBomb(this);
             owner = controller.owner;
+            owner.GetComponent<FishermanSkillObjectTracker>().deployedBombs.Add(this);
             body = controller.rigidbody;
             origAntiGravCoef = antiGrav.antiGravityCoefficient;
             origDrag = body.drag;
@@ -76,7 +78,8 @@ namespace FishermanMod.Survivors.Fisherman.Components
 
         public void HookAllTethers()
         {
-            
+            moddedDamageComp.Remove(DamageTypes.FishermanTether);
+
             foreach (var target in beamController.previousTargets)
             {
                 if(!target) continue;

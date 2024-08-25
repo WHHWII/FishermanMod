@@ -13,6 +13,8 @@ namespace FishermanMod.Modules
         public static R2API.DamageAPI.ModdedDamageType FishermanTether;
         public static R2API.DamageAPI.ModdedDamageType FishermanHookPassive;
         public static R2API.DamageAPI.ModdedDamageType FishermanKnockup;
+        public static R2API.DamageAPI.ModdedDamageType FishermanWhaleFog;
+
 
 
 
@@ -22,6 +24,7 @@ namespace FishermanMod.Modules
             FishermanTether = DamageAPI.ReserveDamageType();
             FishermanHookPassive = DamageAPI.ReserveDamageType();
             FishermanKnockup = DamageAPI.ReserveDamageType();
+            FishermanWhaleFog = DamageAPI.ReserveDamageType();
             SetHooks();
         }
         private static void SetHooks()
@@ -57,7 +60,7 @@ namespace FishermanMod.Modules
                     damageReport.attacker,
                     damageInfo.inflictor,
                     damageInfo.damage,
-                    damageReport.attacker.transform.position,
+                    damageReport.attackerBody.footPosition,
                     damageReport.victimBody.mainHurtBox
                 );
             }
@@ -70,6 +73,11 @@ namespace FishermanMod.Modules
                 damageInfo.force = damageReport.victimBody.characterMotor.isGrounded ? (damageReport.victimBody.rigidbody && damageReport.victimBody.rigidbody.mass < 700 ? damageReport.victimBody.rigidbody.mass : 0.1f)* damageInfo.force : Vector3.zero;
                 Log.Info($"[DamageTypes][Knockup] Damageinfo force: {damageInfo.force}");
                 damageReport.victim?.TakeDamageForce(damageInfo.force);
+            }
+
+            if (damageInfo.HasModdedDamageType(FishermanWhaleFog))
+            {
+                damageReport.victimBody.healthComponent.ApplyDot(damageReport.attacker, FishermanBuffs.fishermanWhaleFogDot);
             }
         }
 

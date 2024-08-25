@@ -17,6 +17,7 @@ using System.Reflection;
 using System.Collections.Generic;
 using UnityEngine.Networking;
 using HarmonyLib;
+using UnityEngine.ParticleSystemJobs;
 
 namespace FishermanMod.Survivors.Fisherman
 {
@@ -24,6 +25,7 @@ namespace FishermanMod.Survivors.Fisherman
     {
         // particle effects
         public static GameObject swordSwingEffect;
+        public static GameObject swordStabEffect;
         public static GameObject swordHitImpactEffect;
 
         public static GameObject bombExplosionEffect;
@@ -41,6 +43,8 @@ namespace FishermanMod.Survivors.Fisherman
         public static GameObject shantyMasterPrefab;
         public static GameObject shantyCannonShotPrefab;
         public static GameObject hookBombProjectilePrefab;
+        public static GameObject hookScannerPrefab;
+        public static GameObject whaleMisslePrefab;
 
         //materials
         public static Material chainMat;
@@ -71,6 +75,10 @@ namespace FishermanMod.Survivors.Fisherman
             CreateBottleImpactEffect();
 
             swordSwingEffect = _assetBundle.LoadEffect("HenrySwordSwingEffect", true);
+            swordStabEffect = _assetBundle.LoadEffect("HenryBazookaMuzzleFlash", true);
+            //swordStabEffect.GetComponent<ParticleSystemRenderer>().sharedMaterial = Addressables.LoadAssetAsync<UnityEngine.Material>("RoR2/Base/Commando/matCommandoFMJRing.mat").WaitForCompletion();
+
+
             swordHitImpactEffect = _assetBundle.LoadEffect("ImpactHenrySlash");
         }
 
@@ -118,6 +126,10 @@ namespace FishermanMod.Survivors.Fisherman
             Content.AddProjectilePrefab(hookBombProjectilePrefab);
             CreateMovePlatformProjectileAttack();
             Content.AddProjectilePrefab(shantyCannonShotPrefab);
+            CreateHookScanner();
+            Content.AddProjectilePrefab(hookScannerPrefab);
+            CreateWhaleMissleProjectile();
+            Content.AddProjectilePrefab(whaleMisslePrefab);
         }
 
         private static void CreateBombProjectile()
@@ -279,8 +291,14 @@ namespace FishermanMod.Survivors.Fisherman
             //trailEffect.startWidth = 0.2f;
             //trailEffect.endWidth = 0.01f;
 
+
+
         }
 
+        private static void CreateHookScanner()
+        {
+            hookScannerPrefab = _assetBundle.LoadAndAddProjectilePrefab("FishermanHookScanner");
+        }
        
         private static void CreateMovePlatformProjectileAttack()
         {
@@ -386,11 +404,24 @@ namespace FishermanMod.Survivors.Fisherman
             hookBomb.antiGrav = hookBombProjectilePrefab.GetComponent<AntiGravityForce>();
             hookBomb.moddedDamageComp = damageTypeComp;
             hookBomb.bombColliders = hookBombProjectilePrefab.GetComponentsInChildren<SphereCollider>();
+            foreach(var col in hookBomb.bombColliders)
+            {
+                if (col.gameObject.name.Contains("Grapple")){
+                    col.gameObject.layer = LayerIndex.world.intVal;
+                }
+            }
             //awakeComponent.action.AddListener(hookBomb.ClearHooks);
 
 
 
 
+        }
+
+        private static void CreateWhaleMissleProjectile()
+        {
+            whaleMisslePrefab = _assetBundle.LoadAndAddProjectilePrefab("FishermanWhaleMissle");
+            var mdthc = whaleMisslePrefab.AddComponent<DamageAPI.ModdedDamageTypeHolderComponent>();
+            mdthc.Add(DamageTypes.FishermanWhaleFog);
         }
         #endregion projectiles
 
@@ -432,6 +463,11 @@ namespace FishermanMod.Survivors.Fisherman
             //shantyBodyPrefab.transform.localScale *= 4;
             var mpc = shantyBodyPrefab.AddComponent<MovingPlatformController>();
             mpc.characterBody = shantyBodyPrefab.GetComponent<CharacterBody>();
+
+            //foreach (var col in shantyBodyPrefab.GetComponentsInChildren<BoxCollider>())
+            //{
+            //    col.gameObject.layer = LayerIndex.entityPrecise.intVal;
+            //}
 
             //master
             shantyMasterPrefab = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Drones/MegaDroneMaster.prefab").WaitForCompletion(), "ShantyMaster");//_assetBundle.LoadAsset<GameObject>("ShantyPlatformMaster");//

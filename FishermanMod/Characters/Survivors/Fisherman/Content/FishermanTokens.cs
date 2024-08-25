@@ -68,6 +68,10 @@ namespace FishermanMod.Survivors.Fisherman
             Language.Add(prefix + "UTILITY_PLATFORM_NAME", Tokens.FishermanText("F153 Mobile Shanty Platform",3));
             Language.Add(prefix + "UTILITY_PLATFORM_DESCRIPTION", $"Deploy a drone that <style=cIsUtility>you can stand on.</style> It slowly fires explosive rounds for <style=cIsDamage>{100f * FishermanStaticValues.shantyCannonDamage}% damage.</style>");
             Language.Add(prefix + "UTILITY_MINION_NAME", "Chris");
+
+            Language.Add(prefix + "UTILITY_WHALE_NAME", Tokens.FishermanText("Strange Friend", 3));
+            Language.Add(prefix + "UTILITY_WHALE_DESCRIPTION", $"Summon a Baby Void Whale that continously damages enemies for <style=cIsDamage>{100f * FishermanStaticValues.whaleMissleDotDamage}% damage per second.</style> Kills increase its damage. <style=cIsUtility>Smack Him!.</style> ");
+            Language.Add(prefix + "UTILITY_WHALE_MINION_NAME", "Son");
             #endregion
 
             #region Special

@@ -1,5 +1,6 @@
 ﻿using BepInEx.Configuration;
 using EntityStates;
+using FishermanMod.Characters.Survivors.Fisherman.Components;
 using FishermanMod.Modules;
 using FishermanMod.Modules.Characters;
 using FishermanMod.Survivors.Fisherman.Components;
@@ -157,6 +158,7 @@ namespace FishermanMod.Survivors.Fisherman
             bodyPrefab.AddComponent<HenryWeaponComponent>();
             var drinkmdl = characterModelObject.GetComponent<ChildLocator>().FindChild("Drink");
             drinkmdl.gameObject.SetActive(false);
+            bodyPrefab.AddComponent<FishermanSkillObjectTracker>();
             //bodyPrefab.AddComponent<HuntressTrackerComopnent>();
             //anything else here
         }
@@ -225,7 +227,7 @@ namespace FishermanMod.Survivors.Fisherman
                     assetBundle.LoadAsset<Sprite>("Melee Attack Icon"),
                     new EntityStates.SerializableEntityStateType(typeof(SkillStates.SlashCombo)),
                     "Weapon",
-                    true
+                    false
                 ));
             //custom Skilldefs can have additional fields that you can set manually
             primaryFishingPoleMelee.stepCount = 3;
@@ -414,9 +416,42 @@ namespace FishermanMod.Survivors.Fisherman
 
             });
 
-            Skills.AddUtilitySkills(bodyPrefab, utilitySummonPlatform);
+            var whaleMissle = Skills.CreateSkillDef(new SkillDefInfo
+            {
+                skillName = "Strange Freind",
+                skillNameToken = FISHERMAN_PREFIX + "UTILITY_WHALE_NAME",
+                skillDescriptionToken = FISHERMAN_PREFIX + "UTILITY_WHALE_DESCRIPTION",
+                skillIcon = assetBundle.LoadAsset<Sprite>("Shanty Icon"),
 
+                activationState = new EntityStates.SerializableEntityStateType(typeof(SkillStates.ReleaseWhaleState)),
+                activationStateMachineName = "Weapon",
+                interruptPriority = EntityStates.InterruptPriority.Skill,
+
+                baseRechargeInterval = 12f,
+                baseMaxStock = 1,
+
+                rechargeStock = 1,
+                requiredStock = 1,
+                stockToConsume = 1,
+
+                resetCooldownTimerOnUse = false,
+                fullRestockOnAssign = true,
+                dontAllowPastMaxStocks = false,
+                mustKeyPress = true,
+                beginSkillCooldownOnSkillEnd = true,
+
+                isCombatSkill = false,
+                canceledFromSprinting = true,
+                cancelSprintingOnActivation = true,
+                forceSprintDuringState = false,
+
+
+            });
             
+            Skills.AddUtilitySkills(bodyPrefab, utilitySummonPlatform);
+            Skills.AddUtilitySkills(bodyPrefab, whaleMissle);
+
+
         }
 
         private void AddSpecialSkills()
@@ -626,7 +661,7 @@ namespace FishermanMod.Survivors.Fisherman
         private void CharacterMaster_OnBodyStart(On.RoR2.CharacterMaster.orig_OnBodyStart orig, CharacterMaster self, CharacterBody body)
         {
             orig(self, body);
-            if (self && self.GetBody() && self.GetBody().isPlayerControlled)
+            if (self && self.GetBody() && self.GetBody().isPlayerControlled) // this causes bugs with other characters. fix or rework later.
             {
                 MinionOwnership.MinionGroup minionGroup = MinionOwnership.MinionGroup.FindGroup(body.master.netId);
                 if (minionGroup != null)
@@ -651,9 +686,9 @@ namespace FishermanMod.Survivors.Fisherman
             if (self && self.body)
             {
                 //ripped right from spacetime skein in tinkers satchel.
-                if (self.body.HasBuff(FishermanBuffs.SteadyNervesBuff))
+                if (self.body.HasBuff(FishermanBuffs.steadyNervesBuff))
                 {
-                    int buffstacks = self.body.GetBuffCount(FishermanBuffs.SteadyNervesBuff);
+                    int buffstacks = self.body.GetBuffCount(FishermanBuffs.steadyNervesBuff);
                     //resist knockback
                     var forceMultiplier = Mathf.Max(0, 100 - buffstacks * 20);
                     if (damageInfo.canRejectForce)
@@ -686,10 +721,10 @@ namespace FishermanMod.Survivors.Fisherman
             {
                 args.moveSpeedReductionMultAdd += 0.3f;
             }
-            if (sender.HasBuff(FishermanBuffs.SteadyNervesBuff))
+            if (sender.HasBuff(FishermanBuffs.steadyNervesBuff))
             {
 
-                int buffcount = sender.GetBuffCount(FishermanBuffs.SteadyNervesBuff);
+                int buffcount = sender.GetBuffCount(FishermanBuffs.steadyNervesBuff);
                 for (int i = 0; i < buffcount; i++)
                 {
                     args.damageMultAdd += FishermanStaticValues.bottleDamageBuff;
@@ -714,7 +749,7 @@ namespace FishermanMod.Survivors.Fisherman
             orig(self);
             
 
-            int buffcount = self.GetBuffCount(FishermanBuffs.SteadyNervesBuff);
+            int buffcount = self.GetBuffCount(FishermanBuffs.steadyNervesBuff);
             //float temp = self.baseAcceleration * Mathf.Max(self.baseAcceleration * 0.33f, 1f / (buffcount * 0.2f + 1f));
             //temp = self.baseAcceleration - temp;
             //self.acceleration -= self.acceleration > self.baseAcceleration * .3f ? temp : 0;
@@ -730,7 +765,7 @@ namespace FishermanMod.Survivors.Fisherman
             //TODO Prevent super mega multihit from behemoth.
             if (!attacker || !inflictor || !enemyHurtBox) return -1;
             #region calculuateThrowingArc 
-            float maxMass = 700;
+            float maxMass = FishermanStaticValues.hookMaxMass;
             CharacterBody body = enemyHurtBox.healthComponent.body;
             Vector3 enemyPosition = enemyHurtBox.transform.position;
             Rigidbody bodyRB = enemyHurtBox.healthComponent.GetComponent<Rigidbody>();
@@ -738,51 +773,67 @@ namespace FishermanMod.Survivors.Fisherman
             bool isHookImmune = body.HasBuff(FishermanBuffs.hookImmunityBuff);
 
             if (bodyMass < maxMass && isHookImmune) return -1; // stop early if target is unhookable and unbleedable
-            Vector3 force;
             //flying vermin seems to be the only flyer in the game that doesnt use a VectorPID to fly.
-            bool isFlyer = body.gameObject.GetComponent<VectorPID>() != null  || body.name == "FlyingVerminBody(Clone)"? true: false;
+            bool isFlyer = body.isFlying || (body.characterMotor && (body.characterMotor.isFlying || !body.characterMotor.isGrounded));//body.gameObject.GetComponent<VectorPID>() != null  || body.name == "FlyingVerminBody(Clone)"? true: false;
             
             float dist = Vector3.Distance(enemyPosition, targetPos);
 
-            Vector3 distanceVector = (targetPos - enemyPosition);
-            Vector3 halfDistVec = distanceVector * 0.5f;
-            Vector3 centerAdjEPos = halfDistVec + enemyPosition;
-            Vector3 hookTarget = centerAdjEPos;
-            if (!isFlyer)
-            {
-                hookTarget.y += dist * 0.5f;
-            }
-            Vector3 newDistanceVector = (hookTarget - enemyPosition);
-            //float bonusPower = Mathf.Clamp(Mathf.Log(-dist + 262, 1.1f) - 55, 1, 5); //this one is really good
-            float bonusPower = Mathf.Clamp(Mathf.Log(-dist + 312, 1.1f) - 57.2f, 1, 5);
-            // if (isFlyer) { bonusPower += 0.1f; }
-            force = newDistanceVector * bodyMass * bonusPower;
+            
+            //Vector2 distanceVector2D = new Vector2(distanceVector.x, distanceVector.z);
+            //float horizontalDist = distanceVector2D.magnitude;
+            //Vector2 horizontalDir = distanceVector2D / horizontalDist;
+            //float timeToTarget = 1;
+            //float travelRate = horizontalDist / timeToTarget;
+
+            //float ySpeed =  Trajectory.CalculateInitialYSpeed(timeToTarget, distanceVector.y);
+            //force = new Vector3(distanceVector.x * travelRate, ySpeed, distanceVector.z * travelRate) * bodyMass;
+
+
+            //Vector3 halfDistVec = distanceVector * 0.5f;
+            //Vector3 centerAdjEPos = halfDistVec + enemyPosition;
+            //Vector3 hookTarget = centerAdjEPos;
+            //if (!isFlyer)
+            //{
+            //    hookTarget.y += dist * 0.5f;
+            //}
+            //Vector3 newDistanceVector = (hookTarget - enemyPosition);
+            ////float bonusPower = Mathf.Clamp(Mathf.Log(-dist + 262, 1.1f) - 55, 1, 5); //this one is really good
+            //float bonusPower = Mathf.Clamp(Mathf.Log(-dist + 312, 1.1f) - 57.2f, 1, 5);
+            //// if (isFlyer) { bonusPower += 0.1f; }
+            //force = newDistanceVector * bodyMass * bonusPower;
+
+
+            Vector3 throwVelocity = FishermanSurvivor.GetHookThrowVelocity(targetPos,enemyPosition, isFlyer);
+
+
             #endregion 
 
             DamageInfo damageInfo = new DamageInfo
             {
                 attacker = attacker,
                 inflictor = inflictor,
-                force = force,
+                //force = force,
                 position = enemyHurtBox.transform.position,
             };
 
-            //Log.Debug($"\nHookInfo: " +
-            //    $"\n\tName: {body.name}" +
-            //    $"\n\tIsFlyer: {isFlyer}" +
-            //    $"\n\ttargetMass: {bodyMass}" +
-            //    $"\n\tdist: {dist}" +
-            //    $"\n\tdistanceVector: {distanceVector}" +
-            //    $"\n\tnewDistanceVector: {newDistanceVector}" +
-            //    $"\n\bonusPower: {bonusPower}" +
-            //    $"\n\t>Final Force: {force}");
+            Log.Debug($"\nHookInfo: " +
+                $"\n\tName: {body.name}" +
+                $"\n\tIsFlyer: {isFlyer}" +
+                $"\n\ttargetMass: {bodyMass}" +
+                $"\n\tdist: {dist}" 
+                //$"\n\tdistanceVector: {distanceVector}" 
+                //$"\n\ttimetotarget: {timeToTarget}"
+                //$"\n\tnewDistanceVector: {newDistanceVector}" +
+                //$"\n\bonusPower: {bonusPower}" +
+                //$"\n\t>Final Force: {force}"
+            );
 
             if (bodyMass > maxMass)
             {
                 Log.Info($"Attacker: {attacker.name} Inflictor {inflictor.name}");
                 //play hook fail sound effect
                 //show hook hook fail decal on enemy
-                damageInfo.force = force * 0.1f;
+                //damageInfo.force = force * 0.1f;
                 damageInfo.procCoefficient = 1;
                 damageInfo.procChainMask = new ProcChainMask();
                 damageInfo.procChainMask.AddProc(ProcType.Behemoth);
@@ -804,7 +855,20 @@ namespace FishermanMod.Survivors.Fisherman
                 //Log.Debug("Hook Succeeded");
                 body.AddTimedBuff(FishermanBuffs.hookImmunityBuff, 0.3f);
                 //enemyHurtBox.healthComponent.TakeDamage(damageInfo);
-                enemyHurtBox.healthComponent.TakeDamageForce(damageInfo);
+                //enemyHurtBox.healthComponent.TakeDamageForce(damageInfo);
+                if (body.characterMotor)
+                {
+                    if (body.characterMotor.isGrounded) body.characterMotor.Motor.ForceUnground();
+                    if (!isFlyer) body.characterMotor.disableAirControlUntilCollision = true;
+                    body.characterMotor.velocity = Vector3.zero;
+                    body.characterMotor.velocity = throwVelocity;
+                }
+                else
+                {
+                    body.rigidbody.AddForce(throwVelocity, ForceMode.VelocityChange);
+                }
+
+
                 return 1;
             }
             return -1;
@@ -912,31 +976,13 @@ Log.Debug(
 
         }
 
-        //should probably make this use a list
-        //also should probably not rely on static members as it may break in MP (apperently this should be fine)
-        public static FishHookController deployedHook;
-        public static HookBombController deployedHookBomb;
-        public static MovingPlatformController deployedPlatform;
-        public static UnityEngine.GameObject platformTarget;
-        public static void SetDeployedHook(FishHookController fishHookInstance)
-        {
-            deployedHook = fishHookInstance;
-        }
-        public static void SetDeployedHookBomb(HookBombController bombInstance)
-        {
-            deployedHookBomb = bombInstance;
-        }
-        public static void SetDeployedPlatform(MovingPlatformController platformInstance)
-        {
-            deployedPlatform = platformInstance;
-        }
         static HashSet<String> GrabableInteractablesWhitelist = new HashSet<String>();
         static HashSet<String> GrabableInteractablesBlacklist = new HashSet<String>();
         static void InitValidInteractableGrabs()
         {
             GrabableInteractablesWhitelist.UnionWith(new[] {
                 "Turret1Broken",
-                "mdlNewtStatue",
+                "mdlNewtStatue", // this doesnt work
 
             });
             GrabableInteractablesBlacklist.UnionWith(new[] {
@@ -965,6 +1011,21 @@ Log.Debug(
                 isGrabable = !GrabableInteractablesBlacklist.Contains(name);
             }
             return isGrabable;
+        }
+
+
+        public static Vector3 GetHookThrowVelocity(Vector3 targetPos, Vector3 startPos, bool isFlyer)
+        {
+            Vector3 distanceVector = (targetPos - startPos);
+            Vector2 xzDistanceVec = new Vector2(distanceVector.x, distanceVector.z); // 
+            float distanceToTarget = xzDistanceVec.magnitude;
+            float timeToTarget = Mathf.Min(distanceToTarget * 0.05f, 2);
+
+            Vector2 normailzedDistvec = xzDistanceVec / distanceToTarget;
+            float y = isFlyer ? distanceVector.y : Mathf.Max(Trajectory.CalculateInitialYSpeed(timeToTarget, distanceVector.y),6);
+            float travelRate = distanceToTarget / timeToTarget;
+            Vector3 direction = new Vector3(normailzedDistvec.x * travelRate, y, normailzedDistvec.y * travelRate);
+            return direction;
         }
     }
 }

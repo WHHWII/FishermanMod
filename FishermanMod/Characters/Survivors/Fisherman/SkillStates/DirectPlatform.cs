@@ -5,6 +5,7 @@ using UnityEngine;
 using FishermanMod.Survivors.Fisherman;
 using FishermanMod.Characters.Survivors.Fisherman.Content;
 using On.RoR2;
+using FishermanMod.Characters.Survivors.Fisherman.Components;
 
 namespace FishermanMod.Survivors.Fisherman.SkillStates
 {
@@ -16,34 +17,32 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
         {
             if (base.isAuthority)
             {
+                FishermanSkillObjectTracker objTracker = characterBody.GetComponent<FishermanSkillObjectTracker>();
+
                 PlayAnimation("LeftArm, Override", "UtilityPlatform", "UtilityPlatform.playbackRate", 0.65f);
 
 
                 RaycastHit hitInfo;
                 Ray aimray = GetAimRay();
                 aimray.origin = transform.position + Vector3.up + aimray.direction;
+                //TODO make ping ignore platform
 
-
-
-                bool result = Physics.Raycast(aimray, out hitInfo, 500, RoR2.LayerIndex.world.mask | ~RoR2.LayerIndex.entityPrecise.mask, QueryTriggerInteraction.Ignore);
-                if (!FishermanSurvivor.platformTarget)
+                bool result = Physics.Raycast(aimray, out hitInfo, 50, RoR2.LayerIndex.world.mask | ~RoR2.LayerIndex.entityPrecise.mask, QueryTriggerInteraction.Ignore);
+                if (!objTracker.platformTargetIndicator)
                 {
-                    FishermanSurvivor.platformTarget = UnityEngine.GameObject.Instantiate(FishermanAssets.shantyBlueprintPrefab);
+                    objTracker.platformTargetIndicator = UnityEngine.GameObject.Instantiate(FishermanAssets.shantyBlueprintPrefab);
                 }
                 if (result)
                 {
-                    
-                    FishermanSurvivor.platformTarget.transform.position = hitInfo.point + hitInfo.normal * commandPointOffset;
+
+                    objTracker.platformTargetIndicator.transform.position = hitInfo.point + hitInfo.normal * commandPointOffset;
                 }
                 else
                 {
-                    FishermanSurvivor.platformTarget.transform.position = aimray.GetPoint(100);
+                    objTracker.platformTargetIndicator.transform.position = aimray.GetPoint(50);
                 }
-                //Custom state is to allow the platoform to move to the specified target, AND shoot indipenently with ai.
-                ShantyMoveShootState customState = new ShantyMoveShootState();
-                customState.CommandTarget = FishermanSurvivor.platformTarget.transform.position;
-                FishermanSurvivor.deployedPlatform?.GetComponent<RoR2.CharacterBody>().master.GetComponent<RoR2.EntityStateMachine>().SetState(customState);
-                FishermanSurvivor.deployedPlatform?.GetComponent<RoR2.CharacterBody>().inventory.CopyItemsFrom(characterBody.inventory);
+                objTracker.DirectAllPlatforms();
+
             }
             outer.SetNextStateToMain();
             base.OnEnter();
