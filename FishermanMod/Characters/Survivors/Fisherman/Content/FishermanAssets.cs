@@ -404,14 +404,14 @@ namespace FishermanMod.Survivors.Fisherman
             hookBomb.antiGrav = hookBombProjectilePrefab.GetComponent<AntiGravityForce>();
             hookBomb.moddedDamageComp = damageTypeComp;
             hookBomb.bombColliders = hookBombProjectilePrefab.GetComponentsInChildren<SphereCollider>();
-            foreach(var col in hookBomb.bombColliders)
-            {
-                if (col.gameObject.name.Contains("Grapple")){
-                    col.gameObject.layer = LayerIndex.world.intVal;
-                }
-            }
+            //foreach(var col in hookBomb.bombColliders)
+            //{
+            //    if (col.gameObject.name.Contains("Grapple")){
+            //        col.gameObject.layer = LayerIndex.projectile.intVal;
+            //    }
+            //}
             //awakeComponent.action.AddListener(hookBomb.ClearHooks);
-
+            hookBombProjectilePrefab.layer = LayerIndex.projectile.intVal;
 
 
 

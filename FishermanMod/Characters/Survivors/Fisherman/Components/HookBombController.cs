@@ -91,7 +91,6 @@ namespace FishermanMod.Survivors.Fisherman.Components
                 );
                 if (target.body.HasBuff(FishermanBuffs.hookTetherDebuff))
                 {
-                    Log.Debug("Removing Tether");
                     target.body.RemoveBuff(FishermanBuffs.hookTetherDebuff);
                 }
             }
@@ -116,7 +115,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
                     target.body.RemoveBuff(FishermanBuffs.hookTetherDebuff);
                 }
             }
-            FishermanSurvivor.SetDeployedHookBomb(null);
+            //FishermanSurvivor.SetDeployedHookBomb(null);
         }
 
 

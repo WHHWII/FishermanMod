@@ -120,53 +120,23 @@ namespace FishermanMod.Survivors.Fisherman.Components
             rb.isKinematic = false;
 
             //ability specific interactions (OOB crash was occuring before these were added )
-            if (skillObjectTracker.deployedBombs)
-            {
-                ThrowHookBomb();
-            }
-            if (FishermanSurvivor.deployedPlatform && FishermanSurvivor.deployedPlatform.wasStuckByHook)
-            {
-                ThrowPlatform();
-            }
+            //if (skillObjectTracker.deployedBombs)
+            //{
+            //    ThrowHookBomb();
+            //}
+            //if (FishermanSurvivor.deployedPlatform && FishermanSurvivor.deployedPlatform.wasStuckByHook)
+            //{
+            //    ThrowPlatform();
+            //}
 
             //apply return force to hook, causing it to arc up into the air
-            rb.AddForce(FishermanSurvivor.GetHookThrowVelocity(ownerTransform.position, rb.position, !stickComponent.stuck), ForceMode.VelocityChange);
+            projSimple.desiredForwardSpeed = 0;
+            rb.AddForce(FishermanSurvivor.GetHookThrowVelocity(ownerTransform.position, transform.position, !stickComponent.stuck), ForceMode.VelocityChange);
 
             //enable projectile overlap. (OOB crash was occuring before this was added )
             projOverlap.enabled = true;
             projectileDamage.damage = FishermanSurvivor.instance.bodyInfo.damage * FishermanStaticValues.castDamageCoefficient;
             projOverlap.damageCoefficient = FishermanStaticValues.castDamageCoefficient;
-        }
-
-        private Vector3 CalculateReturnForce(float baseForce, Rigidbody rbody, bool dampPower = false)
-        {
-            //TODO: Add This function to fishermansurvivor and standardized what i can
-            //TODO: Create custom bonus power curve for items instead of power damper.
-            float powerDamper = 0.70f;
-            Vector3 targetPos = ownerTransform.position;
-            float bodyMass = (rbody ? rbody.mass : 1f);
-            //targetPos.y += distanceToOwner * 0.45f;
-            //Vector3 direction = (targetPos - transform.position).normalized;
-            //float massAdjForce = baseForce + bodyMass;
-            //return massAdjForce * distanceToOwner * direction;
-            Vector3 startPosition = transform.position;
-            float dist = Vector3.Distance(startPosition, targetPos);
-
-            Vector3 distanceVector = (targetPos - startPosition);
-            Vector3 halfDistVec = distanceVector * 0.5f;
-            Vector3 centerAdjEPos = halfDistVec + startPosition;
-            Vector3 hookTarget = centerAdjEPos;
-            hookTarget.y += dist * 0.5f;
-            Vector3 newDistanceVector = (hookTarget - startPosition);
-            //float bonusPower = Mathf.Clamp(Mathf.Log(-dist + 262, 1.1f) - 55, 1, 5); //this one is really good
-            float bonusPower = Mathf.Clamp(Mathf.Log(-dist + 312, 1.1f) - 57.2f, 1, 5);
-            // if (isFlyer) { bonusPower += 0.1f; }
-            Vector3 force = newDistanceVector * bodyMass * bonusPower ;
-            if (dampPower)
-            {
-                force *= powerDamper;
-            }
-            return force;
         }
         bool CanThrow(GameObject gameObject)
         {
@@ -178,45 +148,51 @@ namespace FishermanMod.Survivors.Fisherman.Components
         }
         void OnCollisionEnter(UnityEngine.Collision collision)
         {
-            if (collision.gameObject.GetComponent<MapZone>()) Log.Debug("Hit bounds box: col enter");
+            if (collision.gameObject.GetComponent<MapZone>()) Log.Debug("[Cast Hook] Hit bounds box: col enter");
             //collision.rigidbody.velocity = Vector3.zero;
-            Log.Debug($"Collision Enter {collision.gameObject.name}");
-
-            //if ((FishermanSurvivor.deployedHookBomb) && collision.gameObject == FishermanSurvivor.deployedHookBomb.gameObject)
-            //{
-            //    Log.Debug($"[hookcontroller] enter bomb col");
-            //    FishermanSurvivor.deployedHookBomb.wasStuckByHook = true;
-            //}
-            //if ((FishermanSurvivor.deployedPlatform) && collision.gameObject == FishermanSurvivor.deployedPlatform.gameObject)
-            //{
-            //    Log.Debug($"[hookcontroller] enter platform col");
-            //    FishermanSurvivor.deployedPlatform.wasStuckByHook = true;
-            //}
+            Log.Debug($"[Cast Hook]Collision Enter {collision.gameObject.name}");
+            HookBombController hookBomb = collision.gameObject.GetComponent<HookBombController>();
+            if (hookBomb && CanThrow(hookBomb.gameObject))
+            {
+                ThrowHookBomb(hookBomb);
+            }
         }
-        void OnTriggerExit(Collider collider)
+        void OnCollisionExit(UnityEngine.Collision collision)
         {
-            if (collider.gameObject.GetComponent<MapZone>()) Log.Debug("Hit bounds box: trig exit");
-            //Log.Debug($"Trigger Exit {collider.gameObject.name}");
-            if (!CanThrow(collider.gameObject)) return;
-            if (ThrowItem(collider)) return;
-            ThrowInteractable(collider);
+            Log.Debug($"[Cast Hook] Collision Exit {collision.gameObject.name}");
+            HookBombController hookBomb = collision.gameObject.GetComponent<HookBombController>();
+            if (hookBomb && CanThrow(hookBomb.gameObject))
+            {
+                ThrowHookBomb(hookBomb);
+            }
         }
+
         void OnTriggerEnter(Collider collider)
         {
-            if (collider.gameObject.GetComponent<MapZone>()) Log.Debug("Hit bounds box: trig enter");
-            //Log.Debug($"Trigger Enter {collider.gameObject.name}");
+            if (collider.gameObject.GetComponent<MapZone>()) Log.Debug("[Cast Hook] Hit bounds box: trig enter");
+            Log.Debug($"[Cast Hook] Trigger Enter {collider.gameObject.name}");
 
             //DrawAggro(collider);
             if (!CanThrow(collider.gameObject)) return;
             if (ThrowItem(collider)) return;
             ThrowInteractable(collider);
         }
+        void OnTriggerExit(Collider collider)
+        {
+            if (collider.gameObject.GetComponent<MapZone>()) Log.Debug("[Cast Hook] Hit bounds box: trig exit");
+            Log.Debug($"[Cast Hook] Trigger Exit {collider.gameObject.name}");
+            if (!CanThrow(collider.gameObject)) return;
+            ThrowHookBomb(collider.transform.parent?.GetComponent<HookBombController>());
+            if (ThrowItem(collider)) return;
+            ThrowInteractable(collider);
+        }
+
         bool ThrowItem(Collider collider)
         {
             
             if (collider.gameObject.name == "GenericPickup(Clone)")
             {
-                Log.Debug($"Item Hit, {collider.gameObject.name}");
+                Log.Debug($"[Cast Hook] Item Hit, {collider.gameObject.name}");
                 Rigidbody itemBody = collider.gameObject.GetComponent<Rigidbody>();
                 itemBody.AddForce(FishermanSurvivor.GetHookThrowVelocity(ownerTransform.position,itemBody.position,false), ForceMode.VelocityChange);
                 return true;
@@ -246,27 +222,28 @@ namespace FishermanMod.Survivors.Fisherman.Components
             }
 
         }
-        void ThrowHookBomb()
+        void ThrowHookBomb(HookBombController bomb)
         {
-            Log.Debug("[HookController] Trying to throw bomb");
-            //FishermanSurvivor.deployedHookBomb.stickComponent.Detach() ;
-            //FishermanSurvivor.deployedHookBomb.DisableAllColliders();
-            //FishermanSurvivor.deployedHook.stickComponent.enabled = false;
-            //FishermanSurvivor.deployedHookBomb.body.isKinematic = false;
-            //FishermanSurvivor.deployedHookBomb.body.drag = 0;
-            //FishermanSurvivor.deployedHookBomb.body.angularDrag = 0.05f;
-            //FishermanSurvivor.deployedHookBomb.body.mass = 120;
-            //FishermanSurvivor.deployedHookBomb.body.AddForce(FishermanSurvivor.GetHookThrowVelocity(ownerTransform.position, FishermanSurvivor.deployedHookBomb.transform.position, !FishermanSurvivor.deployedHookBomb.stickComponent.stuck), ForceMode.VelocityChange);
-            //FishermanSurvivor.deployedHookBomb.wasStuckByHook = false;
-            //StartCoroutine(FishermanSurvivor.deployedHookBomb.ResetStickyComponent());
+            if (bomb == null) return;
+            Log.Debug("[Cast Hook] Trying to throw bomb");
+            bomb.stickComponent.Detach() ;
+            bomb.DisableAllColliders();
+            bomb.stickComponent.enabled = false;
+            bomb.body.isKinematic = false;
+            bomb.body.drag = 0;
+            bomb.body.angularDrag = 0.05f;
+            bomb.body.mass = 120;
+            bomb.body.AddForce(FishermanSurvivor.GetHookThrowVelocity(ownerTransform.position, bomb.transform.position, !bomb.stickComponent.stuck), ForceMode.VelocityChange);
+            bomb.wasStuckByHook = false;
+            StartCoroutine(bomb.ResetStickyComponent());
         }
         void ThrowPlatform()
         {
-            FishermanSurvivor.ApplyFishermanPassiveFishHookEffect(ownerTransform.gameObject,
-                ownerTransform.gameObject,
-                0,
-                ownerTransform.position,
-                //FishermanSurvivor.deployedPlatform.characterBody.mainHurtBox);
+            //FishermanSurvivor.ApplyFishermanPassiveFishHookEffect(ownerTransform.gameObject,
+            //    ownerTransform.gameObject,
+            //    0,
+            //    ownerTransform.position,
+            //    //FishermanSurvivor.deployedPlatform.characterBody.mainHurtBox);
         }
         void OnDestroy()
         {

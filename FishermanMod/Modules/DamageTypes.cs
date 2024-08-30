@@ -41,14 +41,15 @@ namespace FishermanMod.Modules
             DamageInfo damageInfo = damageReport.damageInfo;
             HealthComponent victim = damageReport.victim;
 
-            bool flag = damageInfo.procCoefficient >= Mathf.Epsilon;
+            bool canProc = damageInfo.procCoefficient >= Mathf.Epsilon;
 
             if (damageInfo.HasModdedDamageType(FishermanTether))
             {
                 Log.Info("TetherDamageTypeInvoked");
                 if (!victim.body) return;
                 victim.body.AddBuff(FishermanBuffs.hookTetherDebuff);
-                victim.gameObject.AddComponent<HookBombTetherVisual>();
+                HookBombTetherVisual tetherVisual = victim.gameObject.AddComponent<HookBombTetherVisual>();
+                tetherVisual.lineTerminationObject =  damageReport.damageInfo.inflictor ? damageReport.damageInfo.inflictor : damageReport.attacker;
             }
 
             if (damageInfo.HasModdedDamageType(FishermanHookPassive))

@@ -834,17 +834,18 @@ namespace FishermanMod.Survivors.Fisherman
                 //play hook fail sound effect
                 //show hook hook fail decal on enemy
                 //damageInfo.force = force * 0.1f;
-                damageInfo.procCoefficient = 1;
+                throwVelocity *= 0.1f;
+                damageInfo.force = throwVelocity;
+                damageInfo.procCoefficient = 0;
                 damageInfo.procChainMask = new ProcChainMask();
                 damageInfo.procChainMask.AddProc(ProcType.Behemoth);
                 damageInfo.procChainMask.RemoveProc(ProcType.BleedOnHit);
                 damageInfo.damageType = DamageType.BleedOnHit;
                 enemyHurtBox.healthComponent.TakeDamageForce(damageInfo); // apply weak pull no damage to prevent double hit
                 damageInfo.damage = hookFailDamage;  //add damage for bleed calcution
-                //enemyHurtBox.healthComponent.TakeDamage(damageInfo); // apply weak pull no damage to prevent double hit
+
+                enemyHurtBox.healthComponent.TakeDamageForce(damageInfo);
                 enemyHurtBox.healthComponent.ApplyDot(attacker, DotController.DotIndex.Bleed, 8, attacker.GetComponent<CharacterBody>().baseDamage * 0.1f);
-                //GlobalEventManager.instance.OnHitEnemy(damageInfo, body.gameObject);
-                //GlobalEventManager.instance.OnHitAll(damageInfo, body.gameObject);
                 Log.Debug($"Mass too large, hook failed. New force: {damageInfo.force} HookfailDamage: {hookFailDamage}");
                 return 0;
             }
@@ -854,8 +855,6 @@ namespace FishermanMod.Survivors.Fisherman
                 //show hook success decal on enemy
                 //Log.Debug("Hook Succeeded");
                 body.AddTimedBuff(FishermanBuffs.hookImmunityBuff, 0.3f);
-                //enemyHurtBox.healthComponent.TakeDamage(damageInfo);
-                //enemyHurtBox.healthComponent.TakeDamageForce(damageInfo);
                 if (body.characterMotor)
                 {
                     if (body.characterMotor.isGrounded) body.characterMotor.Motor.ForceUnground();
@@ -872,106 +871,6 @@ namespace FishermanMod.Survivors.Fisherman
                 return 1;
             }
             return -1;
-            #region Your Mother
-
-
-
-            /*
-
-
-
-Vector3 flyPointDir = targetPos;
-flyPointDir.x = -distanceVector.y;
-flyPointDir.y = distanceVector.x;
-flyPointDir = flyPointDir.normalized;
-Vector3 flyPoint = -flyPointDir * dist + centerAdjEPos;
-Vector3 flyDirection = (flyPoint - enemyPosition).normalized;
-force = flyDirection * bodyMass * dist;
-
-
-Log.Debug(
-    $"\n" +
-    $"bodyMass......:\t{bodyMass}\n" +
-    $"targetPos.....:\t{targetPos}\n" +
-    $"enemyPosition.:\t{enemyPosition}\n" +
-    $"dist..........:\t{dist}\n" +
-    $"halfdist......:\t{halfdist}\n" +
-    $"distanceVector:\t{distanceVector}\n" +
-    $"halfDistVec...:\t{halfDistVec}\n" +
-    $"direction.....:\t{direction}\n" +
-    $"flyPointDir...:\t{flyPointDir}\n" +
-    $"centerAdjEPos.:\t{centerAdjEPos}\n" +
-    $"flyPoint......:\t{flyPoint}\n" +
-    $"flyDirection..:\t{flyDirection}\n" +
-    $"force.........:\t{force}\n"
-//$"rotation......:\t{rotation}\n" +
-//$"rotatedVector.:\t{rotatedVector}\n"
-);
-*/
-            /*
-            Vector3 diffs = hookTarget - enemyPosition;
-            Vector3 y0 = enemyPosition;
-            Vector3 y1 = hookTarget;
-            Vector3 axis = Vector3.Cross(direction, Vector3.up);
-
-            float angle = Vector3.SignedAngle(direction, Vector3.zero, axis);
-            angle += 45;
-            Mathf.Clamp(angle, -90, 90);
-            Quaternion rotation = Quaternion.AngleAxis(angle, axis);
-            direction = rotation * direction;
-            */
-
-            /*
-            hookTarget.y += Mathf.Abs(dist* 1.1f);
-            
-            Log.Debug($"Distanace vector: {distanceVector}");
-            Log.Debug($"Gravity vector: {Physics.gravity}");
-            
-            float baseForce = targetMass * 1.2f;
-            float cDist = dist * targetMass * 0.001f;
-            cDist = Mathf.Clamp(cDist, 10, 50);
-
-            
-
-
-            //force bonus log 
-            float logbase = 1.1f;
-            float verticalOffset = targetMass * 0.1f;
-            float horizontalOffset = 100;
-            float forceDistanceBonus = 0;
-            string debugForceIntervals = "Force Bonuses at i:\n";
-            for (int i = 0; i < dist; i++)
-            {
-                float possibleBonus = Mathf.Log(-i + horizontalOffset, logbase) + verticalOffset;
-                possibleBonus = possibleBonus >= 1 ? possibleBonus : 1;
-                forceDistanceBonus += possibleBonus;
-                debugForceIntervals += $"{i}: {possibleBonus}\t ";
-            }
-            Log.Debug(debugForceIntervals);
-            Log.Debug($"\nTotalForceBonus: {forceDistanceBonus} ");
-            //-
-
-            float distAdjForce = baseForce * cDist + forceDistanceBonus;
-
-
-            Vector3 force = distAdjForce * direction;
-            if(distanceVector.y > 30)
-            {
-                force.y *= Physics.gravity.y * -0.03f;
-            }
-            */
-
-
-            //Log.Debug($"\nHookInfo: " +
-            //    $"\n\tName: {body.name}" +
-            //    $"\n\ttargetMass: {targetMass}" +
-            //    $"\n\tdist: {dist}" +
-            //    $"\n\tbaseForce: {baseForce}" +
-            //    $"\n\tClampeddist: {cDist}" +
-            //    $"\n\tdistAdjForce: {distAdjForce}" +
-            //    $"\n\t>Final Force: {force}");
-            //Vector3 force = Vector3.oneVector * 1000;
-            #endregion
 
 
         }
