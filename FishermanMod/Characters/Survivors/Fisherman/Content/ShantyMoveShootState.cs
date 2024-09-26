@@ -7,6 +7,9 @@ using System;
 using System.Linq;
 using UnityEngine;
 using TMPro;
+using FishermanMod.Characters.Survivors.Fisherman.Components;
+using FishermanMod.Survivors.Fisherman;
+using static R2API.SoundAPI.Music.CustomMusicTrackDef;
 
 namespace FishermanMod.Characters.Survivors.Fisherman.Content
 {
@@ -17,6 +20,7 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Content
         public  Vector3 startPosition;
 
         public GameObject commanderObj;
+        public FishermanSkillObjectTracker objTracker;
 
         private float strafeDirection;
 
@@ -139,7 +143,15 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Content
                 //move to target - my code
                 targetPosition = commandTarget;
                 float distToCommander = commanderObj ? Vector3.Distance(position, commanderObj.transform.position) : 0;
-                if (commanderObj && distToCommander > 60) targetPosition = commanderObj.transform.position + (Vector3.up * 15) + (Vector3.one * UnityEngine.Random.Range(-3, -3));
+                if (commanderObj && distToCommander > 60)
+                {
+                    targetPosition = commanderObj.transform.position + (Vector3.up * 40) + (Vector3.one * UnityEngine.Random.Range(-3, -3));
+                    for (int i = 0; i < base.ai.skillDrivers.Length; i++)
+                    {
+                        base.ai.skillDrivers[i].ignoreNodeGraph = false;
+                    }
+                    objTracker.platformPosTargetIndicator.SetActive(false);
+                }
                 
                 float distToTarg = Vector3.Distance(position, targetPosition);
                 if (distToTarg < 1.5) targetPosition = position;
@@ -272,6 +284,19 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Content
                 {
                     AimAt(ref bodyInputs, aimTarget);
                 }
+
+                //target visualization
+                if (aimTarget?.characterBody && aimTarget?.gameObject != objTracker?.gameObject)
+                {
+                    if(!objTracker.platformAimTargetIndicator) objTracker.platformAimTargetIndicator = UnityEngine.GameObject.Instantiate(FishermanAssets.shantyBlueprintPrefab);
+                    if (!objTracker.platformAimTargetIndicator.activeSelf) objTracker.platformAimTargetIndicator.SetActive(true);
+                    objTracker.platformAimTargetIndicator.transform.position = aimTarget.characterBody.footPosition;
+                }
+                else
+                {
+                    objTracker?.platformAimTargetIndicator?.SetActive(false);
+                }
+                
             }
             ModifyInputsForJumpIfNeccessary(ref bodyInputs);
             return bodyInputs;

@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using UnityEngine.Networking;
 using HarmonyLib;
 using UnityEngine.ParticleSystemJobs;
+using RoR2;
 
 namespace FishermanMod.Survivors.Fisherman
 {
@@ -74,7 +75,7 @@ namespace FishermanMod.Survivors.Fisherman
         {
             CreateBombExplosionEffect();
             CreateBottleImpactEffect();
-
+            CreateHookScanner();
             swordSwingEffect = _assetBundle.LoadEffect("HenrySwordSwingEffect", true);
             swordStabEffect = _assetBundle.LoadEffect("HenryBazookaMuzzleFlash", true);
             //swordStabEffect.GetComponent<ParticleSystemRenderer>().sharedMaterial = Addressables.LoadAssetAsync<UnityEngine.Material>("RoR2/Base/Commando/matCommandoFMJRing.mat").WaitForCompletion();
@@ -227,7 +228,7 @@ namespace FishermanMod.Survivors.Fisherman
             var damageTypeComp = hookProjectilePrefab.AddComponent<DamageAPI.ModdedDamageTypeHolderComponent>();
             damageTypeComp.Add(DamageTypes.FishermanHookPassive);
             ProjectileDamage projectileDamage = ps.GetComponent<ProjectileDamage>();
-            //projectileDamage.damageType = DamageType.NonLethal;
+            projectileDamage.damageType = DamageType.NonLethal;
 
 
 
@@ -298,7 +299,13 @@ namespace FishermanMod.Survivors.Fisherman
 
         private static void CreateHookScanner()
         {
-            hookScannerPrefab = _assetBundle.LoadAndAddProjectilePrefab("FishermanHookScanner");
+            hookScannerPrefab = _assetBundle.LoadEffect("FishermanHookScanner");
+            _assetBundle.LoadEffect("Nothing");
+
+            //hookScannerPrefab = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Scanner/ChestScanner.prefab").WaitForCompletion();
+            //ChestRevealer radarPing = hookScannerPrefab.GetComponent<ChestRevealer>();
+            //radarPing.radius = 3.2f;
+            //radarPing.pulseEffectScale /= 156.25f;
         }
        
         private static void CreateMovePlatformProjectileAttack()

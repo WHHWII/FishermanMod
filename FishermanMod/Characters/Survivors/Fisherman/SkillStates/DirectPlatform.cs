@@ -28,18 +28,18 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
                 //TODO make ping ignore platform
 
                 bool result = Physics.Raycast(aimray, out hitInfo, 50, RoR2.LayerIndex.world.mask | ~RoR2.LayerIndex.entityPrecise.mask, QueryTriggerInteraction.Ignore);
-                if (!objTracker.platformTargetIndicator)
+                if (!objTracker.platformPosTargetIndicator)
                 {
-                    objTracker.platformTargetIndicator = UnityEngine.GameObject.Instantiate(FishermanAssets.shantyBlueprintPrefab);
+                    objTracker.platformPosTargetIndicator = UnityEngine.GameObject.Instantiate(FishermanAssets.shantyBlueprintPrefab);
                 }
                 if (result)
                 {
 
-                    objTracker.platformTargetIndicator.transform.position = hitInfo.point + hitInfo.normal * commandPointOffset;
+                    objTracker.platformPosTargetIndicator.transform.position = hitInfo.point + hitInfo.normal * commandPointOffset;
                 }
                 else
                 {
-                    objTracker.platformTargetIndicator.transform.position = aimray.GetPoint(50);
+                    objTracker.platformPosTargetIndicator.transform.position = aimray.GetPoint(50);
                 }
                 objTracker.DirectAllPlatforms();
 

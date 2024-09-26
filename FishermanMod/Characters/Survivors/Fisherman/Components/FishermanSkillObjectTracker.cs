@@ -2,7 +2,8 @@
 using FishermanMod.Modules;
 using FishermanMod.Survivors.Fisherman;
 using FishermanMod.Survivors.Fisherman.Components;
-using IL.RoR2;
+using RoR2;
+using RoR2.CharacterAI;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,7 +16,8 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Components
         public List<FishHookController> deployedHooks;
         public List<HookBombController> deployedBombs;
         public List<MovingPlatformController> deployedPlatforms;
-        public GameObject platformTargetIndicator;
+        public GameObject platformPosTargetIndicator;
+        public GameObject platformAimTargetIndicator;
         public RoR2.CharacterBody characterBody;
 
         public void Start()
@@ -55,14 +57,26 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Components
                     //Custom state is to allow the platoform to move to the specified target, AND shoot indipenently with ai.
 
                     ShantyMoveShootState customState = new ShantyMoveShootState();
-                    customState.commandTarget = platformTargetIndicator.transform.position;
+                    customState.commandTarget = platformPosTargetIndicator.transform.position;
                     customState.startPosition = platform.transform.position;
                     customState.commanderObj = gameObject;
-                    platform.GetComponent<RoR2.CharacterBody>().master.GetComponent<RoR2.EntityStateMachine>().SetState(customState);
+                    customState.objTracker = this;
+
+                    CharacterMaster master = platform.GetComponent<RoR2.CharacterBody>().master;
+                    master.GetComponent<RoR2.EntityStateMachine>().SetState(customState);
                     platform.GetComponent<RoR2.CharacterBody>().inventory.CopyItemsFrom(characterBody.inventory);
+
+                    BaseAI baseAi = master.GetComponent<RoR2.CharacterAI.BaseAI>();
+                    CharacterMaster owner = baseAi.GetComponent<AIOwnership>()?.ownerMaster;
+                    for (int i = 0; i < baseAi.skillDrivers.Length; i++)
+                    {
+                        baseAi.skillDrivers[i].ignoreNodeGraph = true;
+                    }
                 }
 
+
             }
+            platformPosTargetIndicator.SetActive(true); // note that the target indicators will not work when there is more than one platform.
             deployedPlatforms.RemoveAll((x) => toRemove.Contains(x));
             toRemove.Clear();
 

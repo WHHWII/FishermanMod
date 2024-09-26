@@ -1,4 +1,6 @@
-﻿using System;
+﻿
+using RoR2;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -21,12 +23,13 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Components
         {
             if (!canStop) return;
             //Log.Debug($"Thrown Interactable colldided with {collision.gameObject.name}");
-            if (collision.gameObject.name.Contains("Terrain"))
+            if (collision.gameObject && collision.gameObject.layer == LayerIndex.world.intVal)
             {
                 rb.useGravity = false;
                 rb.velocity = Vector3.zero;
                 UnityEngine.Object.Destroy(rb);
                 UnityEngine.Object.Destroy(collider);
+                UnityEngine.Object.Destroy(this);
             }
                 
         }

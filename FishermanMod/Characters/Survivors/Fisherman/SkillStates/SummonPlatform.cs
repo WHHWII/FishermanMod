@@ -5,6 +5,7 @@ using FishermanMod.Survivors.Fisherman.Components;
 using RoR2;
 using RoR2.CharacterAI;
 using RoR2.Projectile;
+using System;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -45,6 +46,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
         private float entryCountdown;
 
         private PlacementInfo currentPlacementInfo;
+        FishermanSkillObjectTracker objTracker;
 
         public override void OnEnter()
         {
@@ -53,12 +55,13 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
             if (base.isAuthority)
             {
                 currentPlacementInfo = GetPlacementInfo();
-                blueprints = Object.Instantiate(blueprintPrefab, currentPlacementInfo.position, currentPlacementInfo.rotation).GetComponent<BlueprintController>();
+                blueprints = UnityEngine.Object.Instantiate(blueprintPrefab, currentPlacementInfo.position, currentPlacementInfo.rotation).GetComponent<BlueprintController>();
             }
             PlayAnimation("LeftArm, Override", "UtilityPlatform", "UtilityPlatform.playbackRate", 0.65f);
             entryCountdown = 0.1f;
             exitCountdown = 0.25f;
             exitPending = false;
+            objTracker = characterBody.GetComponent<FishermanSkillObjectTracker>();
         }
 
         private PlacementInfo GetPlacementInfo()
@@ -173,6 +176,9 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
                                 {
                                     platformMaster.inventory.CopyItemsFrom(base.characterBody.inventory);
                                 }
+                                //objTracker.platformAimTargetIndicator = UnityEngine.GameObject.Instantiate(FishermanAssets.shantyBlueprintPrefab);
+                                //objTracker.platformPosTargetIndicator.transform.position = characterBody.transform.position + Vector3.up * 50;
+                                //objTracker.DirectAllPlatforms();
                             }
                         }
                         base.transform.rotation = Util.QuaternionSafeLookRotation(base.characterDirection.forward);

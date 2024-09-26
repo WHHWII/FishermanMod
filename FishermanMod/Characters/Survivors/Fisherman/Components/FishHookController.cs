@@ -72,10 +72,13 @@ namespace FishermanMod.Survivors.Fisherman.Components
             rb.velocity = Vector3.zero;
             rb.drag = 0;
             rb.angularDrag = 0;
-            rb.mass = 0;
+            rb.mass = 0; 
             rb.useGravity = false;
             projSimple.SetForwardSpeed(0);
             //NetworkServer.Spawn(UnityEngine.Object.Instantiate(FishermanAssets.hookScannerPrefab, transform.position, Quaternion.identity));
+            EffectData effectData = new EffectData();
+            effectData.origin = transform.position;
+            EffectManager.SpawnEffect(FishermanAssets.hookScannerPrefab, effectData, true);
         }
 
         void FixedUpdate()
@@ -131,7 +134,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
 
             //apply return force to hook, causing it to arc up into the air
             projSimple.desiredForwardSpeed = 0;
-            rb.AddForce(FishermanSurvivor.GetHookThrowVelocity(ownerTransform.position, transform.position, !stickComponent.stuck), ForceMode.VelocityChange);
+            rb.AddForce(FishermanSurvivor.GetHookThrowVelocity(ownerTransform.position, transform.position, !stickComponent.stuck) * 10, ForceMode.VelocityChange);
 
             //enable projectile overlap. (OOB crash was occuring before this was added )
             projOverlap.enabled = true;
