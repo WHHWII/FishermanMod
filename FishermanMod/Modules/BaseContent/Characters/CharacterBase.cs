@@ -1,5 +1,6 @@
 ﻿using RoR2;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -30,7 +31,7 @@ namespace FishermanMod.Modules.Characters
         public virtual void Initialize()
         {
             instance = this as T;
-            assetBundle = Assets.LoadAssetBundle(assetBundleName);
+            assetBundle = ModAssetManager.LoadAssetBundle(assetBundleName);
             InitializeCharacter();
         }
 
@@ -85,17 +86,41 @@ namespace FishermanMod.Modules.Characters
         public string bodyNameToken = "";
         public string subtitleNameToken = "";
 
-        /// <summary> body prefab you're cloning for your character- commando is the safest </summary>
-        public string bodyNameToClone = "Commando";
+        /// <summary> the body prefab you're cloning for your character- commando is the safest </summary>
+        [Obsolete("I recommend loading asynchronously instead, using bodyToClonePath.")]
+        public string bodynameToClone = "Commando";
+
+        /// <summary> addressable path for the body prefab you're cloning for your character- commando is the safest </summary>
+        public string bodyToClonePath = "RoR2/Base/Commando/CommandoBody.prefab";
 
         public Color bodyColor = Color.white;
 
-        public Texture characterPortrait = null;
-
         public float sortPosition = 100f;
 
+        public CharacterBody.BodyFlags bodyFlags = CharacterBody.BodyFlags.ImmuneToExecutes;
+
+        /// <summary>
+        /// pass in instead a bundle path or addressable path to load async
+        /// </summary>
+        public Texture characterPortrait = null;
+        public string characterPortraitBundlePath = null;
+        public string characterPortraitAddressablePath = null;
+
+        /// <summary>
+        /// pass in instead a bundle path or addressable path to load async
+        /// </summary>
         public GameObject crosshair = null;
+        public string crosshairBundlePath = null;
+        public string crosshairAddressablePath = null;
+
+        /// <summary>
+        /// pass in instead a bundle path or addressable path to load async
+        /// </summary>
         public GameObject podPrefab = null;
+        public string podPrefabBundlePath = null;
+        public string podPrefabAddressablePath = null;
+
+        public List<IEnumerator> asyncLoads = null;
         #endregion Character
 
         #region Stats
@@ -143,12 +168,18 @@ namespace FishermanMod.Modules.Characters
 
         /// <summary> basically the "height" of your camera </summary>
         public Vector3 cameraPivotPosition = new Vector3(0f, 0.8f, 0f);
-        
+
         /// <summary> how far relative to the pivot is your camera's center </summary>
         public float cameraParamsVerticalOffset = 1.37f;
 
         /// <summary> large characters like loader are -12. for smaller characters like commando go for -10 maybe -9 </summary>
         public float cameraParamsDepth = -10;
+
+        internal bool hasAimAnimator = true;
+        internal bool hasCharacterDirection = true;
+        internal bool hasFoostepController = true;
+        internal bool hasRagdoll = true;
+        internal bool hasSkinController = true;
 
         private CharacterCameraParams _cameraParams;
         public CharacterCameraParams cameraParams

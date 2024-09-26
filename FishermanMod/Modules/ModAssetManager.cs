@@ -11,7 +11,7 @@ using Path = System.IO.Path;
 
 namespace FishermanMod.Modules
 {
-    internal static class Assets
+    internal static class ModAssetManager
     {
         //cache bundles if multiple characters use the same one
         internal static Dictionary<string, AssetBundle> loadedBundles = new Dictionary<string, AssetBundle>();
@@ -124,7 +124,7 @@ namespace FishermanMod.Modules
             if (!ghostPrefab.GetComponent<NetworkIdentity>()) ghostPrefab.AddComponent<NetworkIdentity>();
             if (!ghostPrefab.GetComponent<ProjectileGhostController>()) ghostPrefab.AddComponent<ProjectileGhostController>();
 
-            Modules.Assets.ConvertAllRenderersToHopooShader(ghostPrefab);
+            Modules.ModAssetManager.ConvertAllRenderersToHopooShader(ghostPrefab);
 
             return ghostPrefab;
         }

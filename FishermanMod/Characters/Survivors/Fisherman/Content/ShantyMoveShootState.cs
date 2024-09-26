@@ -145,7 +145,7 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Content
                 if (distToTarg < 1.5) targetPosition = position;
                 if(distToTarg <= body.moveSpeed)
                 {
-                    targetPosition = Vector3.Lerp(targetPosition, position, 0.5f * deltaTime);
+                    targetPosition = Vector3.MoveTowards(targetPosition, position, 0.5f * deltaTime);
                     body.baseMoveSpeed = Mathf.Lerp(body.baseMoveSpeed, 0, 0.5f * deltaTime);
                     moveinputScale = Mathf.Lerp(moveinputScale, 0.1f, 0.5f * deltaTime);
                 }

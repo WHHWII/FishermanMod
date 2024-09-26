@@ -4,6 +4,7 @@ using FishermanMod.Survivors.Fisherman;
 using IL.RoR2;
 using R2API;
 using RoR2;
+using RoR2.Projectile;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.XR.WSA;
@@ -34,8 +35,6 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
             base.OnEnter();
             if (base.isAuthority && !KeyIsDown() && !base.IsKeyDownAuthority()) { }
                 PlayAnimation("Gesture, Override", "SecondaryCastStart", "SecondaryCast.playbackRate", 0.65f);
-
-
 
 
         }

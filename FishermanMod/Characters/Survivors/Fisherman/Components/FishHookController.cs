@@ -75,7 +75,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
             rb.mass = 0;
             rb.useGravity = false;
             projSimple.SetForwardSpeed(0);
-            NetworkServer.Spawn(UnityEngine.Object.Instantiate(FishermanAssets.hookScannerPrefab, transform.position, Quaternion.identity));
+            //NetworkServer.Spawn(UnityEngine.Object.Instantiate(FishermanAssets.hookScannerPrefab, transform.position, Quaternion.identity));
         }
 
         void FixedUpdate()

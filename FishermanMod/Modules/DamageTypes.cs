@@ -71,7 +71,7 @@ namespace FishermanMod.Modules
                 Log.Info("KnockupDamageTypeInvoked");
                 if (!victim.body) return;
                 //apply knockup scaled with mass if victim has rigidbody. Do not apply knockup if victim is airborne.
-                damageInfo.force = damageReport.victimBody.characterMotor.isGrounded ? (damageReport.victimBody.rigidbody && damageReport.victimBody.rigidbody.mass < 700 ? damageReport.victimBody.rigidbody.mass : 0.1f)* damageInfo.force : Vector3.zero;
+                damageInfo.force = (bool)damageReport.victimBody.characterMotor?.isGrounded ? (damageReport.victimBody.rigidbody && damageReport.victimBody.rigidbody.mass < 700 ? damageReport.victimBody.rigidbody.mass : 0.1f)* damageInfo.force : Vector3.zero;
                 Log.Info($"[DamageTypes][Knockup] Damageinfo force: {damageInfo.force}");
                 damageReport.victim?.TakeDamageForce(damageInfo.force);
             }

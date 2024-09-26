@@ -55,6 +55,7 @@ namespace FishermanMod.Survivors.Fisherman
 
             _assetBundle = assetBundle;
 
+            //sots
             swordHitSoundEvent = Content.CreateAndAddNetworkSoundEventDef("HenrySwordHit");
 
             CreateEffects();
@@ -126,8 +127,8 @@ namespace FishermanMod.Survivors.Fisherman
             Content.AddProjectilePrefab(hookBombProjectilePrefab);
             CreateMovePlatformProjectileAttack();
             Content.AddProjectilePrefab(shantyCannonShotPrefab);
-            CreateHookScanner();
-            Content.AddProjectilePrefab(hookScannerPrefab);
+            //CreateHookScanner();
+            //Content.AddProjectilePrefab(hookScannerPrefab);
             CreateWhaleMissleProjectile();
             Content.AddProjectilePrefab(whaleMisslePrefab);
         }
@@ -135,7 +136,7 @@ namespace FishermanMod.Survivors.Fisherman
         private static void CreateBombProjectile()
         {
             //highly recommend setting up projectiles in editor, but this is a quick and dirty way to prototype if you want
-            bottleProjectilePrefab = Assets.CloneProjectilePrefab("CommandoGrenadeProjectile", "HenryBombProjectile");
+            bottleProjectilePrefab = ModAssetManager.CloneProjectilePrefab("CommandoGrenadeProjectile", "HenryBombProjectile");
 
             //remove their ProjectileImpactExplosion component and start from default values
             UnityEngine.Object.Destroy(bottleProjectilePrefab.GetComponent<ProjectileImpactExplosion>());
@@ -303,7 +304,7 @@ namespace FishermanMod.Survivors.Fisherman
         private static void CreateMovePlatformProjectileAttack()
         {
            
-            shantyCannonShotPrefab = Assets.CloneProjectilePrefab("MageFireboltBasic", "FishermanShantyCannonShot");
+            shantyCannonShotPrefab = ModAssetManager.CloneProjectilePrefab("MageFireboltBasic", "FishermanShantyCannonShot");
             //UnityEngine.Object.Destroy(shantyCannonShotPrefab.GetComponent<ProjectileOverlapAttack>());
             var projectileController = shantyCannonShotPrefab.GetComponent<ProjectileController>();
             projectileController.ghostPrefab = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Commando/FMJRampingGhost.prefab").WaitForCompletion();
@@ -347,7 +348,7 @@ namespace FishermanMod.Survivors.Fisherman
         }
         private static void CreateJellyfishProjectile()
         {
-            hookBombProjectilePrefab = Assets.CloneProjectilePrefab("LoaderPylon", "FishermanJellyfish");
+            hookBombProjectilePrefab = ModAssetManager.CloneProjectilePrefab("LoaderPylon", "FishermanJellyfish");
 
             //UnityEngine.Object.Destroy(hookBombProjectilePrefab.GetComponent<AntiGravityForce>());
             //UnityEngine.Object.Destroy(hookBombProjectilePrefab.GetComponent<AwakeEvent>());
@@ -452,7 +453,7 @@ namespace FishermanMod.Survivors.Fisherman
             }
 
             //body
-            shantyBodyPrefab = _assetBundle.LoadAsset<GameObject>("ShantyPlatformBody") ;//PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Drones/EmergencyDroneBody.prefab").WaitForCompletion(), "ShantyBody");
+            shantyBodyPrefab = _assetBundle.LoadAsset<GameObject>("ShantyMinionBody") ;//PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Drones/EmergencyDroneBody.prefab").WaitForCompletion(), "ShantyBody");
             shantyBodyPrefab.gameObject.layer = LayerIndex.entityPrecise.intVal;
            // LayerIndex.entityPrecise
             //var hc = shantyBodyPrefab.GetComponent<HealthComponent>();
@@ -472,7 +473,6 @@ namespace FishermanMod.Survivors.Fisherman
             //master
             shantyMasterPrefab = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Drones/MegaDroneMaster.prefab").WaitForCompletion(), "ShantyMaster");//_assetBundle.LoadAsset<GameObject>("ShantyPlatformMaster");//
             shantyMasterPrefab.GetComponent<CharacterMaster>().bodyPrefab = shantyBodyPrefab;
-
 
 
             //InitializeMinionSkins();

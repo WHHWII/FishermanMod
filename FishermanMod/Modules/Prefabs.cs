@@ -35,7 +35,7 @@ namespace FishermanMod.Modules
             }
             characterModel.baseRendererInfos = prefab.GetComponentInChildren<CharacterModel>().baseRendererInfos;
 
-            Modules.Assets.ConvertAllRenderersToHopooShader(display);
+            Modules.ModAssetManager.ConvertAllRenderersToHopooShader(display);
 
             return display;
         }
@@ -66,10 +66,10 @@ namespace FishermanMod.Modules
 
         public static GameObject CloneCharacterBody(BodyInfo bodyInfo)
         {
-            GameObject clonedBody = RoR2.LegacyResourcesAPI.Load<GameObject>("Prefabs/CharacterBodies/" + bodyInfo.bodyNameToClone + "Body");
+            GameObject clonedBody = RoR2.LegacyResourcesAPI.Load<GameObject>("Prefabs/CharacterBodies/" + bodyInfo.bodynameToClone + "Body");
             if (!clonedBody)
             {
-                Log.Error(bodyInfo.bodyNameToClone + " Body to clone is not a valid body, character creation failed");
+                Log.Error(bodyInfo.bodynameToClone + " Body to clone is not a valid body, character creation failed");
                 return null;
             }
 
@@ -168,6 +168,78 @@ namespace FishermanMod.Modules
 
             if (bodyInfo.autoCalculateLevelStats)
             {
+                bodyComponent.levelMaxHealth = Mathf.Round(bodyComponent.baseMaxHealth * 0.3f);
+                bodyComponent.levelMaxShield = Mathf.Round(bodyComponent.baseMaxShield * 0.3f);
+                bodyComponent.levelRegen = bodyComponent.baseRegen * 0.2f;
+
+                bodyComponent.levelMoveSpeed = 0f;
+                bodyComponent.levelJumpPower = 0f;
+
+                bodyComponent.levelDamage = bodyComponent.baseDamage * 0.2f;
+                bodyComponent.levelAttackSpeed = 0f;
+                bodyComponent.levelCrit = 0f;
+
+                bodyComponent.levelArmor = 0f;
+            }
+            else
+            {
+                bodyComponent.levelMaxHealth = bodyInfo.healthGrowth;
+                bodyComponent.levelMaxShield = bodyInfo.shieldGrowth;
+                bodyComponent.levelRegen = bodyInfo.regenGrowth;
+
+                bodyComponent.levelMoveSpeed = bodyInfo.moveSpeedGrowth;
+                bodyComponent.levelJumpPower = bodyInfo.jumpPowerGrowth;
+
+                bodyComponent.levelDamage = bodyInfo.damageGrowth;
+                bodyComponent.levelAttackSpeed = bodyInfo.attackSpeedGrowth;
+                bodyComponent.levelCrit = bodyInfo.critGrowth;
+
+                bodyComponent.levelArmor = bodyInfo.armorGrowth;
+            }
+            //other
+            bodyComponent.baseAcceleration = bodyInfo.acceleration;
+
+            bodyComponent.baseJumpCount = bodyInfo.jumpCount;
+
+            bodyComponent.bodyFlags = bodyInfo.bodyFlags;
+
+            bodyComponent.sprintingSpeedMultiplier = 1.45f;
+
+            bodyComponent.rootMotionInMainState = false;
+
+            bodyComponent.hullClassification = HullClassification.Human;
+
+            bodyComponent.isChampion = false;
+            /*
+            CharacterBody bodyComponent = newBodyPrefab.GetComponent<CharacterBody>();
+            //identity
+            bodyComponent.baseNameToken = bodyInfo.bodyNameToken;
+            bodyComponent.subtitleNameToken = bodyInfo.subtitleNameToken;
+            bodyComponent.portraitIcon = bodyInfo.characterPortrait;
+            bodyComponent.bodyColor = bodyInfo.bodyColor;
+
+            bodyComponent._defaultCrosshairPrefab = bodyInfo.crosshair;
+            bodyComponent.hideCrosshair = false;
+            bodyComponent.preferredPodPrefab = bodyInfo.podPrefab;
+
+            //stats
+            bodyComponent.baseMaxHealth = bodyInfo.maxHealth;
+            bodyComponent.baseRegen = bodyInfo.healthRegen;
+            bodyComponent.baseArmor = bodyInfo.armor;
+            bodyComponent.baseMaxShield = bodyInfo.shield;
+
+            bodyComponent.baseDamage = bodyInfo.damage;
+            bodyComponent.baseAttackSpeed = bodyInfo.attackSpeed;
+            bodyComponent.baseCrit = bodyInfo.crit;
+
+            bodyComponent.baseMoveSpeed = bodyInfo.moveSpeed;
+            bodyComponent.baseJumpPower = bodyInfo.jumpPower;
+
+            //level stats
+            bodyComponent.autoCalculateLevelStats = bodyInfo.autoCalculateLevelStats;
+
+            if (bodyInfo.autoCalculateLevelStats)
+            {
 
                 bodyComponent.levelMaxHealth = Mathf.Round(bodyComponent.baseMaxHealth * 0.3f);
                 bodyComponent.levelMaxShield = Mathf.Round(bodyComponent.baseMaxShield * 0.3f);
@@ -212,6 +284,7 @@ namespace FishermanMod.Modules
             bodyComponent.hullClassification = HullClassification.Human;
 
             bodyComponent.isChampion = false;
+            */
         }
 
         private static Transform AddCharacterModelToSurvivorBody(GameObject bodyPrefab, Transform modelTransform, BodyInfo bodyInfo)
@@ -309,7 +382,13 @@ namespace FishermanMod.Modules
 
             characterModel.autoPopulateLightInfos = true;
             characterModel.invisibilityCount = 0;
-            characterModel.temporaryOverlays = new List<TemporaryOverlay>();
+            characterModel.temporaryOverlays = new List<TemporaryOverlayInstance>();
+            //temporaryOverlayInstance.duration = 1f;
+            //temporaryOverlayInstance.destroyComponentOnEnd = true;
+            ////temporaryOverlayInstance.originalMaterial = Hide.destealthMaterial;
+            //temporaryOverlayInstance.inspectorCharacterModel = bodyPrefab.GetComponent<CharacterModel>();
+            //temporaryOverlayInstance.alphaCurve = AnimationCurve.EaseInOut(0f, 1f, 1f, 0f);
+            //temporaryOverlayInstance.animateShaderAlpha = true;
 
             if (!preattached)
             {

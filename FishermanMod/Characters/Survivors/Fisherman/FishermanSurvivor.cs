@@ -63,7 +63,7 @@ namespace FishermanMod.Survivors.Fisherman
             bodyColor = new Color32(198, 184, 2, 255),
             sortPosition = 100,
 
-            crosshair = Assets.LoadCrosshair("Standard"),
+            crosshair = ModAssetManager.LoadCrosshair("Standard"),
             podPrefab = LegacyResourcesAPI.Load<GameObject>("Prefabs/NetworkedObjects/SurvivorPod"),
 
             maxHealth = 130,
@@ -212,7 +212,7 @@ namespace FishermanMod.Survivors.Fisherman
             skillLocator.passiveSkill.enabled = true;
             skillLocator.passiveSkill.skillNameToken = FISHERMAN_PREFIX + "PASSIVE_HOOK_EFFECT_NAME";
             skillLocator.passiveSkill.skillDescriptionToken = FISHERMAN_PREFIX + "PASSIVE_HOOK_EFFECT_DESCRIPTION";
-            skillLocator.passiveSkill.icon = Assets.loadedBundles["fishermanbundleprime"].LoadAsset<Sprite>("Hook Icon");
+            skillLocator.passiveSkill.icon = ModAssetManager.loadedBundles["fishermanbundleprime"].LoadAsset<Sprite>("Hook Icon");
         }
         //if this is your first look at skilldef creation, take a look at Secondary first
         private void AddPrimarySkills()
@@ -845,7 +845,7 @@ namespace FishermanMod.Survivors.Fisherman
                 damageInfo.damage = hookFailDamage;  //add damage for bleed calcution
 
                 enemyHurtBox.healthComponent.TakeDamageForce(damageInfo);
-                enemyHurtBox.healthComponent.ApplyDot(attacker, DotController.DotIndex.Bleed, 8, attacker.GetComponent<CharacterBody>().baseDamage * 0.1f);
+                enemyHurtBox.healthComponent.ApplyDot(attacker, DotController.DotIndex.Bleed, 8, attacker.GetComponent<CharacterBody>().baseDamage * 0.05f);
                 Log.Debug($"Mass too large, hook failed. New force: {damageInfo.force} HookfailDamage: {hookFailDamage}");
                 return 0;
             }
