@@ -18,6 +18,8 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Content
 
         public  Vector3 commandTarget;
         public  Vector3 startPosition;
+        public bool followingCommand;
+        public bool leashing;
 
         public GameObject commanderObj;
         public FishermanSkillObjectTracker objTracker;
@@ -143,28 +145,46 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Content
                 //move to target - my code
                 targetPosition = commandTarget;
                 float distToCommander = commanderObj ? Vector3.Distance(position, commanderObj.transform.position) : 0;
-                if (commanderObj && distToCommander > 60)
+                if (commanderObj && distToCommander > 60 && !followingCommand && !leashing)
                 {
-                    targetPosition = commanderObj.transform.position + (Vector3.up * 40) + (Vector3.one * UnityEngine.Random.Range(-3, -3));
+                    leashing = true;
+                    RaycastHit hit;
+                    Vector3 offset = Vector3.down * 8;
+                    Ray upRay = new Ray(commanderObj.transform.position, Vector3.up);
+                    if(Physics.Raycast(upRay,out hit, 40))
+                    {
+                        targetPosition = hit.point + offset;
+                    }
+                    else
+                    {
+                        targetPosition = commanderObj.transform.position + (Vector3.up * 40) + (Vector3.one * UnityEngine.Random.Range(-3, -3));
+
+                    }
+
                     for (int i = 0; i < base.ai.skillDrivers.Length; i++)
                     {
                         base.ai.skillDrivers[i].ignoreNodeGraph = false;
+                        base.ai.desiredSpawnNodeGraphType = MapNodeGroup.GraphType.Air;
                     }
                     objTracker.platformPosTargetIndicator.SetActive(false);
                 }
                 
                 float distToTarg = Vector3.Distance(position, targetPosition);
-                if (distToTarg < 1.5) targetPosition = position;
-                if(distToTarg <= body.moveSpeed)
+                if (distToTarg < 1.5)
                 {
-                    targetPosition = Vector3.MoveTowards(targetPosition, position, 0.5f * deltaTime);
-                    body.baseMoveSpeed = Mathf.Lerp(body.baseMoveSpeed, 0, 0.5f * deltaTime);
-                    moveinputScale = Mathf.Lerp(moveinputScale, 0.1f, 0.5f * deltaTime);
+                    followingCommand = false;
+                    targetPosition = position;
                 }
-                else
-                {
-                    body.baseMoveSpeed = 8; // fix hardcoding later
-                }
+                //if(distToTarg <= body.moveSpeed)
+                //{
+                //    targetPosition = Vector3.MoveTowards(targetPosition, position, 0.5f * deltaTime);
+                //    body.baseMoveSpeed = Mathf.Lerp(body.baseMoveSpeed, 0, 0.5f * deltaTime);
+                //    moveinputScale = Mathf.Lerp(moveinputScale, 0.1f, 0.5f * deltaTime);
+                //}
+                //else
+                //{
+                //    body.baseMoveSpeed = 8; // fix hardcoding later
+                //}
                 //if(distToCommander > 10 && distToTarg > 10)  body.isSprinting = true;
 
 

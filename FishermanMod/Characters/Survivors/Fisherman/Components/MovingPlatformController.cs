@@ -26,7 +26,8 @@ namespace FishermanMod.Survivors.Fisherman.Components
         public Vector3 direction;
         public TeamIndex team;
         BaseAI baseAi;
-        private Dictionary<Transform, Transform> passengersOriginalParents = new Dictionary<Transform, Transform>();
+
+
         Rigidbody rb;
 
         void Start()

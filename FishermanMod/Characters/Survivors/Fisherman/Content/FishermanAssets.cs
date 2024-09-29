@@ -46,6 +46,9 @@ namespace FishermanMod.Survivors.Fisherman
         public static GameObject hookBombProjectilePrefab;
         public static GameObject hookScannerPrefab;
         public static GameObject whaleMisslePrefab;
+        public static GameObject floatingBombletPrefab;
+        public static GameObject floatingBombletPrefab2;
+
 
         //materials
         public static Material chainMat;
@@ -75,7 +78,7 @@ namespace FishermanMod.Survivors.Fisherman
         {
             CreateBombExplosionEffect();
             CreateBottleImpactEffect();
-            CreateHookScanner();
+            CreateHookScannerEffect();
             swordSwingEffect = _assetBundle.LoadEffect("HenrySwordSwingEffect", true);
             swordStabEffect = _assetBundle.LoadEffect("HenryBazookaMuzzleFlash", true);
             //swordStabEffect.GetComponent<ParticleSystemRenderer>().sharedMaterial = Addressables.LoadAssetAsync<UnityEngine.Material>("RoR2/Base/Commando/matCommandoFMJRing.mat").WaitForCompletion();
@@ -120,7 +123,7 @@ namespace FishermanMod.Survivors.Fisherman
         #region projectiles
         private static void CreateProjectiles()
         {
-            CreateBombProjectile();
+            CreateBottleProjectile();
             Content.AddProjectilePrefab(bottleProjectilePrefab);
             CreateHookProjectile();
             Content.AddProjectilePrefab(hookProjectilePrefab);
@@ -132,9 +135,11 @@ namespace FishermanMod.Survivors.Fisherman
             //Content.AddProjectilePrefab(hookScannerPrefab);
             CreateWhaleMissleProjectile();
             Content.AddProjectilePrefab(whaleMisslePrefab);
+            CreateBombletProjectile();
+            Content.AddProjectilePrefab(floatingBombletPrefab);
         }
 
-        private static void CreateBombProjectile()
+        private static void CreateBottleProjectile()
         {
             //highly recommend setting up projectiles in editor, but this is a quick and dirty way to prototype if you want
             bottleProjectilePrefab = ModAssetManager.CloneProjectilePrefab("CommandoGrenadeProjectile", "HenryBombProjectile");
@@ -297,7 +302,7 @@ namespace FishermanMod.Survivors.Fisherman
 
         }
 
-        private static void CreateHookScanner()
+        private static void CreateHookScannerEffect()
         {
             hookScannerPrefab = _assetBundle.LoadEffect("FishermanHookScanner");
             _assetBundle.LoadEffect("Nothing");
@@ -357,16 +362,30 @@ namespace FishermanMod.Survivors.Fisherman
         {
             hookBombProjectilePrefab = ModAssetManager.CloneProjectilePrefab("LoaderPylon", "FishermanJellyfish");
 
-            //UnityEngine.Object.Destroy(hookBombProjectilePrefab.GetComponent<AntiGravityForce>());
-            //UnityEngine.Object.Destroy(hookBombProjectilePrefab.GetComponent<AwakeEvent>());
+            #region general setup
             UnityEngine.Object.Destroy(hookBombProjectilePrefab.GetComponent<BeginRapidlyActivatingAndDeactivating>());
-            //var awakeComponent = hookBombProjectilePrefab.GetComponent<AwakeEvent>();
-            //var functionComponent = hookBombProjectilePrefab.GetComponent<EventFunctions>();
-
 
             var antiGrav = hookBombProjectilePrefab.GetComponent<AntiGravityForce>();
             antiGrav.antiGravityCoefficient = 0.3f;
 
+            var damageTypeComp = hookBombProjectilePrefab.AddComponent<DamageAPI.ModdedDamageTypeHolderComponent>();
+            damageTypeComp.Add(DamageTypes.FishermanTether);
+
+            var startEvent = hookBombProjectilePrefab.GetComponent<RoR2.EntityLogic.DelayedEvent>();
+            startEvent.CallDelayed(0.5f);
+
+            hookBombProjectilePrefab.layer = LayerIndex.projectile.intVal;
+
+            var stick = hookBombProjectilePrefab.AddComponent<ProjectileStickOnImpact>();
+
+
+            var controller = hookBombProjectilePrefab.GetComponent<ProjectileController>();
+            var simpleProj = hookBombProjectilePrefab.GetComponent<ProjectileSimple>();
+            simpleProj.lifetime = 99999;
+            var pDamageComp = hookBombProjectilePrefab.GetComponent<ProjectileDamage>();
+            #endregion general
+
+            #region  beam controler
             var beamController = hookBombProjectilePrefab.GetComponent<ProjectileProximityBeamController>();
             beamController.damageCoefficient = 0.01f;
             beamController.previousTargets = new System.Collections.Generic.List<HealthComponent>();
@@ -375,17 +394,12 @@ namespace FishermanMod.Survivors.Fisherman
             beamController.listClearInterval = 99999;
             beamController.attackInterval = 0.1f;
             beamController.attackFireCount = 1;
-
-            var damageTypeComp = hookBombProjectilePrefab.AddComponent<DamageAPI.ModdedDamageTypeHolderComponent>();
-            damageTypeComp.Add(DamageTypes.FishermanTether);
-
-            var startEvent = hookBombProjectilePrefab.GetComponent<RoR2.EntityLogic.DelayedEvent>();
-            startEvent.CallDelayed(0.5f);
+            #endregion
 
 
-
+            #region Explosion
             var bomb = hookBombProjectilePrefab.AddComponent<ProjectileImpactExplosion>();
-            bomb.blastRadius = 25;
+            bomb.blastRadius = 15;
             bomb.blastDamageCoefficient = 1;
             bomb.blastProcCoefficient = 1;
             bomb.lifetime = 99999;
@@ -393,16 +407,17 @@ namespace FishermanMod.Survivors.Fisherman
             bomb.impactOnWorld = false;
             bomb.explosionEffect = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Commando/OmniExplosionVFXCommandoGrenade.prefab").WaitForCompletion();
             bomb.transformSpace = ProjectileImpactExplosion.TransformSpace.World;
+            //bomblet children
+            bomb.fireChildren = true;
+            bomb.childrenProjectilePrefab = floatingBombletPrefab;
+            bomb.childrenCount = 1;
+            bomb.childrenDamageCoefficient = FishermanStaticValues.hookbombDamageCoefficient;
+            bomb.explodeOnLifeTimeExpiration = true;
+            #endregion Explosion
 
-            var stick = hookBombProjectilePrefab.AddComponent<ProjectileStickOnImpact>();
-            
 
-            var controller = hookBombProjectilePrefab.GetComponent<ProjectileController>();
-            var simpleProj = hookBombProjectilePrefab.GetComponent<ProjectileSimple>();
-            simpleProj.lifetime = 99999;
-            var pDamageComp = hookBombProjectilePrefab.GetComponent<ProjectileDamage>();
-
-
+            //keeps track of all relevant components for later reference
+            #region custom component
             var hookBomb = hookBombProjectilePrefab.AddComponent<HookBombController>();
             hookBomb.beamController = beamController;
             hookBomb.controller = controller;
@@ -412,6 +427,8 @@ namespace FishermanMod.Survivors.Fisherman
             hookBomb.antiGrav = hookBombProjectilePrefab.GetComponent<AntiGravityForce>();
             hookBomb.moddedDamageComp = damageTypeComp;
             hookBomb.bombColliders = hookBombProjectilePrefab.GetComponentsInChildren<SphereCollider>();
+            #endregion custom Component
+
             //foreach(var col in hookBomb.bombColliders)
             //{
             //    if (col.gameObject.name.Contains("Grapple")){
@@ -419,12 +436,38 @@ namespace FishermanMod.Survivors.Fisherman
             //    }
             //}
             //awakeComponent.action.AddListener(hookBomb.ClearHooks);
-            hookBombProjectilePrefab.layer = LayerIndex.projectile.intVal;
+
 
 
 
         }
 
+        private static void CreateBombletProjectile()
+        {
+            {
+                floatingBombletPrefab = _assetBundle.LoadAsset<GameObject>("FishermanFloatingBombProjectile");
+                var pc = floatingBombletPrefab.GetComponent<ProjectileController>();
+                pc.ghostPrefab = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Commando/CommandoGrenadeGhost.prefab").WaitForCompletion();
+                floatingBombletPrefab.layer = LayerIndex.projectile.intVal;
+                var pie = floatingBombletPrefab.GetComponent<ProjectileImpactExplosion>();
+                pie.explosionEffect = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Commando/OmniExplosionVFXCommandoGrenade.prefab").WaitForCompletion();
+                pie.lifetime = 1.5f;
+            }
+            ////yes this is fucking stupid;
+            //{
+            //    floatingBombletPrefab2 = _assetBundle.LoadAsset<GameObject>("FishermanFloatingBombProjectile");
+            //    var pc = floatingBombletPrefab2.GetComponent<ProjectileController>();
+            //    pc.ghostPrefab = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Commando/CommandoGrenadeGhost.prefab").WaitForCompletion();
+            //    floatingBombletPrefab2.layer = LayerIndex.projectile.intVal;
+            //    var pie = floatingBombletPrefab2.GetComponent<ProjectileImpactExplosion>();
+            //    pie.explosionEffect = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Commando/OmniExplosionVFXCommandoGrenade.prefab").WaitForCompletion();
+            //    pie.lifetime = 1.5f;
+
+
+            //    pie.childrenProjectilePrefab = floatingBombletPrefab;
+            //}
+
+        }
         private static void CreateWhaleMissleProjectile()
         {
             whaleMisslePrefab = _assetBundle.LoadAndAddProjectilePrefab("FishermanWhaleMissle");

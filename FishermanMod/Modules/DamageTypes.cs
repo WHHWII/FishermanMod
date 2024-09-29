@@ -45,7 +45,7 @@ namespace FishermanMod.Modules
 
             if (damageInfo.HasModdedDamageType(FishermanTether))
             {
-                Log.Info("TetherDamageTypeInvoked");
+                //Log.Info("TetherDamageTypeInvoked");
                 if (!victim.body) return;
                 victim.body.AddBuff(FishermanBuffs.hookTetherDebuff);
                 HookBombTetherVisual tetherVisual = victim.gameObject.AddComponent<HookBombTetherVisual>();
@@ -54,7 +54,7 @@ namespace FishermanMod.Modules
 
             if (damageInfo.HasModdedDamageType(FishermanHookPassive))
             {
-                Log.Info("HookDamageTypeInvoked");
+               // Log.Info("HookDamageTypeInvoked");
 
                 if (!victim.body) return;
                 FishermanSurvivor.ApplyFishermanPassiveFishHookEffect(
@@ -68,7 +68,7 @@ namespace FishermanMod.Modules
 
             if (damageInfo.HasModdedDamageType(FishermanKnockup))
             {
-                Log.Info("KnockupDamageTypeInvoked");
+                //Log.Info("KnockupDamageTypeInvoked");
                 if (!victim.body) return;
                 //apply knockup scaled with mass if victim has rigidbody. Do not apply knockup if victim is airborne.
                 if(damageReport.victimBody && damageReport.victimBody.characterMotor && damageReport.victimBody.characterMotor.isGrounded)

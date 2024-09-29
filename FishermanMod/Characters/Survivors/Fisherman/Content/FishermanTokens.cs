@@ -76,7 +76,7 @@ namespace FishermanMod.Survivors.Fisherman
 
             #region Special
             Language.Add(prefix + "SPECIAL_BOMB_NAME", Tokens.FishermanText("Man o' War",4));
-            Language.Add(prefix + "SPECIAL_BOMB_DESCRIPTION", $"Launch a sticky bomb that <style=cIsUtility>Tethers</style> fish. Re-Activate to {Tokens.HookText("Hook")} <style=cIsUtility>Tethered</style> fish inwards and detonate for <style=cIsDamage>{100f * FishermanStaticValues.hookbombDamageCoefficient}% damage.</style>");
+            Language.Add(prefix + "SPECIAL_BOMB_DESCRIPTION", $"Launch a sticky bomb that <style=cIsUtility>Tethers</style> fish. Re-Activate to {Tokens.HookText("Hook")} <style=cIsUtility>Tethered</style> fish inwards and detonate for <style=cIsDamage>2x{100f * FishermanStaticValues.hookbombDamageCoefficient}% damage.</style>");
             #endregion
 
             #region Special

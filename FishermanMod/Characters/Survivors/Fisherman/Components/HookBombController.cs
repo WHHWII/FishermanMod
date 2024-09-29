@@ -96,11 +96,18 @@ namespace FishermanMod.Survivors.Fisherman.Components
             }
             //do explosion
 
-            explosionComponent.lifetime = 1.5f;
-            explosionComponent.lifetimeAfterImpact = 1f;
-            explosionComponent.destroyOnEnemy = false;
-            
-            
+            explosionComponent.blastDamageCoefficient = 1;
+            explosionComponent.falloffModel = BlastAttack.FalloffModel.None;
+            explosionComponent.lifetime = 2f;
+            explosionComponent.lifetime = 2f;
+            explosionComponent.timerAfterImpact = false;
+            explosionComponent.childrenDamageCoefficient = 1;
+            explosionComponent.childrenProjectilePrefab = FishermanAssets.floatingBombletPrefab;
+
+
+            //explosionComponent.lifetimeAfterImpact = 1f;
+            //explosionComponent.destroyOnEnemy = false;
+            //RoR2.Projectile.ProjectileManager.instance.FireProjectile(FishermanAssets.floatingBombletPrefab, transform.position, transform.rotation, owner, 100, 0, false);
 
             //Destroy(gameObject);
 

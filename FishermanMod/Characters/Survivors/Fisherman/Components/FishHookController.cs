@@ -10,6 +10,8 @@ using static UnityEngine.ParticleSystem.PlaybackState;
 using R2API;
 using UnityEngine.Networking;
 using Newtonsoft.Json.Utilities;
+using UnityEngine.UI;
+using UnityEngine.Assertions.Must;
 
 namespace FishermanMod.Survivors.Fisherman.Components
 {
@@ -45,7 +47,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
         float returnForceBase = 1;
         Transform ownerTransform;
         float timeFlying = 0;
-        float minTimeBeforeReturning = .5f;
+        float minTimeBeforeReturning = 1f;
         float maxFlyTime = 2;
 
         //float maxTauntTime = 5f;
@@ -67,6 +69,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
         }
         void OnStickEvent()
         {
+            if (isFlying) return;
             //remove motion and collision in order to prevent enemy sliding
             hookCollider.enabled = false;
             rb.velocity = Vector3.zero;
@@ -87,7 +90,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
             distanceToOwner = Vector3.Distance(transform.position, ownerTransform.position);
             if (!isFlying && distanceToOwner > autoTriggerDistance) 
             {
-                FlyBack();
+                StartCoroutine(FlyBack());
             }
             if (isFlying)
             {
@@ -109,7 +112,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
                 
             }
         }
-        public void FlyBack()
+        public IEnumerator FlyBack()
         {
             isFlying = true; //aka is being recalled
 
@@ -122,6 +125,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
             stickComponent.enabled = false;
             rb.isKinematic = false;
 
+            yield return new WaitForFixedUpdate();
             //ability specific interactions (OOB crash was occuring before these were added )
             //if (skillObjectTracker.deployedBombs)
             //{
@@ -134,12 +138,20 @@ namespace FishermanMod.Survivors.Fisherman.Components
 
             //apply return force to hook, causing it to arc up into the air
             projSimple.desiredForwardSpeed = 0;
-            rb.AddForce(FishermanSurvivor.GetHookThrowVelocity(ownerTransform.position, transform.position, !stickComponent.stuck) * 10, ForceMode.VelocityChange);
+            Log.Debug($"[HOOK][FLYBACK] owner {ownerTransform.position} hook position {transform.position}");
+            Vector3 vel = FishermanSurvivor.GetHookThrowVelocity(ownerTransform.position, transform.position, !stickComponent.stuck);
+            Log.Debug($"[HOOK][FLYBACK] vel {vel}");
+            vel.y = -vel.y;
+            Log.Debug($"[HOOK][FLYBACK] altered vel {vel}");
+
+            rb.AddForce(vel, ForceMode.VelocityChange);
+            Log.Debug($"[HOOK][FLYBACK] RB vel {rb.velocity}");
+
 
             //enable projectile overlap. (OOB crash was occuring before this was added )
             projOverlap.enabled = true;
-            projectileDamage.damage = FishermanSurvivor.instance.bodyInfo.damage * FishermanStaticValues.castDamageCoefficient;
-            projOverlap.damageCoefficient = FishermanStaticValues.castDamageCoefficient;
+            projectileDamage.damage =  skillObjectTracker.characterBody.damage * FishermanStaticValues.castDamageCoefficient;
+            projOverlap.damageCoefficient = 1;
         }
         bool CanThrow(GameObject gameObject)
         {
@@ -151,9 +163,9 @@ namespace FishermanMod.Survivors.Fisherman.Components
         }
         void OnCollisionEnter(UnityEngine.Collision collision)
         {
-            if (collision.gameObject.GetComponent<MapZone>()) Log.Debug("[Cast Hook] Hit bounds box: col enter");
+            //if (collision.gameObject.GetComponent<MapZone>()) Log.Debug("[Cast Hook] Hit bounds box: col enter");
             //collision.rigidbody.velocity = Vector3.zero;
-            Log.Debug($"[Cast Hook]Collision Enter {collision.gameObject.name}");
+            //Log.Debug($"[Cast Hook]Collision Enter {collision.gameObject.name}");
             HookBombController hookBomb = collision.gameObject.GetComponent<HookBombController>();
             if (hookBomb && CanThrow(hookBomb.gameObject))
             {
@@ -162,7 +174,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
         }
         void OnCollisionExit(UnityEngine.Collision collision)
         {
-            Log.Debug($"[Cast Hook] Collision Exit {collision.gameObject.name}");
+            //Log.Debug($"[Cast Hook] Collision Exit {collision.gameObject.name}");
             HookBombController hookBomb = collision.gameObject.GetComponent<HookBombController>();
             if (hookBomb && CanThrow(hookBomb.gameObject))
             {
@@ -173,7 +185,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
         void OnTriggerEnter(Collider collider)
         {
             if (collider.gameObject.GetComponent<MapZone>()) Log.Debug("[Cast Hook] Hit bounds box: trig enter");
-            Log.Debug($"[Cast Hook] Trigger Enter {collider.gameObject.name}");
+            //Log.Debug($"[Cast Hook] Trigger Enter {collider.gameObject.name}");
 
             //DrawAggro(collider);
             if (!CanThrow(collider.gameObject)) return;
@@ -182,8 +194,8 @@ namespace FishermanMod.Survivors.Fisherman.Components
         }
         void OnTriggerExit(Collider collider)
         {
-            if (collider.gameObject.GetComponent<MapZone>()) Log.Debug("[Cast Hook] Hit bounds box: trig exit");
-            Log.Debug($"[Cast Hook] Trigger Exit {collider.gameObject.name}");
+            //if (collider.gameObject.GetComponent<MapZone>()) Log.Debug("[Cast Hook] Hit bounds box: trig exit");
+            //Log.Debug($"[Cast Hook] Trigger Exit {collider.gameObject.name}");
             if (!CanThrow(collider.gameObject)) return;
             ThrowHookBomb(collider.transform.parent?.GetComponent<HookBombController>());
             if (ThrowItem(collider)) return;
@@ -195,7 +207,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
             
             if (collider.gameObject.name == "GenericPickup(Clone)")
             {
-                Log.Debug($"[Cast Hook] Item Hit, {collider.gameObject.name}");
+                //Log.Debug($"[Cast Hook] Item Hit, {collider.gameObject.name}");
                 Rigidbody itemBody = collider.gameObject.GetComponent<Rigidbody>();
                 itemBody.AddForce(FishermanSurvivor.GetHookThrowVelocity(ownerTransform.position,itemBody.position,false), ForceMode.VelocityChange);
                 return true;
@@ -228,7 +240,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
         void ThrowHookBomb(HookBombController bomb)
         {
             if (bomb == null) return;
-            Log.Debug("[Cast Hook] Trying to throw bomb");
+            //Log.Debug("[Cast Hook] Trying to throw bomb");
             bomb.stickComponent.Detach() ;
             bomb.DisableAllColliders();
             bomb.stickComponent.enabled = false;

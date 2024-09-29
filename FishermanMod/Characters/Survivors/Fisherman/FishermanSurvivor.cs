@@ -804,7 +804,8 @@ namespace FishermanMod.Survivors.Fisherman
 
 
             Vector3 throwVelocity = FishermanSurvivor.GetHookThrowVelocity(targetPos,enemyPosition, isFlyer);
-
+            Log.Debug($"[HOOK][Effect] owner {targetPos} Enemy position {enemyPosition}");
+            Log.Debug($"[HOOK][Effect] throwvel {throwVelocity}");
 
             #endregion 
 
@@ -816,17 +817,17 @@ namespace FishermanMod.Survivors.Fisherman
                 position = enemyHurtBox.transform.position,
             };
 
-            Log.Debug($"\nHookInfo: " +
-                $"\n\tName: {body.name}" +
-                $"\n\tIsFlyer: {isFlyer}" +
-                $"\n\ttargetMass: {bodyMass}" +
-                $"\n\tdist: {dist}" 
-                //$"\n\tdistanceVector: {distanceVector}" 
-                //$"\n\ttimetotarget: {timeToTarget}"
-                //$"\n\tnewDistanceVector: {newDistanceVector}" +
-                //$"\n\bonusPower: {bonusPower}" +
-                //$"\n\t>Final Force: {force}"
-            );
+            //Log.Debug($"\nHookInfo: " +
+            //    $"\n\tName: {body.name}" +
+            //    $"\n\tIsFlyer: {isFlyer}" +
+            //    $"\n\ttargetMass: {bodyMass}" +
+            //    $"\n\tdist: {dist}" 
+            //    //$"\n\tdistanceVector: {distanceVector}" 
+            //    //$"\n\ttimetotarget: {timeToTarget}"
+            //    //$"\n\tnewDistanceVector: {newDistanceVector}" +
+            //    //$"\n\bonusPower: {bonusPower}" +
+            //    //$"\n\t>Final Force: {force}"
+            //);
 
             if (bodyMass > maxMass)
             {

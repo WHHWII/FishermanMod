@@ -29,7 +29,7 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Components
         {
             foreach (FishHookController hook in deployedHooks) 
             {
-                hook.FlyBack();
+                hook.StartCoroutine(hook.FlyBack());
             }
             deployedHooks.Clear();
         }
@@ -61,6 +61,8 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Components
                     customState.startPosition = platform.transform.position;
                     customState.commanderObj = gameObject;
                     customState.objTracker = this;
+                    customState.followingCommand = true;
+                    customState.leashing = false;
 
                     CharacterMaster master = platform.GetComponent<RoR2.CharacterBody>().master;
                     master.GetComponent<RoR2.EntityStateMachine>().SetState(customState);
