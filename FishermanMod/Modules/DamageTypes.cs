@@ -20,7 +20,7 @@ namespace FishermanMod.Modules
 
         public static void RegisterDamageTypes()
         {
-            Log.Debug("Damage registered");
+            //Log.Debug("Damage registered");
             FishermanTether = DamageAPI.ReserveDamageType();
             FishermanHookPassive = DamageAPI.ReserveDamageType();
             FishermanKnockup = DamageAPI.ReserveDamageType();
@@ -80,7 +80,7 @@ namespace FishermanMod.Modules
                     damageInfo.force = Vector3.zero;
                 }
                 //damageInfo.force = (bool)damageReport.victimBody.characterMotor?.isGrounded ? (damageReport.victimBody.rigidbody && damageReport.victimBody.rigidbody.mass < 700 ? damageReport.victimBody.rigidbody.mass : 0.1f)* damageInfo.force : Vector3.zero;
-                Log.Info($"[DamageTypes][Knockup] Damageinfo force: {damageInfo.force}");
+                //Log.Info($"[DamageTypes][Knockup] Damageinfo force: {damageInfo.force}");
                 damageReport.victim?.TakeDamageForce(damageInfo.force);
             }
 

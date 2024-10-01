@@ -1,9 +1,9 @@
-﻿using IL.RoR2;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using RoR2;
 
 namespace FishermanMod.Survivors.Fisherman.Components
 {
@@ -15,12 +15,15 @@ namespace FishermanMod.Survivors.Fisherman.Components
     {
         LineRenderer lineRenderer;
         GameObject lineContainer;
+        DestroyOnTimer deathTimer;
         public GameObject lineTerminationObject;
 
         //setup appearance for tether
         void Start ()
         {
-            lineContainer = Instantiate(new GameObject("Fisherman HookBomb TetherVisual"), transform);
+            lineContainer = new GameObject("Fisherman HookBomb TetherVisual");
+            deathTimer = lineContainer.AddComponent<DestroyOnTimer>();
+            deathTimer.enabled = false;
             lineRenderer = lineContainer.AddComponent<LineRenderer>();
             lineRenderer.positionCount = 2;
             lineRenderer.material = FishermanAssets.chainMat;
@@ -43,6 +46,10 @@ namespace FishermanMod.Survivors.Fisherman.Components
                 {
                     body.RemoveBuff(FishermanBuffs.hookTetherDebuff);
                 }
+                deathTimer.enabled = true;
+                deathTimer.duration = 0.0001f;
+                deathTimer.Start();
+                Destroy(lineContainer.gameObject);
                 Destroy(this);
                 return;
             }

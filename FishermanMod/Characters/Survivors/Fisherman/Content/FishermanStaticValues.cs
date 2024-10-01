@@ -18,7 +18,7 @@ namespace FishermanMod.Survivors.Fisherman
         public const float whaleMissleDotDamage = 0.1f;
         public const float whaleMissleDotInterval = 0.1f;
 
-        public const float hookbombDamageCoefficient = 4f;
+        public const float hookbombDamageCoefficient = 5f;
 
         public const float bottleDamageCoefficient = 4f;
         public const float bottleDamageBuff = 0.25f;

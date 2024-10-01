@@ -831,7 +831,7 @@ namespace FishermanMod.Survivors.Fisherman
 
             if (bodyMass > maxMass)
             {
-                Log.Info($"Attacker: {attacker.name} Inflictor {inflictor.name}");
+                //Log.Info($"Attacker: {attacker.name} Inflictor {inflictor.name}");
                 //play hook fail sound effect
                 //show hook hook fail decal on enemy
                 //damageInfo.force = force * 0.1f;
@@ -847,7 +847,7 @@ namespace FishermanMod.Survivors.Fisherman
 
                 enemyHurtBox.healthComponent.TakeDamageForce(damageInfo);
                 enemyHurtBox.healthComponent.ApplyDot(attacker, DotController.DotIndex.Bleed, 8, attacker.GetComponent<CharacterBody>().baseDamage * 0.05f);
-                Log.Debug($"Mass too large, hook failed. New force: {damageInfo.force} HookfailDamage: {hookFailDamage}");
+                //Log.Debug($"Mass too large, hook failed. New force: {damageInfo.force} HookfailDamage: {hookFailDamage}");
                 return 0;
             }
             else if (!isHookImmune)

@@ -406,13 +406,13 @@ namespace FishermanMod.Survivors.Fisherman
             bomb.destroyOnEnemy = false;
             bomb.impactOnWorld = false;
             bomb.explosionEffect = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Commando/OmniExplosionVFXCommandoGrenade.prefab").WaitForCompletion();
-            bomb.transformSpace = ProjectileImpactExplosion.TransformSpace.World;
+            bomb.transformSpace = ProjectileImpactExplosion.TransformSpace.Local;
             //bomblet children
             bomb.fireChildren = true;
             bomb.childrenProjectilePrefab = floatingBombletPrefab;
             bomb.childrenCount = 1;
             bomb.childrenDamageCoefficient = FishermanStaticValues.hookbombDamageCoefficient;
-            bomb.explodeOnLifeTimeExpiration = true;
+            bomb.explodeOnLifeTimeExpiration = false;
             #endregion Explosion
 
 
@@ -447,11 +447,13 @@ namespace FishermanMod.Survivors.Fisherman
             {
                 floatingBombletPrefab = _assetBundle.LoadAsset<GameObject>("FishermanFloatingBombProjectile");
                 var pc = floatingBombletPrefab.GetComponent<ProjectileController>();
-                pc.ghostPrefab = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Commando/CommandoGrenadeGhost.prefab").WaitForCompletion();
+                //pc.ghostPrefab = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Commando/CommandoGrenadeGhost.prefab").WaitForCompletion();
                 floatingBombletPrefab.layer = LayerIndex.projectile.intVal;
+
                 var pie = floatingBombletPrefab.GetComponent<ProjectileImpactExplosion>();
                 pie.explosionEffect = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Commando/OmniExplosionVFXCommandoGrenade.prefab").WaitForCompletion();
                 pie.lifetime = 1.5f;
+                pie.explodeOnLifeTimeExpiration = false;
             }
             ////yes this is fucking stupid;
             //{
@@ -522,7 +524,11 @@ namespace FishermanMod.Survivors.Fisherman
 
             //master
             shantyMasterPrefab = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Drones/MegaDroneMaster.prefab").WaitForCompletion(), "ShantyMaster");//_assetBundle.LoadAsset<GameObject>("ShantyPlatformMaster");//
-            shantyMasterPrefab.GetComponent<CharacterMaster>().bodyPrefab = shantyBodyPrefab;
+            CharacterMaster master = shantyMasterPrefab.GetComponent<CharacterMaster>();
+            master.spawnOnStart = false;
+            master.bodyPrefab = shantyBodyPrefab;
+            UnityEngine.Object.Destroy(shantyMasterPrefab.GetComponent<SetDontDestroyOnLoad>());
+
 
 
             //InitializeMinionSkins();

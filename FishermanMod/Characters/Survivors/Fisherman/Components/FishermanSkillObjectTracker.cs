@@ -48,9 +48,11 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Components
             List<MovingPlatformController> toRemove = new List<MovingPlatformController>();
             foreach (MovingPlatformController platform in deployedPlatforms)
             {
+                Debug.Log("Platform instance: "+ platform);
                 if(platform == null)
                 {
                     toRemove.Add(platform);
+                    Debug.Log("Platform was null. Removing");
                 }
                 else
                 {

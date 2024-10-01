@@ -95,15 +95,16 @@ namespace FishermanMod.Survivors.Fisherman.Components
                 }
             }
             //do explosion
+            Log.Debug("Hooking");
 
             explosionComponent.blastDamageCoefficient = 1;
             explosionComponent.falloffModel = BlastAttack.FalloffModel.None;
-            explosionComponent.lifetime = 2f;
+            explosionComponent.explodeOnLifeTimeExpiration = false;
             explosionComponent.lifetime = 2f;
             explosionComponent.timerAfterImpact = false;
             explosionComponent.childrenDamageCoefficient = 1;
             explosionComponent.childrenProjectilePrefab = FishermanAssets.floatingBombletPrefab;
-
+            explosionComponent.childrenCount = 1;
 
             //explosionComponent.lifetimeAfterImpact = 1f;
             //explosionComponent.destroyOnEnemy = false;
