@@ -17,11 +17,13 @@ namespace FishermanMod.Survivors.Fisherman.Components
         GameObject lineContainer;
         DestroyOnTimer deathTimer;
         public GameObject lineTerminationObject;
+        CharacterBody owner;
 
         //setup appearance for tether
         void Start ()
         {
             lineContainer = new GameObject("Fisherman HookBomb TetherVisual");
+            owner = GetComponent<RoR2.CharacterBody>();
             deathTimer = lineContainer.AddComponent<DestroyOnTimer>();
             deathTimer.enabled = false;
             lineRenderer = lineContainer.AddComponent<LineRenderer>();
@@ -36,15 +38,13 @@ namespace FishermanMod.Survivors.Fisherman.Components
         //if the inflictor no longer exists, it destroys itself.
         void Update ()
         {
-            if (lineTerminationObject == null)
+            if (lineTerminationObject == null || owner == null)
             {
                 Destroy(lineContainer);
-                //Destroy(lineRenderer);
-                RoR2.CharacterBody body = GetComponent<RoR2.CharacterBody>();
-                //even though this is just a visual, and the debuff should be removed already by other components, this is here just in case this damage type is used anywhere else
-                if (body.HasBuff(FishermanBuffs.hookTetherDebuff))
+                //even though this is just a visual, and the debuff should be removed already by other components, this is here just in case this damage type is used anywhere else. Which it shouldnt be. this is also probably not networked because it isnt networked
+                if (owner && owner.HasBuff(FishermanBuffs.hookTetherDebuff))
                 {
-                    body.RemoveBuff(FishermanBuffs.hookTetherDebuff);
+                    owner.RemoveBuff(FishermanBuffs.hookTetherDebuff);
                 }
                 deathTimer.enabled = true;
                 deathTimer.duration = 0.0001f;
@@ -57,6 +57,16 @@ namespace FishermanMod.Survivors.Fisherman.Components
             lineRenderer.SetPosition(1, lineTerminationObject.transform.position);
         }
         
+        void OnDestroy () {
+            if (deathTimer)
+            {
+                deathTimer.enabled = true;
+                deathTimer.duration = 0.0001f;
+                deathTimer.Start();
+            }
+            if(lineContainer) Destroy(lineContainer.gameObject);
+
+        }
 
     }
 }

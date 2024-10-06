@@ -170,9 +170,11 @@ namespace FishermanMod.Survivors.Fisherman
             //example of how to create a hitbox
             Transform swipeHitBoxTransform = childLocator.FindChild("SwipeHitbox");
             Transform stabHitBoxTransform = childLocator.FindChild("StabHitbox");
+            Transform uppercutHitboxTransform = childLocator.FindChild("UppercutHitbox");
             
             Prefabs.SetupHitBoxGroup(characterModelObject, "SwipeGroup", swipeHitBoxTransform);
             Prefabs.SetupHitBoxGroup(characterModelObject, "StabGroup", stabHitBoxTransform);
+            Prefabs.SetupHitBoxGroup(characterModelObject, "UppercutGroup", uppercutHitboxTransform);
         }
 
         public override void InitializeEntityStateMachines() 
@@ -189,6 +191,7 @@ namespace FishermanMod.Survivors.Fisherman
             Prefabs.AddEntityStateMachine(bodyPrefab, "Weapon");
             Prefabs.AddEntityStateMachine(bodyPrefab, "Weapon2");
             Prefabs.AddEntityStateMachine(bodyPrefab, "FishookRecall");
+            Prefabs.AddEntityStateMachine(bodyPrefab, "NervesThrow");
         }
 
         #region skills
@@ -225,13 +228,14 @@ namespace FishermanMod.Survivors.Fisherman
                     FISHERMAN_PREFIX + "PRIMARY_SLASH_NAME",
                     FISHERMAN_PREFIX + "PRIMARY_SLASH_DESCRIPTION",
                     assetBundle.LoadAsset<Sprite>("Melee Attack Icon"),
-                    new EntityStates.SerializableEntityStateType(typeof(SkillStates.SlashCombo)),
+                    new EntityStates.SerializableEntityStateType(typeof(SkillStates.PrimaryAttack)),
                     "Weapon",
                     false
                 ));
             //custom Skilldefs can have additional fields that you can set manually
             primaryFishingPoleMelee.stepCount = 3;
             primaryFishingPoleMelee.stepGraceDuration = 0.5f;
+            primaryFishingPoleMelee.canceledFromSprinting = true;
 
             Skills.AddPrimarySkills(bodyPrefab, primaryFishingPoleMelee);
 
@@ -511,16 +515,16 @@ namespace FishermanMod.Survivors.Fisherman
                 skillName = "SteadyTheNerves",
                 skillNameToken = FISHERMAN_PREFIX + "SPECIAL_DRINK_NAME",
                 skillDescriptionToken = FISHERMAN_PREFIX + "SPECIAL_DRINK_DESCRIPTION",
-                keywordTokens = new string[] { "KEYWORD_STUNNING" },
+                keywordTokens = new string[] { "KEYWORD_STUNNING", FISHERMAN_PREFIX + "KEYWORD_DAUNTLESS" },
                 skillIcon = assetBundle.LoadAsset<Sprite>("Jelly Bomb Icon"),
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(SkillStates.NervesDrinkState)),
                 //setting this to the "weapon2" EntityStateMachine allows us to cast this skill at the same time primary, which is set to the "weapon" EntityStateMachine
-                activationStateMachineName = "Weapon2",
+                activationStateMachineName = "NervesThrow",
                 interruptPriority = EntityStates.InterruptPriority.Skill,
 
                 baseMaxStock = 1,
-                baseRechargeInterval = 3f,
+                baseRechargeInterval = 12f,
 
                 isCombatSkill = false,
                 mustKeyPress = true,
@@ -533,7 +537,7 @@ namespace FishermanMod.Survivors.Fisherman
                 skillIcon = assetBundle.LoadAsset<Sprite>("texUtilityIcon"),
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(SkillStates.NervesThrowState)),
-                activationStateMachineName = "Weapon2",
+                activationStateMachineName = "NervesThrow",
                 interruptPriority = EntityStates.InterruptPriority.Skill,
 
                 baseRechargeInterval = 0.5f,
@@ -661,25 +665,24 @@ namespace FishermanMod.Survivors.Fisherman
         private void CharacterMaster_OnBodyStart(On.RoR2.CharacterMaster.orig_OnBodyStart orig, CharacterMaster self, CharacterBody body)
         {
             orig(self, body);
-            if (self && self.GetBody() && self.GetBody().isPlayerControlled) // this causes bugs with other characters. fix or rework later.
-            {
-                MinionOwnership.MinionGroup minionGroup = MinionOwnership.MinionGroup.FindGroup(body.master.netId);
-                if (minionGroup != null)
-                {
-                    var members = minionGroup.members;
-                    foreach (var member in members)
-                    {
-                        CharacterMaster master = member?.GetComponent<CharacterMaster>();
-                        CharacterBody minionBody = master?.GetBody();
-                        if (master.name.Contains("ShantyMaster") && body.skillLocator.utility != FishermanSurvivor.utilityDirectPlatform)
-                        {
-                            body.skillLocator.utility.SetSkillOverride(this, FishermanSurvivor.utilityDirectPlatform, RoR2.GenericSkill.SkillOverridePriority.Upgrade);
-                            body.skillLocator.utility.DeductStock(1); // may change this to deduct all stocks if all hooks are fired at once.
-                            break;
-                        }
-                    }
-                }
-            }
+            //if (self && self.GetBody() && self.GetBody().isPlayerControlled) // this causes bugs with other characters. fix or rework later.
+            //{
+            //    MinionOwnership.MinionGroup minionGroup = MinionOwnership.MinionGroup.FindGroup(body.master.netId);
+            //    if (minionGroup != null)
+            //    {
+            //        var members = minionGroup.members;
+            //        foreach (var member in members)
+            //        {
+            //            CharacterMaster master = member?.GetComponent<CharacterMaster>();
+            //            if (master.name.Contains("ShantyMaster") && body.skillLocator.utility != FishermanSurvivor.utilityDirectPlatform)
+            //            {
+            //                body.skillLocator.utility.SetSkillOverride(this, FishermanSurvivor.utilityDirectPlatform, RoR2.GenericSkill.SkillOverridePriority.Upgrade);
+            //                body.skillLocator.utility.DeductStock(1); // may change this to deduct all stocks if all hooks are fired at once.
+            //                break;
+            //            }
+            //        }
+            //    }
+            //}
         }
         private void HealthComponent_TakeDamage(On.RoR2.HealthComponent.orig_TakeDamage orig, HealthComponent self, DamageInfo damageInfo)
         {
@@ -711,7 +714,7 @@ namespace FishermanMod.Survivors.Fisherman
 
         private void RecalculateStatsAPI_GetStatCoefficients(CharacterBody sender, R2API.RecalculateStatsAPI.StatHookEventArgs args)
         {
-
+            
             if (sender.HasBuff(FishermanBuffs.armorBuff)) // your buff
             {
                 args.moveSpeedReductionMultAdd -= args.moveSpeedReductionMultAdd;
@@ -846,7 +849,8 @@ namespace FishermanMod.Survivors.Fisherman
                 damageInfo.damage = hookFailDamage;  //add damage for bleed calcution
 
                 enemyHurtBox.healthComponent.TakeDamageForce(damageInfo);
-                enemyHurtBox.healthComponent.ApplyDot(attacker, DotController.DotIndex.Bleed, 8, attacker.GetComponent<CharacterBody>().baseDamage * 0.05f);
+
+                enemyHurtBox.healthComponent.ApplyDot(attacker, DotController.DotIndex.Bleed, 3, FishermanStaticValues.hookBleedCoefficient);
                 //Log.Debug($"Mass too large, hook failed. New force: {damageInfo.force} HookfailDamage: {hookFailDamage}");
                 return 0;
             }

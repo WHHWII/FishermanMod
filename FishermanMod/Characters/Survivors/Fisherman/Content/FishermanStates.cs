@@ -7,7 +7,7 @@ namespace FishermanMod.Survivors.Fisherman
         public static void Init()
         {
             
-            Modules.Content.AddEntityState(typeof(SlashCombo));
+            Modules.Content.AddEntityState(typeof(PrimaryAttack));
 
             Modules.Content.AddEntityState(typeof(Shoot));
 

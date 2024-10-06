@@ -38,9 +38,11 @@ namespace FishermanMod.Survivors.Fisherman
             Language.Add(prefix + "OUTRO_FAILURE", outroFailure);
 
             #region Keywords
-            LanguageAPI.Add(prefix + "KEYWORD_TREASURE", $" <style=cKeywordName>Treasure</style><style=cSub> Cast can {Tokens.HookText("Hook")} drones, items, small chests, and more...");
+            LanguageAPI.Add(prefix + "KEYWORD_TREASURE", $" <style=cKeywordName>Treasure</style><style=cSub> Cast can {Tokens.HookText("Hook")} drones, items, chests, and more...");
             LanguageAPI.Add(prefix + "KEYWORD_NONLETHAL", $" <style=cKeywordName>Non-Lethal</style><style=cSub> Cannot kill.");
             LanguageAPI.Add(prefix + "KEYWORD_TETHER", $" <style=cKeywordName>Tether</style><style=cSub> Reduces movement speed by <style=cIsDamage>30%.</style>");
+            LanguageAPI.Add(prefix + "KEYWORD_UNFINISHED", $" <style=cKeywordName>UNFINISHED</style><style=cSub> Ability is still in development, meaning it probably functions poorly and is likley to change");
+            LanguageAPI.Add(prefix + "KEYWORD_DAUNTLESS", $" <style=cKeywordName>Dauntless</style><style=cSub>Resist most negative effects and gain <style=cIsDamage>{100 * FishermanStaticValues.bottleDamageBuff}%</style> damage for each one currently effecting you.");
             #endregion Keyowrds
 
 
@@ -51,7 +53,7 @@ namespace FishermanMod.Survivors.Fisherman
 
             #region Passive
             Language.Add(prefix + "PASSIVE_HOOK_EFFECT_NAME", Tokens.FishermanText("The Hooks!",0));
-            Language.Add(prefix + "PASSIVE_HOOK_EFFECT_DESCRIPTION", $"The Fisherman can {Tokens.HookText("Hook")} fish, flinging them towards him. If a fish is too heavy to be {Tokens.HookText("Hooked")}, they are instead {Tokens.RedText("inflicted with bleed.")}");
+            Language.Add(prefix + "PASSIVE_HOOK_EFFECT_DESCRIPTION", $"Certain attacks {Tokens.HookText("Hook")} fish, pulling them close. If a fish is too heavy to be {Tokens.HookText("Hooked")},  {Tokens.RedText("bleed")} them for {Tokens.RedText("120% damage.")} ");
             #endregion
 
             #region Primary
@@ -61,16 +63,16 @@ namespace FishermanMod.Survivors.Fisherman
 
             #region Secondary
             Language.Add(prefix + "SECONDARY_GUN_NAME", Tokens.FishermanText("Cast",2));
-            Language.Add(prefix + "SECONDARY_GUN_DESCRIPTION", $"<style=cIsUtility>Non-Lethal.</style> Charge up and Cast out an arcing hook. Recall it to {Tokens.HookText("Hook")} fish for <style=cIsDamage>{100f * FishermanStaticValues.castDamageCoefficient}% damage.</style> Can {Tokens.HookText("Hook")} all kinds of <style=cIsUtility>Treasure...</style>");
+            Language.Add(prefix + "SECONDARY_GUN_DESCRIPTION", $"<style=cIsUtility>Non-Lethal.</style> Charge up and cast out an arcing hook. Recall it to {Tokens.HookText("Hook")} fish for <style=cIsDamage>{100f * FishermanStaticValues.castDamageCoefficient}% damage.</style> Can {Tokens.HookText("Hook")} all kinds of <style=cIsUtility>Treasure...</style>");
             #endregion
 
             #region Utility
             Language.Add(prefix + "UTILITY_PLATFORM_NAME", Tokens.FishermanText("F153 Mobile Shanty Platform",3));
-            Language.Add(prefix + "UTILITY_PLATFORM_DESCRIPTION", $"Deploy a <style=cIsUtility>directable</style> drone that <style=cIsUtility>you can stand.</style> It slowly fires explosive rounds for <style=cIsDamage>{100f * FishermanStaticValues.shantyCannonDamage}% damage.</style>");
+            Language.Add(prefix + "UTILITY_PLATFORM_DESCRIPTION", $"<style=cIsUtility>Soulbound.</style> Deploy a <style=cIsUtility>directable</style> drone that <style=cIsUtility>you can stand on.</style> It slowly fires explosive rounds for <style=cIsDamage>{100f * FishermanStaticValues.shantyCannonDamage}% damage.</style>");
             Language.Add(prefix + "UTILITY_MINION_NAME", "Chris");
 
             Language.Add(prefix + "UTILITY_WHALE_NAME", Tokens.FishermanText("Strange Friend", 3));
-            Language.Add(prefix + "UTILITY_WHALE_DESCRIPTION", $"Summon a Baby Void Whale that continously deals <style=cIsDamage>{100f * FishermanStaticValues.whaleMissleDotDamage}% damage per second around it.</style> Kills increase his damage. <style=cIsUtility>Smack Him!.</style> ");
+            Language.Add(prefix + "UTILITY_WHALE_DESCRIPTION", $"{Tokens.HookText("UNFINISHED")} Release a whale that <style=cIsUtility>inherits all your items.</style> Emits smog that deals <style=cIsDamage>{100f * FishermanStaticValues.whaleMissleDotDamage}% damage per second</style>. Kills increase it's damage by <style=cIsDamage>{100f * FishermanStaticValues.whaleMissleDotDamage}%.</style> <style=cIsUtility>Smack Him!.</style> ");
             Language.Add(prefix + "UTILITY_WHALE_MINION_NAME", "Son");
             #endregion
 
@@ -81,7 +83,7 @@ namespace FishermanMod.Survivors.Fisherman
 
             #region Special
             Language.Add(prefix + "SPECIAL_DRINK_NAME", Tokens.FishermanText("Steady The Nerves", 4));
-            Language.Add(prefix + "SPECIAL_DRINK_DESCRIPTION", $"<style=cIsDamage>Stunning</style>. Take a drink. Resist most negative effects and gain <style=cIsDamage>{100 * FishermanStaticValues.bottleDamageBuff}%</style> damage for each one on you. Recast to throw the bottle for <style=cIsDamage>{100f * FishermanStaticValues.bottleDamageCoefficient}% damage.</style>");
+            Language.Add(prefix + "SPECIAL_DRINK_DESCRIPTION", $"{Tokens.HookText("UNFINISHED")} <style=cIsDamage>Stunning</style>. Take a drink for <style=cIsDamage>{100f * FishermanStaticValues.bottleUppercutDamageCoefficient}% damage.</style> and gain <style=cIsUtility>Dauntless</style>. Then throw the bottle for <style=cIsDamage>{100f * FishermanStaticValues.bottleDamageCoefficient}% damage.</style>");
             #endregion
 
             #region Achievements

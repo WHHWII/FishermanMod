@@ -28,10 +28,12 @@ namespace FishermanMod.Survivors.Fisherman
         public static GameObject swordSwingEffect;
         public static GameObject swordStabEffect;
         public static GameObject swordHitImpactEffect;
+        public static GameObject uppercutEffect;
 
         public static GameObject bombExplosionEffect;
         public static GameObject bottleImpactEffect;
         public static GameObject shantyShotGhost;
+       
 
         // networked hit sounds
         public static NetworkSoundEventDef swordHitSoundEvent;
@@ -83,6 +85,7 @@ namespace FishermanMod.Survivors.Fisherman
             swordStabEffect = _assetBundle.LoadEffect("HenryBazookaMuzzleFlash", true);
             //swordStabEffect.GetComponent<ParticleSystemRenderer>().sharedMaterial = Addressables.LoadAssetAsync<UnityEngine.Material>("RoR2/Base/Commando/matCommandoFMJRing.mat").WaitForCompletion();
 
+            uppercutEffect = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Merc/MercSwordUppercutSlash.prefab").WaitForCompletion();
 
             swordHitImpactEffect = _assetBundle.LoadEffect("ImpactHenrySlash");
         }

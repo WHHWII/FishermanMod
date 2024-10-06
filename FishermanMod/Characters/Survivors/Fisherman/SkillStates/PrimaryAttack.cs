@@ -1,12 +1,10 @@
-﻿using FishermanMod.Modules;
-using FishermanMod.Modules.BaseStates;
-using R2API;
+﻿using FishermanMod.Modules.BaseStates;
 using RoR2;
 using UnityEngine;
 
 namespace FishermanMod.Survivors.Fisherman.SkillStates
 {
-    public class SlashCombo : BaseMeleeAttack
+    public class PrimaryAttack : BaseMeleeAttack
     {
         public float drunkDeviation = 0;
         public int drunkBuffCnt = 0;

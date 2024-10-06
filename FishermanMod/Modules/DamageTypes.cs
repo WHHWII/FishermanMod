@@ -14,6 +14,7 @@ namespace FishermanMod.Modules
         public static R2API.DamageAPI.ModdedDamageType FishermanHookPassive;
         public static R2API.DamageAPI.ModdedDamageType FishermanKnockup;
         public static R2API.DamageAPI.ModdedDamageType FishermanWhaleFog;
+        public static R2API.DamageAPI.ModdedDamageType FishermanUppercut;
 
 
 
@@ -25,6 +26,7 @@ namespace FishermanMod.Modules
             FishermanHookPassive = DamageAPI.ReserveDamageType();
             FishermanKnockup = DamageAPI.ReserveDamageType();
             FishermanWhaleFog = DamageAPI.ReserveDamageType();
+            FishermanUppercut = DamageAPI.ReserveDamageType();
             SetHooks();
         }
         private static void SetHooks()
@@ -54,9 +56,10 @@ namespace FishermanMod.Modules
 
             if (damageInfo.HasModdedDamageType(FishermanHookPassive))
             {
-               // Log.Info("HookDamageTypeInvoked");
-
+                // Log.Info("HookDamageTypeInvoked");
                 if (!victim.body) return;
+                if (damageReport.victimBody.characterMotor) damageReport.victimBody.characterMotor.velocity = Vector3.zero;
+
                 FishermanSurvivor.ApplyFishermanPassiveFishHookEffect(
                     damageReport.attacker,
                     damageInfo.inflictor,
@@ -73,7 +76,7 @@ namespace FishermanMod.Modules
                 //apply knockup scaled with mass if victim has rigidbody. Do not apply knockup if victim is airborne.
                 if(damageReport.victimBody && damageReport.victimBody.characterMotor && damageReport.victimBody.characterMotor.isGrounded)
                 {
-                    damageInfo.force = (damageReport.victimBody.rigidbody && damageReport.victimBody.rigidbody.mass < 700 ? damageReport.victimBody.rigidbody.mass : 0.1f) * damageInfo.force;
+                    damageInfo.force = (damageReport.victimBody.rigidbody && damageReport.victimBody.rigidbody.mass < FishermanStaticValues.hookMaxMass ? damageReport.victimBody.rigidbody.mass : 0.1f) * damageInfo.force;
                 }
                 else
                 {
@@ -87,6 +90,18 @@ namespace FishermanMod.Modules
             if (damageInfo.HasModdedDamageType(FishermanWhaleFog))
             {
                 damageReport.victimBody.healthComponent.ApplyDot(damageReport.attacker, FishermanBuffs.fishermanWhaleFogDot);
+            }
+            if (damageInfo.HasModdedDamageType(FishermanUppercut))
+            {
+                DamageInfo diTemp = damageInfo;
+                //counteract current velocity
+               if(damageReport.victimBody.characterMotor) damageReport.victimBody.characterMotor.velocity = Vector3.zero;
+
+                diTemp.force = new Vector3(0, FishermanStaticValues.bottleUppercutForceYZ[0],0) + damageReport.attackerBody.inputBank.aimDirection * FishermanStaticValues.bottleUppercutForceYZ[1];
+                diTemp.canRejectForce = false;
+                damageInfo.force = (damageReport.victimBody.rigidbody && damageReport.victimBody.rigidbody.mass < FishermanStaticValues.hookMaxMass ? damageReport.victimBody.rigidbody.mass : Mathf.Max(damageReport.attackerBody.level / 20, 2) * FishermanStaticValues.hookMaxMass) * damageInfo.force;
+
+                damageReport.victimBody.healthComponent.TakeDamageForce(diTemp);
             }
         }
 

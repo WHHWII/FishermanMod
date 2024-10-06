@@ -10,6 +10,7 @@ using TMPro;
 using FishermanMod.Characters.Survivors.Fisherman.Components;
 using FishermanMod.Survivors.Fisherman;
 using static R2API.SoundAPI.Music.CustomMusicTrackDef;
+using UnityEngine.UIElements;
 
 namespace FishermanMod.Characters.Survivors.Fisherman.Content
 {
@@ -112,6 +113,7 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Content
             bool requiresTargetLos = false;
             bool requiresAimLos = false;
             bool requiresAimConfirmation = false;
+            
             if (!base.body || !base.bodyInputBank)
             {
                 return;
@@ -132,8 +134,8 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Content
             BaseAI.Target target = skillDriverEvaluation.target;
             if ((bool)target?.gameObject)
             {
-                target.GetBullseyePosition(out var position2);
-                Vector3 vector = position2;
+                target.GetBullseyePosition(out var enemyPosition);
+                Vector3 vector = enemyPosition;
                 //if (fallbackNodeStartAge + fallbackNodeDuration < base.fixedAge)
                 //{
                 //    base.ai.SetGoalPosition(target);
@@ -142,11 +144,22 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Content
 
 
 
+                /////
+                /*todo
+                 * i want the platform to use the node graph if he is far enough away from you
+                 * need to get the position of the target whether that be the command or leader and calculate the node graph step
+                 * Need a secondary navigation agent so that he may keep his enemy target. He should always be able to shoot independant of movement.
+                 */
+                
+
+                ////
+
                 //move to target - my code
                 targetPosition = commandTarget;
                 float distToCommander = commanderObj ? Vector3.Distance(position, commanderObj.transform.position) : 0;
-                if (commanderObj && distToCommander > 60 && !followingCommand && !leashing)
+                if (commanderObj && distToCommander > 60 && !followingCommand)
                 {
+                    /*
                     leashing = true;
                     RaycastHit hit;
                     Vector3 offset = Vector3.down * 8;
@@ -160,27 +173,38 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Content
                         targetPosition = commanderObj.transform.position + (Vector3.up * 40) + (Vector3.one * UnityEngine.Random.Range(-3, -3));
 
                     }
+                    */
+
+                    Vector3 commanderPosition;
+                    ai.leader.GetBullseyePosition(out commanderPosition);
 
                     for (int i = 0; i < base.ai.skillDrivers.Length; i++)
                     {
                         base.ai.skillDrivers[i].ignoreNodeGraph = false;
                         base.ai.desiredSpawnNodeGraphType = MapNodeGroup.GraphType.Air;
                     }
+                    Vector3 vector2 = ((!dominantSkillDriver || !dominantSkillDriver.ignoreNodeGraph) ? (output.nextPosition ?? myBodyFootPosition) : ((!base.body.isFlying) ? vector : commanderPosition));
+                    targetPosition = vector2 + (position - myBodyFootPosition);
+
                     objTracker.platformPosTargetIndicator.SetActive(false);
                 }
-                
-                float distToTarg = Vector3.Distance(position, targetPosition);
-                if (distToTarg < 1.5)
+                else
                 {
-                    followingCommand = false;
-                    targetPosition = position;
+                    float distToTarg = Vector3.Distance(position, targetPosition);
+                    if (distToTarg < 1.5)
+                    {
+                        followingCommand = false;
+                        targetPosition = position;
+                    }
+                    if (distToTarg <= body.moveSpeed)
+                    {
+                        targetPosition = Vector3.MoveTowards(targetPosition, position, 0.5f * deltaTime);
+                        //body.baseMoveSpeed = Mathf.Lerp(body.baseMoveSpeed, 0, 0.5f * deltaTime);
+                        //moveinputScale = Mathf.Lerp(moveinputScale, 0.1f, 0.5f * deltaTime);
+                    }
                 }
-                //if(distToTarg <= body.moveSpeed)
-                //{
-                //    targetPosition = Vector3.MoveTowards(targetPosition, position, 0.5f * deltaTime);
-                //    body.baseMoveSpeed = Mathf.Lerp(body.baseMoveSpeed, 0, 0.5f * deltaTime);
-                //    moveinputScale = Mathf.Lerp(moveinputScale, 0.1f, 0.5f * deltaTime);
-                //}
+                
+
                 //else
                 //{
                 //    body.baseMoveSpeed = 8; // fix hardcoding later

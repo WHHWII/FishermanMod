@@ -27,10 +27,11 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Components
 
         public void RecallAllHooks()
         {
-            foreach (FishHookController hook in deployedHooks) 
+            foreach (FishHookController hook in deployedHooks)
             {
-                hook.StartCoroutine(hook.FlyBack());
+                if (hook) hook.StartCoroutine(hook.FlyBack());
             }
+
             deployedHooks.Clear();
         }
 
@@ -38,7 +39,7 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Components
         {
             foreach (HookBombController bomb in deployedBombs)
             {
-                bomb.HookAllTethers();
+                if (bomb) bomb.HookAllTethers();
             }
             deployedBombs.Clear();
         }
@@ -48,8 +49,8 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Components
             List<MovingPlatformController> toRemove = new List<MovingPlatformController>();
             foreach (MovingPlatformController platform in deployedPlatforms)
             {
-                Debug.Log("Platform instance: "+ platform);
-                if(platform == null)
+                Debug.Log("Platform instance: " + platform);
+                if (platform == null)
                 {
                     toRemove.Add(platform);
                     Debug.Log("Platform was null. Removing");
