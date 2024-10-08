@@ -90,7 +90,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
             {
                 AddBuffForeachDebuff();
             }
-            base.skillLocator.special.SetSkillOverride(this, FishermanSurvivor.specialThrowFlask, RoR2.GenericSkill.SkillOverridePriority.Upgrade);
+            base.skillLocator.special.SetSkillOverride(gameObject, FishermanSurvivor.specialThrowFlask, RoR2.GenericSkill.SkillOverridePriority.Upgrade);
         }
 
 

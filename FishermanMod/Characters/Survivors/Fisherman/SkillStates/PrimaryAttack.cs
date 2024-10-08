@@ -41,35 +41,35 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
             switch (swingIndex)
             {
                 case 0:
-                    baseDuration = 1.2f + drunkDeviation;
+                    baseDuration = 1.2f;
 
                     damageCoefficient = FishermanStaticValues.stabDamageCoefficient;
                     
-                    attackStartPercentTime = 0.3f + drunkDeviation;
-                    attackEndPercentTime = 0.5f + drunkDeviation;
-                    earlyExitPercentTime = 0.6f + drunkDeviation;
+                    attackStartPercentTime = 0.3f;
+                    attackEndPercentTime = 0.5f;
+                    earlyExitPercentTime = 0.6f;
                     muzzleString = "StabMuzzle";
                     swingEffectPrefab = FishermanAssets.swordStabEffect;
                     break;
 
                 case 1:
-                    baseDuration = 0.75f + drunkDeviation;
+                    baseDuration = 0.75f;
 
                     damageCoefficient = FishermanStaticValues.swipeDamageCoefficient;
                     muzzleString = "SwingLeftMuzzle";
-                    attackStartPercentTime = 0.2f + drunkDeviation;
-                    attackEndPercentTime = 0.4f + drunkDeviation;
-                    earlyExitPercentTime = 0.6f + drunkDeviation;
+                    attackStartPercentTime = 0.2f;
+                    attackEndPercentTime = 0.4f;
+                    earlyExitPercentTime = 0.6f;
                     swingEffectPrefab = FishermanAssets.swordSwingEffect;
                     break;
                 case 2:
-                    baseDuration = 0.75f + drunkDeviation;
+                    baseDuration = 0.75f;
 
                     damageCoefficient = FishermanStaticValues.swipeDamageCoefficient;
                     muzzleString = "SwingRightMuzzle";
-                    attackStartPercentTime = 0.2f + drunkDeviation;
-                    attackEndPercentTime = 0.4f + drunkDeviation;
-                    earlyExitPercentTime = 0.6f + drunkDeviation;
+                    attackStartPercentTime = 0.2f;
+                    attackEndPercentTime = 0.4f;
+                    earlyExitPercentTime = 0.6f;
                     swingEffectPrefab = FishermanAssets.swordSwingEffect;
                     break;
             }

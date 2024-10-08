@@ -19,7 +19,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
             if (base.isAuthority)
             {
                 PlayAnimation("Gesture, Override", "SecondaryCastRecall", "SecondaryCast.playbackRate", 0.65f);
-                base.skillLocator.secondary.SetSkillOverride(this, FishermanSurvivor.secondaryFireFishHook, RoR2.GenericSkill.SkillOverridePriority.Upgrade);
+                base.skillLocator.secondary.UnsetSkillOverride(gameObject, FishermanSurvivor.secondaryRecallFishHook, RoR2.GenericSkill.SkillOverridePriority.Upgrade);
                 base.skillLocator.secondary.DeductStock(1); // may change this to deduct all stocks if all hooks are fired at once.
                 characterBody.GetComponent<FishermanSkillObjectTracker>()?.RecallAllHooks(); 
             }

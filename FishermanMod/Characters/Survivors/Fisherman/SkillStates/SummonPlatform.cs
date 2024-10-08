@@ -139,7 +139,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
                     Log.Debug("Exiting platform placement");
                     if(exitedFromUse)
                     {
-                        base.skillLocator.utility.SetSkillOverride(this, FishermanSurvivor.utilityDirectPlatform, RoR2.GenericSkill.SkillOverridePriority.Upgrade);
+                        base.skillLocator.utility.SetSkillOverride(gameObject, FishermanSurvivor.utilityDirectPlatform, RoR2.GenericSkill.SkillOverridePriority.Upgrade);
                         base.skillLocator.utility.DeductStock(1); // may change this to deduct all stocks if all hooks are fired at once.
                     }
                     outer.SetNextStateToMain();
@@ -172,10 +172,10 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
                                 masterSummon.position = GetPlacementInfo().position;
                                 masterSummon.rotation = Util.QuaternionSafeLookRotation(base.characterDirection.forward);
                                 CharacterMaster platformMaster = masterSummon.Perform();
-                                if (platformMaster)
-                                {
-                                    platformMaster.inventory.CopyItemsFrom(base.characterBody.inventory);
-                                }
+                                //if (platformMaster)
+                                //{
+                                //    //platformMaster.inventory.CopyItemsFrom(base.characterBody.inventory);
+                                //}
                                 //objTracker.platformAimTargetIndicator = UnityEngine.GameObject.Instantiate(FishermanAssets.shantyBlueprintPrefab);
                                 //objTracker.platformPosTargetIndicator.transform.position = characterBody.transform.position + Vector3.up * 50;
                                 //objTracker.DirectAllPlatforms();

@@ -130,7 +130,10 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Content
             Vector3 position = base.bodyTransform.position;
             _ = base.bodyInputBank.aimOrigin;
             BroadNavigationSystem.Agent broadNavigationAgent = base.ai.broadNavigationAgent;
-            BroadNavigationSystem.AgentOutput output = broadNavigationAgent.output;
+            BroadNavigationSystem.Agent broadNavigationAgentLeash = base.ai.broadNavigationAgent;
+
+            BroadNavigationSystem.AgentOutput navigationOutput = broadNavigationAgent.output;
+            
             BaseAI.Target target = skillDriverEvaluation.target;
             if ((bool)target?.gameObject)
             {
@@ -177,13 +180,17 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Content
 
                     Vector3 commanderPosition;
                     ai.leader.GetBullseyePosition(out commanderPosition);
+                    Vector3 leashLocation = commanderObj.transform.position + (Vector3.up * 40) /*+ (Vector3.one * UnityEngine.Random.Range(-3, -3))*/;
+                    broadNavigationAgentLeash.goalPosition = leashLocation;
+
+
 
                     for (int i = 0; i < base.ai.skillDrivers.Length; i++)
                     {
                         base.ai.skillDrivers[i].ignoreNodeGraph = false;
                         base.ai.desiredSpawnNodeGraphType = MapNodeGroup.GraphType.Air;
                     }
-                    Vector3 vector2 = ((!dominantSkillDriver || !dominantSkillDriver.ignoreNodeGraph) ? (output.nextPosition ?? myBodyFootPosition) : ((!base.body.isFlying) ? vector : commanderPosition));
+                    Vector3 vector2 = ((!dominantSkillDriver || !dominantSkillDriver.ignoreNodeGraph) ? (broadNavigationAgentLeash.output.nextPosition ?? myBodyFootPosition) : ((!base.body.isFlying) ? vector : leashLocation));
                     targetPosition = vector2 + (position - myBodyFootPosition);
 
                     objTracker.platformPosTargetIndicator.SetActive(false);
@@ -191,7 +198,7 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Content
                 else
                 {
                     float distToTarg = Vector3.Distance(position, targetPosition);
-                    if (distToTarg < 1.5)
+                    if (distToTarg < 5)
                     {
                         followingCommand = false;
                         targetPosition = position;
@@ -249,7 +256,7 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Content
             //    broadNavigationAgent.goalPosition = PickRandomNearbyReachablePosition();
             //    broadNavigationAgent.InvalidatePath();
             //}
-            lastPathUpdate = output.lastPathUpdate;
+            lastPathUpdate = navigationOutput.lastPathUpdate;
         }
 
         public override BaseAI.BodyInputs GenerateBodyInputs(in BaseAI.BodyInputs previousBodyInputs)

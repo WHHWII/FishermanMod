@@ -44,7 +44,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
 
             if(base.isAuthority && !KeyIsDown() && !base.IsKeyDownAuthority())
                 PlayAnimation("Gesture, Override", "SecondaryCastEnd", "SecondaryCast.playbackRate", 0.65f);
-            base.skillLocator.secondary.SetSkillOverride(this, FishermanSurvivor.secondaryRecallFishHook, RoR2.GenericSkill.SkillOverridePriority.Upgrade);
+            base.skillLocator.secondary.SetSkillOverride(gameObject, FishermanSurvivor.secondaryRecallFishHook, RoR2.GenericSkill.SkillOverridePriority.Upgrade);
             base.skillLocator.secondary.DeductStock(1);
         }
         public override void FixedUpdate()

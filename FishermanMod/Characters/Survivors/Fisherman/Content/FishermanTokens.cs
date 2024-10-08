@@ -23,9 +23,9 @@ namespace FishermanMod.Survivors.Fisherman
 
             string desc = "Fisherman is a utility focused survivor that forces enemies to fight on his terms.<color=#CCD3E0>"                                                    + Environment.NewLine + Environment.NewLine
              + "< ! > Debone can be used to snatch enemies out of the air and throw attackers out of position"                                                                   + Environment.NewLine + Environment.NewLine
-             + "< ! > Cast can be used to grab faraway enemies, chests, drones and all sorts of things in order to clear stages quickly. It can even grab some of your abilties" + Environment.NewLine + Environment.NewLine
+             + "< ! > Cast can be used to grab faraway enemies, chests, drones and all sorts of things in order to clear stages quickly. It can also grab some of your abilties" + Environment.NewLine + Environment.NewLine
              + "< ! > The F153 Mobile Shanty plaform may not help you dodge attacks, but can help you navigate large gaps, sheer cliffs, and can provide aerial support."        + Environment.NewLine + Environment.NewLine
-             + "< ! > Man o' War can be used to group up pesky flyers or throw enemies off stage while Steady the Nerves can be used to get krunked."                            + Environment.NewLine + Environment.NewLine;
+             + "< ! > Man o' War can be used to group up pesky flyers or throw enemies off stage."                                                                               + Environment.NewLine + Environment.NewLine;
 
             string outro = "..and so he left, with what little time he had.";
             string outroFailure = "..and so he vanished, lost at sea.";
@@ -42,7 +42,10 @@ namespace FishermanMod.Survivors.Fisherman
             LanguageAPI.Add(prefix + "KEYWORD_NONLETHAL", $" <style=cKeywordName>Non-Lethal</style><style=cSub> Cannot kill.");
             LanguageAPI.Add(prefix + "KEYWORD_TETHER", $" <style=cKeywordName>Tether</style><style=cSub> Reduces movement speed by <style=cIsDamage>30%.</style>");
             LanguageAPI.Add(prefix + "KEYWORD_UNFINISHED", $" <style=cKeywordName>UNFINISHED</style><style=cSub> Ability is still in development, meaning it probably functions poorly and is likley to change");
-            LanguageAPI.Add(prefix + "KEYWORD_DAUNTLESS", $" <style=cKeywordName>Dauntless</style><style=cSub>Resist most negative effects and gain <style=cIsDamage>{100 * FishermanStaticValues.bottleDamageBuff}%</style> damage for each one currently effecting you.");
+            LanguageAPI.Add(prefix + "KEYWORD_DAUNTLESS", $" <style=cKeywordName>Steady</style><style=cSub>Resist most negative effects and gain a <style=cIsDamage>{100 * FishermanStaticValues.bottleDamageBuff}%</style> increase to all damage for each one currently effecting you.");
+            LanguageAPI.Add(prefix + "KEYWORD_SMACK", $" <style=cKeywordName>Smack Him!</style><style=cSub>The whale can be damaged, {Tokens.HookText("Hooked")}, and pushed by your abilities.");
+            LanguageAPI.Add(prefix + "KEYWORD_LINKED", $"<style=cKeywordName>Soulbound</style><style=cSub>This minion does not inherit your items, but all damage they deal " + $"is treated as your own.</style>");
+
             #endregion Keyowrds
 
 
@@ -83,7 +86,7 @@ namespace FishermanMod.Survivors.Fisherman
 
             #region Special
             Language.Add(prefix + "SPECIAL_DRINK_NAME", Tokens.FishermanText("Steady The Nerves", 4));
-            Language.Add(prefix + "SPECIAL_DRINK_DESCRIPTION", $"{Tokens.HookText("UNFINISHED")} <style=cIsDamage>Stunning</style>. Take a drink for <style=cIsDamage>{100f * FishermanStaticValues.bottleUppercutDamageCoefficient}% damage.</style> and gain <style=cIsUtility>Dauntless</style>. Then throw the bottle for <style=cIsDamage>{100f * FishermanStaticValues.bottleDamageCoefficient}% damage.</style>");
+            Language.Add(prefix + "SPECIAL_DRINK_DESCRIPTION", $"<style=cIsDamage>Stunning</style>. Take a drink for <style=cIsDamage>{100f * FishermanStaticValues.bottleUppercutDamageCoefficient}% damage</style> and become <style=cIsUtility>Steady</style>. Then throw the bottle for <style=cIsDamage>{100f * FishermanStaticValues.bottleDamageCoefficient}% damage.</style>");
             #endregion
 
             #region Achievements

@@ -62,7 +62,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
         {
             base.OnExit();
             //PlayAnimation("LeftArm, Override", "SpecialBomb", "SpecialBomb.playbackRate", 0.65f);
-            base.skillLocator.special.SetSkillOverride(this, FishermanSurvivor.specialRecallHookBomb, RoR2.GenericSkill.SkillOverridePriority.Upgrade);
+            base.skillLocator.special.SetSkillOverride(gameObject, FishermanSurvivor.specialRecallHookBomb, RoR2.GenericSkill.SkillOverridePriority.Upgrade);
             base.skillLocator.special.DeductStock(1);
         }
     }

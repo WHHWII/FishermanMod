@@ -2,6 +2,7 @@
 using EntityStates.AI;
 using FishermanMod.Characters.Survivors.Fisherman.Components;
 using FishermanMod.Characters.Survivors.Fisherman.Content;
+using R2API.Networking;
 using RoR2;
 using RoR2.CharacterAI;
 using System;
@@ -42,6 +43,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
             baseAi = GetComponent<CharacterBody>().master.GetComponent<RoR2.CharacterAI.BaseAI>();
             CharacterMaster owner = baseAi.GetComponent<AIOwnership>()?.ownerMaster;
             owner?.GetBodyObject().GetComponent<FishermanSkillObjectTracker>()?.deployedPlatforms.Add(this);
+            characterBody.AddBuff(BuffCatalog.GetBuffDef(BuffCatalog.FindBuffIndex("HiddenRejectAllDamage")));
             //for (int i = 0; i < baseAi.skillDrivers.Length; i++)
             //{
             //    baseAi.skillDrivers[i].ignoreNodeGraph = true;

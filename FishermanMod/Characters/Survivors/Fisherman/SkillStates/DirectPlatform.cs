@@ -41,7 +41,10 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
                 {
                     objTracker.platformPosTargetIndicator.transform.position = aimray.GetPoint(50);
                 }
-                objTracker.DirectAllPlatforms();
+                if (!objTracker.DirectAllPlatforms())
+                {
+                    skillLocator.utility.UnsetSkillOverride(gameObject, FishermanSurvivor.utilityDirectPlatform, RoR2.GenericSkill.SkillOverridePriority.Upgrade);
+                }
 
             }
             outer.SetNextStateToMain();

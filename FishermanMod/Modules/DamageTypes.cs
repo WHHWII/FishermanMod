@@ -98,9 +98,21 @@ namespace FishermanMod.Modules
                if(damageReport.victimBody.characterMotor) damageReport.victimBody.characterMotor.velocity = Vector3.zero;
 
                 diTemp.force = new Vector3(0, FishermanStaticValues.bottleUppercutForceYZ[0],0) + damageReport.attackerBody.inputBank.aimDirection * FishermanStaticValues.bottleUppercutForceYZ[1];
-                diTemp.canRejectForce = false;
-                damageInfo.force = (damageReport.victimBody.rigidbody && damageReport.victimBody.rigidbody.mass < FishermanStaticValues.hookMaxMass ? damageReport.victimBody.rigidbody.mass : Mathf.Max(damageReport.attackerBody.level / 20, 2) * FishermanStaticValues.hookMaxMass) * damageInfo.force;
+                //diTemp.canRejectForce = false;
 
+                float massScalar = 0;
+                if (damageReport.victimBody.rigidbody)
+                {
+                    if(damageReport.victimBody.rigidbody.mass < FishermanStaticValues.hookMaxMass)
+                    {
+                        massScalar = damageReport.victimBody.rigidbody.mass;
+                    }
+                    else
+                    {
+                        massScalar = damageReport.victimBody.rigidbody.mass * Mathf.Min(damageReport.attackerBody.level / 40, 1);
+                    }
+                }
+                diTemp.force *= massScalar;
                 damageReport.victimBody.healthComponent.TakeDamageForce(diTemp);
             }
         }

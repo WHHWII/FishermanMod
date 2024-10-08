@@ -45,7 +45,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
                 ChildLocator childLocator = characterBody.modelLocator.modelTransform.gameObject.GetComponent<ChildLocator>();
                 childLocator.FindChild("Drink").gameObject.SetActive(false);
                 PlayAnimation("LeftArm, Override", "UtilityPlatform", "UtilityPlatform.playbackRate", -0.65f);
-                base.skillLocator.special.SetSkillOverride(this, FishermanSurvivor.specialDrinkFlask, RoR2.GenericSkill.SkillOverridePriority.Upgrade);
+                base.skillLocator.special.UnsetSkillOverride(gameObject, FishermanSurvivor.specialThrowFlask, RoR2.GenericSkill.SkillOverridePriority.Upgrade);
                 base.skillLocator.special.DeductStock(1); 
                
 

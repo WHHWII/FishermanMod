@@ -236,6 +236,7 @@ namespace FishermanMod.Survivors.Fisherman
             primaryFishingPoleMelee.stepCount = 3;
             primaryFishingPoleMelee.stepGraceDuration = 0.5f;
             primaryFishingPoleMelee.canceledFromSprinting = true;
+            primaryFishingPoleMelee.cancelSprintingOnActivation = true;
 
             Skills.AddPrimarySkills(bodyPrefab, primaryFishingPoleMelee);
 
@@ -363,6 +364,7 @@ namespace FishermanMod.Survivors.Fisherman
                 skillNameToken = FISHERMAN_PREFIX + "UTILITY_PLATFORM_NAME",
                 skillDescriptionToken = FISHERMAN_PREFIX + "UTILITY_PLATFORM_DESCRIPTION",
                 skillIcon = assetBundle.LoadAsset<Sprite>("Shanty Icon"),
+                keywordTokens = new string[] { FISHERMAN_PREFIX + "KEYWORD_LINKED" },
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(SkillStates.SummonPlatform)),
                 activationStateMachineName = "Weapon",
@@ -426,6 +428,7 @@ namespace FishermanMod.Survivors.Fisherman
                 skillNameToken = FISHERMAN_PREFIX + "UTILITY_WHALE_NAME",
                 skillDescriptionToken = FISHERMAN_PREFIX + "UTILITY_WHALE_DESCRIPTION",
                 skillIcon = assetBundle.LoadAsset<Sprite>("Shanty Icon"),
+                keywordTokens = new string[] { FISHERMAN_PREFIX + "KEYWORD_UNFINISHED" },
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(SkillStates.ReleaseWhaleState)),
                 activationStateMachineName = "Weapon",
@@ -524,7 +527,7 @@ namespace FishermanMod.Survivors.Fisherman
                 interruptPriority = EntityStates.InterruptPriority.Skill,
 
                 baseMaxStock = 1,
-                baseRechargeInterval = 12f,
+                baseRechargeInterval = 10f,
 
                 isCombatSkill = false,
                 mustKeyPress = true,

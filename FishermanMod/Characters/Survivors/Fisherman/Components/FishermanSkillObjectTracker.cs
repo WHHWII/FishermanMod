@@ -44,13 +44,13 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Components
             deployedBombs.Clear();
         }
 
-        public void DirectAllPlatforms()
+        public bool DirectAllPlatforms()
         {
             List<MovingPlatformController> toRemove = new List<MovingPlatformController>();
             foreach (MovingPlatformController platform in deployedPlatforms)
             {
                 Debug.Log("Platform instance: " + platform);
-                if (platform == null)
+                if (platform == null || !platform.characterBody.healthComponent.alive)
                 {
                     toRemove.Add(platform);
                     Debug.Log("Platform was null. Removing");
@@ -69,7 +69,7 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Components
 
                     CharacterMaster master = platform.GetComponent<RoR2.CharacterBody>().master;
                     master.GetComponent<RoR2.EntityStateMachine>().SetState(customState);
-                    platform.GetComponent<RoR2.CharacterBody>().inventory.CopyItemsFrom(characterBody.inventory);
+                    //platform.GetComponent<RoR2.CharacterBody>().inventory.CopyItemsFrom(characterBody.inventory);
 
                     BaseAI baseAi = master.GetComponent<RoR2.CharacterAI.BaseAI>();
                     CharacterMaster owner = baseAi.GetComponent<AIOwnership>()?.ownerMaster;
@@ -83,8 +83,13 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Components
             }
             platformPosTargetIndicator.SetActive(true); // note that the target indicators will not work when there is more than one platform.
             deployedPlatforms.RemoveAll((x) => toRemove.Contains(x));
+            if(deployedPlatforms.Count == 0)
+            {
+                return false;
+            }
             toRemove.Clear();
-
+            return true;
+            
         }
     }
 
