@@ -428,7 +428,7 @@ namespace FishermanMod.Survivors.Fisherman
                 skillNameToken = FISHERMAN_PREFIX + "UTILITY_WHALE_NAME",
                 skillDescriptionToken = FISHERMAN_PREFIX + "UTILITY_WHALE_DESCRIPTION",
                 skillIcon = assetBundle.LoadAsset<Sprite>("Shanty Icon"),
-                keywordTokens = new string[] { FISHERMAN_PREFIX + "KEYWORD_UNFINISHED" },
+                keywordTokens = new string[] { FISHERMAN_PREFIX + "KEYWORD_UNFINISHED", FISHERMAN_PREFIX + "KEYWORD_SMACK" },
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(SkillStates.ReleaseWhaleState)),
                 activationStateMachineName = "Weapon",

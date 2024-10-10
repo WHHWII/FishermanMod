@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using static R2API.SoundAPI.Music.CustomMusicTrackDef;
 
 namespace FishermanMod.Characters.Survivors.Fisherman.Components
 {
@@ -15,10 +16,14 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Components
     {
         public List<FishHookController> deployedHooks;
         public List<HookBombController> deployedBombs;
-        public List<MovingPlatformController> deployedPlatforms;
+        public List<FishermanPlatformMinionController> deployedPlatforms;
         public GameObject platformPosTargetIndicator;
         public GameObject platformAimTargetIndicator;
         public RoR2.CharacterBody characterBody;
+        public const string COMMAND_SKILL_DRIVER_NAME = "FollowCommand";
+        public const string LEASH_SKILL_DRIVER_NAME = "LeashLeader";
+        public const string STOP_SKILL_DRIVER_NAME = "StandStill";
+
 
         public void Start()
         {
@@ -46,8 +51,8 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Components
 
         public bool DirectAllPlatforms()
         {
-            List<MovingPlatformController> toRemove = new List<MovingPlatformController>();
-            foreach (MovingPlatformController platform in deployedPlatforms)
+            List<FishermanPlatformMinionController> toRemove = new List<FishermanPlatformMinionController>();
+            foreach (FishermanPlatformMinionController platform in deployedPlatforms)
             {
                 Debug.Log("Platform instance: " + platform);
                 if (platform == null || !platform.characterBody.healthComponent.alive)
@@ -57,28 +62,39 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Components
                 }
                 else
                 {
-                    //Custom state is to allow the platoform to move to the specified target, AND shoot indipenently with ai.
+                    ////Custom state is to allow the platoform to move to the specified target, AND shoot indipenently with ai.
 
-                    ShantyMoveShootState customState = new ShantyMoveShootState();
-                    customState.commandTarget = platformPosTargetIndicator.transform.position;
-                    customState.startPosition = platform.transform.position;
-                    customState.commanderObj = gameObject;
-                    customState.objTracker = this;
-                    customState.followingCommand = true;
-                    customState.leashing = false;
+                    //ShantyMoveShootState customState = new ShantyMoveShootState();
+                    //customState.commandTarget = platformPosTargetIndicator.transform.position;
+                    //customState.startPosition = platform.transform.position;
+                    //customState.commanderObj = gameObject;
+                    //customState.objTracker = this;
+                    //customState.followingCommand = true;
+                    //customState.leashing = false;
+
+                    //CharacterMaster master = platform.GetComponent<RoR2.CharacterBody>().master;
+                    //master.GetComponent<RoR2.EntityStateMachine>().SetState(customState);
+                    ////platform.GetComponent<RoR2.CharacterBody>().inventory.CopyItemsFrom(characterBody.inventory);
+
+                    //BaseAI baseAi = master.GetComponent<RoR2.CharacterAI.BaseAI>();
+                    //CharacterMaster owner = baseAi.GetComponent<AIOwnership>()?.ownerMaster;
+                    //for (int i = 0; i < baseAi.skillDrivers.Length; i++)
+                    //{
+                    //    baseAi.skillDrivers[i].ignoreNodeGraph = true;
+                    //}
 
                     CharacterMaster master = platform.GetComponent<RoR2.CharacterBody>().master;
-                    master.GetComponent<RoR2.EntityStateMachine>().SetState(customState);
-                    //platform.GetComponent<RoR2.CharacterBody>().inventory.CopyItemsFrom(characterBody.inventory);
-
-                    BaseAI baseAi = master.GetComponent<RoR2.CharacterAI.BaseAI>();
-                    CharacterMaster owner = baseAi.GetComponent<AIOwnership>()?.ownerMaster;
-                    for (int i = 0; i < baseAi.skillDrivers.Length; i++)
+                    BaseAI ai = master.GetComponent<BaseAI>();
+                    ai.customTarget.gameObject = platformPosTargetIndicator;
+                    ai.customTarget.lastKnownBullseyePosition = platformPosTargetIndicator.transform.position;
+                    ai.BeginSkillDriver(new BaseAI.SkillDriverEvaluation
                     {
-                        baseAi.skillDrivers[i].ignoreNodeGraph = true;
-                    }
+                        target = ai.customTarget,
+                        aimTarget = ai.currentEnemy,
+                        dominantSkillDriver = GetComponent<AISkillDriver>(),
+                        separationSqrMagnitude = Vector3.Distance(ai.body.footPosition, ai.customTarget.gameObject.transform.position)
+                    }); ;
                 }
-
 
             }
             platformPosTargetIndicator.SetActive(true); // note that the target indicators will not work when there is more than one platform.

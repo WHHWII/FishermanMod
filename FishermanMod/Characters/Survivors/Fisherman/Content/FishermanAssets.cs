@@ -19,6 +19,11 @@ using UnityEngine.Networking;
 using HarmonyLib;
 using UnityEngine.ParticleSystemJobs;
 using RoR2;
+using Mono.Cecil.Cil;
+using MonoMod.Cil;
+using static RoR2.LocalNavigator;
+using Newtonsoft.Json.Utilities;
+using static UnityEngine.UIElements.UIR.BestFitAllocator;
 
 namespace FishermanMod.Survivors.Fisherman
 {
@@ -517,21 +522,39 @@ namespace FishermanMod.Survivors.Fisherman
 
             //emergency drone base version
             //shantyBodyPrefab.transform.localScale *= 4;
-            var mpc = shantyBodyPrefab.AddComponent<MovingPlatformController>();
+            var mpc = shantyBodyPrefab.AddComponent<FishermanPlatformMinionController>();
             mpc.characterBody = shantyBodyPrefab.GetComponent<CharacterBody>();
 
-            //foreach (var col in shantyBodyPrefab.GetComponentsInChildren<BoxCollider>())
+            //foreach (BoxCollider col in shantyBodyPrefab.GetComponentsInChildren<BoxCollider>())
             //{
-            //    col.gameObject.layer = LayerIndex.entityPrecise.intVal;
+            //    col.gameObject.layer = LayerIndex.fakeActor.intVal;
             //}
+            //foreach(Transform t in shantyBodyPrefab.transform)
+            //{
+            //    t.gameObject.layer = LayerIndex.fakeActor.intVal;
+            //}
+            //shantyBodyPrefab.layer = LayerIndex.fakeActor.intVal;
+            //shantyBodyPrefab.layer = LayerIndex.fakeActor.intVal;
+            //var cl = shantyBodyPrefab.GetComponent<ModelLocator>().modelTransform.GetComponent<ChildLocator>();
+            //cl.FindChild("StandableSurface").gameObject.layer = LayerIndex.fakeActor.intVal;
+
 
             //master
-            shantyMasterPrefab = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Drones/MegaDroneMaster.prefab").WaitForCompletion(), "ShantyMaster");//_assetBundle.LoadAsset<GameObject>("ShantyPlatformMaster");//
+            shantyMasterPrefab = _assetBundle.LoadAsset<GameObject>("ShantyMinionMaster");//PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Drones/MegaDroneMaster.prefab").WaitForCompletion(), "ShantyMaster");//
             CharacterMaster master = shantyMasterPrefab.GetComponent<CharacterMaster>();
             master.spawnOnStart = false;
             master.bodyPrefab = shantyBodyPrefab;
+            //foreach(BaseAI ai in master.aiComponents)
+            //{
+            //    //ai.skillDrivers.
+            //}
             UnityEngine.Object.Destroy(shantyMasterPrefab.GetComponent<SetDontDestroyOnLoad>());
 
+            IL.RoR2.LocalNavigator.Update += ShantyMinion_LocalNavigator_ObstructionBypass;
+
+           
+
+     
 
 
             //InitializeMinionSkins();
@@ -562,8 +585,8 @@ namespace FishermanMod.Survivors.Fisherman
                 beginSkillCooldownOnSkillEnd = true,
 
                 isCombatSkill = true,
-                canceledFromSprinting = true,
-                cancelSprintingOnActivation = true,
+                canceledFromSprinting = false,
+                cancelSprintingOnActivation = false,
                 forceSprintDuringState = false,
 
 
@@ -574,26 +597,26 @@ namespace FishermanMod.Survivors.Fisherman
             
             var shantyAI = FishermanAssets.shantyMasterPrefab.GetComponent<RoR2.CharacterAI.BaseAI>();
 
-            AISkillDriver fireCannon = shantyMasterPrefab.AddComponent<AISkillDriver>();
-            fireCannon.customName = "fireCannon";
-            fireCannon.skillSlot = SkillSlot.Primary;
-            fireCannon.requireSkillReady = true;
-            fireCannon.minUserHealthFraction = float.NegativeInfinity;
-            fireCannon.maxUserHealthFraction = float.PositiveInfinity;
-            fireCannon.minTargetHealthFraction = float.NegativeInfinity;
-            fireCannon.maxTargetHealthFraction = float.PositiveInfinity;
-            fireCannon.minDistance = 0f;
-            fireCannon.maxDistance = 200f;
-            fireCannon.activationRequiresAimConfirmation = true;
-            fireCannon.activationRequiresTargetLoS = true;
-            fireCannon.selectionRequiresTargetLoS = true;
-            fireCannon.maxTimesSelected = -1;
-            fireCannon.moveTargetType = AISkillDriver.TargetType.CurrentEnemy;
-            fireCannon.movementType = AISkillDriver.MovementType.StrafeMovetarget;
-            fireCannon.aimType = AISkillDriver.AimType.AtMoveTarget;
-            fireCannon.moveInputScale = 1f;
-            fireCannon.ignoreNodeGraph = true;
-            fireCannon.buttonPressType = AISkillDriver.ButtonPressType.TapContinuous;
+            //AISkillDriver fireCannon = shantyMasterPrefab.AddComponent<AISkillDriver>();
+            //fireCannon.customName = "fireCannon";
+            //fireCannon.skillSlot = SkillSlot.Primary;
+            //fireCannon.requireSkillReady = true;
+            //fireCannon.minUserHealthFraction = float.NegativeInfinity;
+            //fireCannon.maxUserHealthFraction = float.PositiveInfinity;
+            //fireCannon.minTargetHealthFraction = float.NegativeInfinity;
+            //fireCannon.maxTargetHealthFraction = float.PositiveInfinity;
+            //fireCannon.minDistance = 0f;
+            //fireCannon.maxDistance = 200f;
+            //fireCannon.activationRequiresAimConfirmation = true;
+            //fireCannon.activationRequiresTargetLoS = true;
+            //fireCannon.selectionRequiresTargetLoS = true;
+            //fireCannon.maxTimesSelected = -1;
+            //fireCannon.moveTargetType = AISkillDriver.TargetType.CurrentEnemy;
+            //fireCannon.movementType = AISkillDriver.MovementType.StrafeMovetarget;
+            //fireCannon.aimType = AISkillDriver.AimType.AtMoveTarget;
+            //fireCannon.moveInputScale = 1f;
+            //fireCannon.ignoreNodeGraph = true;
+            //fireCannon.buttonPressType = AISkillDriver.ButtonPressType.TapContinuous;
             #endregion ShantyMinionSkills
             PrefabAPI.RegisterNetworkPrefab(shantyBodyPrefab);
         }
@@ -622,6 +645,53 @@ namespace FishermanMod.Survivors.Fisherman
             #endregion
 
             skinController.skins = skins.ToArray();
+        }
+
+        /// <summary>
+        /// This IL hook prevents the shanty minion from ever being "obstructed" in order to prevent it from moving randomly, as the platform obstructs itself
+        /// </summary>
+        /// <param name="il"></param>
+        static void ShantyMinion_LocalNavigator_ObstructionBypass(ILContext il)
+        {
+            //When an AI is forwardObstructed, IE looking straight into a wall, it will move randomly to attempt to get itself unstuck.
+            //we can make sure that our platform is never considered to be forwardObstructed by adding an additional check to the line inside LocalNavigator.Update() that determines if an entity is obstructed
+            //Locate the line we want to modify by Matching this line's IL instructions : 
+            /*	 
+                // if (raycastResults.forwardObstructed)                          
+                IL_00f4: ldarg.0
+                IL_00f5: ldflda valuetype RoR2.LocalNavigator/RaycastResults RoR2.LocalNavigator::raycastResults
+                IL_00fa: ldfld bool RoR2.LocalNavigator/RaycastResults::forwardObstructed
+                IL_00ff: brfalse IL_0188
+            */
+            ILCursor c = new ILCursor(il);
+            ILLabel label = null;
+            if (
+            c.TryGotoNext(MoveType.After,                                                       //i means instruction, like the under-the-hood individual peices of any one line of code
+                i => i.MatchLdarg(0),                                                           //this
+                i => i.MatchLdflda<LocalNavigator>(nameof(LocalNavigator.raycastResults)),      //this.raycastResults
+                i => i.MatchLdfld<RaycastResults>(nameof(RaycastResults.forwardObstructed)),    //this.raycastResults.forwardObstructed
+                i => i.MatchBrfalse(out label)                                                  // == true else skip if body
+            ))
+            {
+
+                c.Emit(OpCodes.Ldarg_0);                                                        // get a ref to this localnavigator instance (this)
+                c.Emit<LocalNavigator>(OpCodes.Ldfld, nameof(LocalNavigator.bodyComponents));   // use ref to get the body field becauese we need to check if this local navigator corresponds to fishermans platform
+                c.EmitDelegate<Func<BodyComponents, bool>>((body) =>                            // black magic (add additional conditions to the if statement)
+                {
+                    //TODO optimize this by finding a better way to determine if the body is the platform. This check is run on every single ai every frame so it matters.
+                    return !body.body.GetComponent<FishermanPlatformMinionController>();        // check if the body contains the platform's unique component, and return false if it does to stop the navigator from being obstructed
+                });
+                c.Emit(OpCodes.Brfalse, label);                                                 // pop this value to change it to the result of the delegate
+                Log.Debug("Platform Obstruction Prevention IL hook Succeeded");
+            }
+            else
+            {
+                Log.Debug("Platform Obstruction Prevention IL hook Failed");
+            }
+
+
+
+
         }
     }
 

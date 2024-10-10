@@ -43,7 +43,7 @@ namespace FishermanMod.Survivors.Fisherman
             LanguageAPI.Add(prefix + "KEYWORD_TETHER", $" <style=cKeywordName>Tether</style><style=cSub> Reduces movement speed by <style=cIsDamage>30%.</style>");
             LanguageAPI.Add(prefix + "KEYWORD_UNFINISHED", $" <style=cKeywordName>UNFINISHED</style><style=cSub> Ability is still in development, meaning it probably functions poorly and is likley to change");
             LanguageAPI.Add(prefix + "KEYWORD_DAUNTLESS", $" <style=cKeywordName>Steady</style><style=cSub>Resist most negative effects and gain a <style=cIsDamage>{100 * FishermanStaticValues.bottleDamageBuff}%</style> increase to all damage for each one currently effecting you.");
-            LanguageAPI.Add(prefix + "KEYWORD_SMACK", $" <style=cKeywordName>Smack Him!</style><style=cSub>The whale can be damaged, {Tokens.HookText("Hooked")}, and pushed by your abilities.");
+            LanguageAPI.Add(prefix + "KEYWORD_SMACK", $" <style=cKeywordName>Smackable</style><style=cSub>This minon can be damaged and pushed by your abilities.");
             LanguageAPI.Add(prefix + "KEYWORD_LINKED", $"<style=cKeywordName>Soulbound</style><style=cSub>This minion does not inherit your items, but all damage they deal " + $"is treated as your own.</style>");
 
             #endregion Keyowrds
@@ -75,7 +75,7 @@ namespace FishermanMod.Survivors.Fisherman
             Language.Add(prefix + "UTILITY_MINION_NAME", "Chris");
 
             Language.Add(prefix + "UTILITY_WHALE_NAME", Tokens.FishermanText("Strange Friend", 3));
-            Language.Add(prefix + "UTILITY_WHALE_DESCRIPTION", $"{Tokens.HookText("UNFINISHED")} Release a whale that <style=cIsUtility>inherits all your items.</style> Emits smog that deals <style=cIsDamage>{100f * FishermanStaticValues.whaleMissleDotDamage}% damage per second</style>. Kills increase it's damage by <style=cIsDamage>{100f * FishermanStaticValues.whaleMissleDotDamage}%.</style> <style=cIsUtility>Smack Him!.</style> ");
+            Language.Add(prefix + "UTILITY_WHALE_DESCRIPTION", $"Release a <style=cIsUtility>Smackable</style> whale that <style=cIsUtility>inherits all your items.</style> Emits smog that deals <style=cIsDamage>{100f * 4f * FishermanStaticValues.whaleMissleDotDamage}% damage per second</style> for each enemy killed.");
             Language.Add(prefix + "UTILITY_WHALE_MINION_NAME", "Son");
             #endregion
 
