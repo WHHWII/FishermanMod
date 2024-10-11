@@ -45,6 +45,8 @@ namespace FishermanMod.Survivors.Fisherman
             LanguageAPI.Add(prefix + "KEYWORD_DAUNTLESS", $" <style=cKeywordName>Steady</style><style=cSub>Resist most negative effects and gain a <style=cIsDamage>{100 * FishermanStaticValues.bottleDamageBuff}%</style> increase to all damage for each one currently effecting you.");
             LanguageAPI.Add(prefix + "KEYWORD_SMACK", $" <style=cKeywordName>Smackable</style><style=cSub>This minon can be damaged and pushed by your abilities.");
             LanguageAPI.Add(prefix + "KEYWORD_LINKED", $"<style=cKeywordName>Soulbound</style><style=cSub>This minion does not inherit your items, but all damage they deal " + $"is treated as your own.</style>");
+            LanguageAPI.Add(prefix + "KEYWORD_DIRECT", $"<style=cKeywordName>Directable</style><style=cSub> Re-Activate this ability to direct the platform to a targeted location. Hold the ability to destroy it.");
+
 
             #endregion Keyowrds
 
@@ -72,11 +74,14 @@ namespace FishermanMod.Survivors.Fisherman
             #region Utility
             Language.Add(prefix + "UTILITY_PLATFORM_NAME", Tokens.FishermanText("F153 Mobile Shanty Platform",3));
             Language.Add(prefix + "UTILITY_PLATFORM_DESCRIPTION", $"<style=cIsUtility>Soulbound.</style> Deploy a <style=cIsUtility>directable</style> drone that <style=cIsUtility>you can stand on.</style> It slowly fires explosive rounds for <style=cIsDamage>{100f * FishermanStaticValues.shantyCannonDamage}% damage.</style>");
-            Language.Add(prefix + "UTILITY_MINION_NAME", "Chris");
+            Language.Add(prefix + "UTILITY_MINION_NAME", "Junior");
+
+            Language.Add(prefix + "UTILITY_DIRECT_NAME", Tokens.FishermanText("Direct Platform", 3));
+            Language.Add(prefix + "UTILITY_DIRECT_DESCRIPTION", $"Tap to direct the platform to move to a targeted location. Hold to Destroy it.");
 
             Language.Add(prefix + "UTILITY_WHALE_NAME", Tokens.FishermanText("Strange Friend", 3));
             Language.Add(prefix + "UTILITY_WHALE_DESCRIPTION", $"Release a <style=cIsUtility>Smackable</style> whale that <style=cIsUtility>inherits all your items.</style> Emits smog that deals <style=cIsDamage>{100f * 4f * FishermanStaticValues.whaleMissleDotDamage}% damage per second</style> for each enemy killed.");
-            Language.Add(prefix + "UTILITY_WHALE_MINION_NAME", "Son");
+            Language.Add(prefix + "UTILITY_WHALE_MINION_NAME", "Fisherman's Friend");
             #endregion
 
             #region Special

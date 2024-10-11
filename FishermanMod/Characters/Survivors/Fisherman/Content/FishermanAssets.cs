@@ -191,7 +191,6 @@ namespace FishermanMod.Survivors.Fisherman
             //rb.useGravity = true;
             //rb.mass = 100;
             //hookProjectilePrefab.layer = 0;
-            hookProjectilePrefab.layer = LayerIndex.projectile.intVal;
 
 
             ProjectileSimple ps = hookProjectilePrefab.GetComponent<ProjectileSimple>();
@@ -382,7 +381,8 @@ namespace FishermanMod.Survivors.Fisherman
             var startEvent = hookBombProjectilePrefab.GetComponent<RoR2.EntityLogic.DelayedEvent>();
             startEvent.CallDelayed(0.5f);
 
-            hookBombProjectilePrefab.layer = LayerIndex.projectile.intVal;
+            //hookBombProjectilePrefab.layer = LayerIndex.projectile.intVal;
+            //hookBombProjectilePrefab.transform.Find("")
 
             var stick = hookBombProjectilePrefab.AddComponent<ProjectileStickOnImpact>();
 
@@ -515,28 +515,9 @@ namespace FishermanMod.Survivors.Fisherman
             //body
             shantyBodyPrefab = _assetBundle.LoadAsset<GameObject>("ShantyMinionBody") ;//PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Drones/EmergencyDroneBody.prefab").WaitForCompletion(), "ShantyBody");
             shantyBodyPrefab.gameObject.layer = LayerIndex.entityPrecise.intVal;
-           // LayerIndex.entityPrecise
-            //var hc = shantyBodyPrefab.GetComponent<HealthComponent>();
-            //var deplyoable = shantyBodyPrefab.GetComponent<Deployable>(); //have to add for non default deployables. dont forget to change if you change your base
-            //deplyoable.onUndeploy.AddListener(() => hc.Suicide()); //// todo: do this not this way??
 
-            //emergency drone base version
-            //shantyBodyPrefab.transform.localScale *= 4;
             var mpc = shantyBodyPrefab.AddComponent<FishermanPlatformMinionController>();
             mpc.characterBody = shantyBodyPrefab.GetComponent<CharacterBody>();
-
-            //foreach (BoxCollider col in shantyBodyPrefab.GetComponentsInChildren<BoxCollider>())
-            //{
-            //    col.gameObject.layer = LayerIndex.fakeActor.intVal;
-            //}
-            //foreach(Transform t in shantyBodyPrefab.transform)
-            //{
-            //    t.gameObject.layer = LayerIndex.fakeActor.intVal;
-            //}
-            //shantyBodyPrefab.layer = LayerIndex.fakeActor.intVal;
-            //shantyBodyPrefab.layer = LayerIndex.fakeActor.intVal;
-            //var cl = shantyBodyPrefab.GetComponent<ModelLocator>().modelTransform.GetComponent<ChildLocator>();
-            //cl.FindChild("StandableSurface").gameObject.layer = LayerIndex.fakeActor.intVal;
 
 
             //master
@@ -596,27 +577,6 @@ namespace FishermanMod.Survivors.Fisherman
             shantyBodyPrefab.GetComponent<GenericSkill>().skillFamily.variants[0] = shantyShotVariant; //FishermanSurvivor.primaryShantyCannon;
             
             var shantyAI = FishermanAssets.shantyMasterPrefab.GetComponent<RoR2.CharacterAI.BaseAI>();
-
-            //AISkillDriver fireCannon = shantyMasterPrefab.AddComponent<AISkillDriver>();
-            //fireCannon.customName = "fireCannon";
-            //fireCannon.skillSlot = SkillSlot.Primary;
-            //fireCannon.requireSkillReady = true;
-            //fireCannon.minUserHealthFraction = float.NegativeInfinity;
-            //fireCannon.maxUserHealthFraction = float.PositiveInfinity;
-            //fireCannon.minTargetHealthFraction = float.NegativeInfinity;
-            //fireCannon.maxTargetHealthFraction = float.PositiveInfinity;
-            //fireCannon.minDistance = 0f;
-            //fireCannon.maxDistance = 200f;
-            //fireCannon.activationRequiresAimConfirmation = true;
-            //fireCannon.activationRequiresTargetLoS = true;
-            //fireCannon.selectionRequiresTargetLoS = true;
-            //fireCannon.maxTimesSelected = -1;
-            //fireCannon.moveTargetType = AISkillDriver.TargetType.CurrentEnemy;
-            //fireCannon.movementType = AISkillDriver.MovementType.StrafeMovetarget;
-            //fireCannon.aimType = AISkillDriver.AimType.AtMoveTarget;
-            //fireCannon.moveInputScale = 1f;
-            //fireCannon.ignoreNodeGraph = true;
-            //fireCannon.buttonPressType = AISkillDriver.ButtonPressType.TapContinuous;
             #endregion ShantyMinionSkills
             PrefabAPI.RegisterNetworkPrefab(shantyBodyPrefab);
         }

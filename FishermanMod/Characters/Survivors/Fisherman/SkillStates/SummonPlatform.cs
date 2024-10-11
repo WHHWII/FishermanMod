@@ -66,27 +66,23 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
 
         private PlacementInfo GetPlacementInfo()
         {
-            Ray aimRay = GetAimRay();
-            Vector3 direction = aimRay.direction;
-            //direction.y = 0f;
-            direction.Normalize();
-            aimRay.direction = direction;
-            PlacementInfo result = default(PlacementInfo);
+            PlacementInfo result = default(PlacementInfo); 
             result.ok = true;
-            result.rotation = Util.QuaternionSafeLookRotation(-direction);
-            Ray ray = new Ray(aimRay.GetPoint(2f) + Vector3.up * 1f, Vector3.down);
-            float num = 4f;
-            float num2 = num;
-            //if (Physics.SphereCast(ray, 0.5f, out var hitInfo, num, LayerIndex.world.mask) && hitInfo.normal.y > 0.5f)
-            //{
-            //    num2 = hitInfo.distance;
-            //    //result.ok = true;
-            //}
-            Vector3 vector = (result.position = ray.GetPoint(num2 + 0.5f));
+            Ray aimRay = GetAimRay();
+            RaycastHit hit;
+            result.rotation = transform.rotation;
+            if (Physics.Raycast(aimRay, out hit, 3))
+            {
+                result.position = hit.point + hit.normal * 3;
+            }
+            else
+            {
+                result.position = aimRay.GetPoint(3);
+            }
             if (result.ok)
             {
                 float num3 = Mathf.Max(1.82f, 0f);
-                if (Physics.CheckCapsule(result.position + Vector3.up * (num3 - 0.5f), result.position + Vector3.up * 0.5f, 0.45f, (int)LayerIndex.world.mask | (int)LayerIndex.defaultLayer.mask))
+                if (Physics.CheckCapsule(result.position + Vector3.up * (num3 - 0.5f), result.position + Vector3.up * 0.5f, 0.45f, (int)LayerIndex.world.mask | (int)LayerIndex.CommonMasks.characterBodiesOrDefault))
                 {
                     result.ok = false;
                 }

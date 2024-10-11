@@ -85,6 +85,7 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Components
 
                     CharacterMaster master = platform.GetComponent<RoR2.CharacterBody>().master;
                     BaseAI ai = master.GetComponent<BaseAI>();
+                    platformPosTargetIndicator.gameObject.SetActive(true);
                     ai.customTarget.gameObject = platformPosTargetIndicator;
                     ai.customTarget.lastKnownBullseyePosition = platformPosTargetIndicator.transform.position;
                     ai.BeginSkillDriver(new BaseAI.SkillDriverEvaluation
@@ -106,6 +107,15 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Components
             toRemove.Clear();
             return true;
             
+        }
+
+        public void DestroyAllPlatforms()
+        {
+            foreach (FishermanPlatformMinionController platform in deployedPlatforms)
+            {
+                platform.characterBody.master.TrueKill();
+            }
+            deployedPlatforms.Clear();
         }
     }
 

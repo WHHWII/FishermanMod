@@ -32,9 +32,6 @@ namespace FishermanMod.Survivors.Fisherman.Components
         public CapsuleCollider hookCollider;
         public ProjectileOverlapAttack projOverlap;
         public ProjectileSimple projSimple;
-        //public GameObject enemyTaunter;
-        //public HurtBox hookHurtBox;
-        //public CharacterBody hookBody;
 
         FishermanSkillObjectTracker skillObjectTracker;
 
@@ -50,12 +47,8 @@ namespace FishermanMod.Survivors.Fisherman.Components
         float minTimeBeforeReturning = 1f;
         float maxFlyTime = 2;
 
-        //float maxTauntTime = 5f;
-        //bool canPollTauntedEnemiesForRelease = true;
-
         HashSet<GameObject> objectsHooked = new HashSet<GameObject>();
-        //HashSet<GameObject> enemiesTaunted = new HashSet<GameObject>();
-       // Dictionary<RoR2.CharacterAI.BaseAI, float> tauntedAITimers = new Dictionary<RoR2.CharacterAI.BaseAI, float>();
+
 
         void Start()
         {
@@ -78,7 +71,6 @@ namespace FishermanMod.Survivors.Fisherman.Components
             rb.mass = 0; 
             rb.useGravity = false;
             projSimple.SetForwardSpeed(0);
-            //NetworkServer.Spawn(UnityEngine.Object.Instantiate(FishermanAssets.hookScannerPrefab, transform.position, Quaternion.identity));
             EffectData effectData = new EffectData();
             effectData.origin = transform.position;
             EffectManager.SpawnEffect(FishermanAssets.hookScannerPrefab, effectData, true);
@@ -126,15 +118,6 @@ namespace FishermanMod.Survivors.Fisherman.Components
             rb.isKinematic = false;
 
             yield return new WaitForFixedUpdate();
-            //ability specific interactions (OOB crash was occuring before these were added )
-            //if (skillObjectTracker.deployedBombs)
-            //{
-            //    ThrowHookBomb();
-            //}
-            //if (FishermanSurvivor.deployedPlatform && FishermanSurvivor.deployedPlatform.wasStuckByHook)
-            //{
-            //    ThrowPlatform();
-            //}
 
             //apply return force to hook, causing it to arc up into the air
             projSimple.desiredForwardSpeed = 0;
@@ -148,7 +131,6 @@ namespace FishermanMod.Survivors.Fisherman.Components
             Log.Debug($"[HOOK][FLYBACK] RB vel {rb.velocity}");
 
 
-            //enable projectile overlap. (OOB crash was occuring before this was added )
             projOverlap.enabled = true;
             projectileDamage.damage =  skillObjectTracker.characterBody.damage * FishermanStaticValues.castDamageCoefficient;
             projOverlap.damageCoefficient = 1;
@@ -163,9 +145,8 @@ namespace FishermanMod.Survivors.Fisherman.Components
         }
         void OnCollisionEnter(UnityEngine.Collision collision)
         {
-            //if (collision.gameObject.GetComponent<MapZone>()) Log.Debug("[Cast Hook] Hit bounds box: col enter");
-            //collision.rigidbody.velocity = Vector3.zero;
-            //Log.Debug($"[Cast Hook]Collision Enter {collision.gameObject.name}");
+            if (collision.gameObject.GetComponent<MapZone>()) Log.Debug("[Cast Hook] Hit bounds box: col enter");
+            Log.Debug($"[Cast Hook]Collision Enter {collision.gameObject.name}");
             HookBombController hookBomb = collision.gameObject.GetComponent<HookBombController>();
             if (hookBomb && CanThrow(hookBomb.gameObject))
             {
@@ -174,7 +155,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
         }
         void OnCollisionExit(UnityEngine.Collision collision)
         {
-            //Log.Debug($"[Cast Hook] Collision Exit {collision.gameObject.name}");
+            Log.Debug($"[Cast Hook] Collision Exit {collision.gameObject.name}");
             HookBombController hookBomb = collision.gameObject.GetComponent<HookBombController>();
             if (hookBomb && CanThrow(hookBomb.gameObject))
             {
@@ -185,17 +166,16 @@ namespace FishermanMod.Survivors.Fisherman.Components
         void OnTriggerEnter(Collider collider)
         {
             if (collider.gameObject.GetComponent<MapZone>()) Log.Debug("[Cast Hook] Hit bounds box: trig enter");
-            //Log.Debug($"[Cast Hook] Trigger Enter {collider.gameObject.name}");
+            Log.Debug($"[Cast Hook] Trigger Enter {collider.gameObject.name}");
 
-            //DrawAggro(collider);
             if (!CanThrow(collider.gameObject)) return;
             if (ThrowItem(collider)) return;
             ThrowInteractable(collider);
         }
         void OnTriggerExit(Collider collider)
         {
-            //if (collider.gameObject.GetComponent<MapZone>()) Log.Debug("[Cast Hook] Hit bounds box: trig exit");
-            //Log.Debug($"[Cast Hook] Trigger Exit {collider.gameObject.name}");
+            if (collider.gameObject.GetComponent<MapZone>()) Log.Debug("[Cast Hook] exit bounds box: trig exit");
+            Log.Debug($"[Cast Hook] Trigger Exit {collider.gameObject.name}");
             if (!CanThrow(collider.gameObject)) return;
             ThrowHookBomb(collider.transform.parent?.GetComponent<HookBombController>());
             if (ThrowItem(collider)) return;
@@ -240,7 +220,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
         void ThrowHookBomb(HookBombController bomb)
         {
             if (bomb == null) return;
-            //Log.Debug("[Cast Hook] Trying to throw bomb");
+            Log.Debug("[Cast Hook] Trying to throw bomb");
             bomb.stickComponent.Detach() ;
             bomb.DisableAllColliders();
             bomb.stickComponent.enabled = false;
@@ -265,80 +245,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
             //FishermanSurvivor.SetDeployedHook(null);
         }
 
-        //void DrawAggro(Collider collider)
-        //{
-        //    if (CanTaunt(collider.gameObject))
-        //    {
-        //        //Log.Debug($"-Can Taunt {collider.gameObject.name}");
-        //        TeamComponent team = collider.GetComponent<TeamComponent>();
-        //        if (team != null)
-        //        {
-        //           // if (hookHurtBox == null) return;
-        //            //Log.Debug($"{collider.gameObject.name}'s Team =  {team.teamIndex}");
-        //            if (team.teamIndex != controller.owner.GetComponent<TeamComponent>().teamIndex)
-        //            {
-        //                CharacterBody body = collider.gameObject.GetComponent<CharacterBody>();
-        //                body.AddTimedBuff(FishermanBuffs.hookTauntDebuff, maxTauntTime);
-        //                body.healthComponent.dontShowHealthbar = false;
-        //                //body.healt
-        //                //Log.Debug($"{collider.gameObject.name} is on a different team than hook owner");
-        //                //RoR2.UI.CombatHealthBarViewer. need to see about making this force show health bars
-        //                //that or make an effect similiar to death mark
-        //                foreach (RoR2.CharacterAI.BaseAI ai in body.master.aiComponents)
-        //                {
-        //                    if (ai != null)
-        //                    {
-        //                        //Log.Debug($"{collider.gameObject.name} Ai located, setting target");
-        //                        //RoR2.CharacterAI.BaseAI.Target newTarget = new RoR2.CharacterAI.BaseAI.Target(controller.owner.GetComponent<CharacterBody>().master.GetComponent<RoR2.CharacterAI.BaseAI>());
-        //                        //newTarget.gameObject = gameObject;
-        //                        //newTarget._gameObject = gameObject;
-        //                        //newTarget.characterBody = 
-        //                        //ai.currentEnemy.Reset();
-        //                        ai.currentEnemy.gameObject = gameObject;
-        //                        ai.currentEnemy.bestHurtBox = null;
-        //                        ai.enemyAttention = ai.enemyAttentionDuration;
-        //                        ai.targetRefreshTimer = 1;
-        //                        ai.BeginSkillDriver(ai.EvaluateSkillDrivers());
-        //                        tauntedAITimers.Add(ai, Time.time); 
-        //                    }
-        //                }
-        //            }
-        //        }
-        //    }
-        //}
-
-        //void ClearAgrro()
-        //{
-        //    //TODO properly clear debuff
-        //    if (tauntedAITimers.Count <= 0) return;
-        //    List<RoR2.CharacterAI.BaseAI> aisToRemove = new List<RoR2.CharacterAI.BaseAI>();
-        //    foreach (var aiTimer in tauntedAITimers)
-        //    {
-        //        if (Time.time - aiTimer.Value > maxTauntTime)
-        //        {
-        //            if(aiTimer.Key == null)
-        //            {
-        //                aisToRemove.Add(aiTimer.Key);
-        //                continue;
-        //            }
-        //            //Log.Debug($"Releasing: {aiTimer.Key.gameObject.name}");
-        //            aiTimer.Key.currentEnemy.gameObject = controller.owner.gameObject;
-        //            aiTimer.Key.currentEnemy.bestHurtBox = controller.owner.GetComponent<CharacterBody>().mainHurtBox;
-        //            aiTimer.Key.BeginSkillDriver(aiTimer.Key.EvaluateSkillDrivers());
-        //            //aiTimer.Key.gameObject.GetComponent<CharacterBody>().RemoveBuff(FishermanBuffs.hookTauntDebuff);
-        //            aisToRemove.Add(aiTimer.Key);
-        //        }
-        //        else
-        //        {
-        //            //aiTimer.Key.gameObject.GetComponent<CharacterBody>().AddTimedBuff(FishermanBuffs.hookTauntDebuff, maxTauntTime);
-        //        }
-        //    }
-        //    foreach (var ai in aisToRemove)
-        //    {
-        //        tauntedAITimers.Remove(ai);
-        //    }
-        //    canPollTauntedEnemiesForRelease = false;
-        //}
+        
     }
 
 }

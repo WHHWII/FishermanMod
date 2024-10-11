@@ -364,7 +364,7 @@ namespace FishermanMod.Survivors.Fisherman
                 skillNameToken = FISHERMAN_PREFIX + "UTILITY_PLATFORM_NAME",
                 skillDescriptionToken = FISHERMAN_PREFIX + "UTILITY_PLATFORM_DESCRIPTION",
                 skillIcon = assetBundle.LoadAsset<Sprite>("Shanty Icon"),
-                keywordTokens = new string[] { FISHERMAN_PREFIX + "KEYWORD_LINKED" },
+                keywordTokens = new string[] { FISHERMAN_PREFIX + "KEYWORD_LINKED", FISHERMAN_PREFIX + "KEYWORD_DIRECT" },
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(SkillStates.SummonPlatform)),
                 activationStateMachineName = "Weapon",
@@ -393,8 +393,8 @@ namespace FishermanMod.Survivors.Fisherman
             FishermanSurvivor.utilityDirectPlatform = Skills.CreateSkillDef(new SkillDefInfo
             {
                 skillName = "Command Boat",
-                skillNameToken = FISHERMAN_PREFIX + "UTILITY_PLATFORM_NAME",
-                skillDescriptionToken = FISHERMAN_PREFIX + "UTILITY_PLATFORM_DESCRIPTION",
+                skillNameToken = FISHERMAN_PREFIX + "UTILITY_DIRECT_NAME",
+                skillDescriptionToken = FISHERMAN_PREFIX + "UTILITY_DIRECT_DESCRIPTION",
                 skillIcon = assetBundle.LoadAsset<Sprite>("texUtilityIcon"),
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(SkillStates.DirectPlatform)),
@@ -411,8 +411,8 @@ namespace FishermanMod.Survivors.Fisherman
                 resetCooldownTimerOnUse = false,
                 fullRestockOnAssign = true,
                 dontAllowPastMaxStocks = true,
-                mustKeyPress = true,
-                beginSkillCooldownOnSkillEnd = false,
+                mustKeyPress = false,
+                beginSkillCooldownOnSkillEnd = true,
 
                 isCombatSkill = false,
                 canceledFromSprinting = false,
