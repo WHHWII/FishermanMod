@@ -32,7 +32,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
 
             AIOwnership aiOwnership = characterBody.master.GetComponent<AIOwnership>();
             ownerBody = aiOwnership?.ownerMaster.GetBody();
-            Log.Debug($"aiowner : {aiOwnership} OwnerMasteR: {aiOwnership?.ownerMaster} Body: {ownerBody}");
+            //Log.Debug($"aiowner : {aiOwnership} OwnerMasteR: {aiOwnership?.ownerMaster} Body: {ownerBody}");
             //proc coefficient is set on the components of the projectile prefab
             //base.projectilePitchBonus = 0;
             //base.minSpread = 0;

@@ -31,7 +31,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
             lineRenderer.material = FishermanAssets.chainMat;
             lineRenderer.startWidth = 0.1f;
             lineRenderer.endWidth = 0.1f;
-            Log.Debug($"Tether Terminator: {lineTerminationObject.name}");
+            //Log.Debug($"Tether Terminator: {lineTerminationObject.name}");
             
         }
         //update the end points of the line renderer each frame to be at the enemy parent and at the inflictor

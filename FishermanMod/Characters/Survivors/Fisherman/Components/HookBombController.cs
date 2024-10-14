@@ -38,7 +38,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
         void Start()
         {
             owner = controller.owner;
-            owner.GetComponent<FishermanSkillObjectTracker>().deployedBombs.Add(this);
+            owner.GetComponent<SkillObjectTracker>().deployedBombs.Add(this);
             body = controller.rigidbody;
             origAntiGravCoef = antiGrav.antiGravityCoefficient;
             origDrag = body.drag;
@@ -55,25 +55,39 @@ namespace FishermanMod.Survivors.Fisherman.Components
             foreach(var collider in bombColliders) collider.enabled = true; 
         }
 
-        public IEnumerator ResetStickyComponent()
+        public IEnumerator ResetPhysics()
         {
             yield return new WaitForSeconds(0.05f);
             EnableAllColliders();
             yield return new WaitForSeconds(0.1f);
             stickComponent.enabled = true;
+            stickComponent.UpdateSticking();
             yield return new WaitForSeconds(1f);
             ResetDragAndGrav();
+ 
+
         }
         void ResetDragAndGrav()
         {
+
+            antiGrav.enabled = true;
             antiGrav.antiGravityCoefficient = origAntiGravCoef;
+            body.detectCollisions = true;
             body.drag = origDrag;
             body.angularDrag = 3;
+            StartCoroutine(EnableRBcol());
+        }
+        
+        IEnumerator EnableRBcol()
+        {
+            yield return new WaitForFixedUpdate();
+            body.detectCollisions = true;
         }
 
         void FixedUpdate()
         {
             lastVelocity = body.velocity;
+            if(!body.detectCollisions) body.detectCollisions = true; // TODO not this.
         }
 
         public void HookAllTethers()
@@ -95,7 +109,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
                 }
             }
             //do explosion
-            Log.Debug("Hooking");
+            //Log.Debug("Hooking");
 
             explosionComponent.blastDamageCoefficient = 1;
             explosionComponent.falloffModel = BlastAttack.FalloffModel.None;

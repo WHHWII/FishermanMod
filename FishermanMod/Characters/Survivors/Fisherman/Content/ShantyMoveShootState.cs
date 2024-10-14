@@ -23,7 +23,7 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Content
         public bool leashing;
 
         public GameObject commanderObj;
-        public FishermanSkillObjectTracker objTracker;
+        public SkillObjectTracker objTracker;
 
         private float strafeDirection;
 

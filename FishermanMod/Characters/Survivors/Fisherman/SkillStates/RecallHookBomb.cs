@@ -17,7 +17,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
                 PlayAnimation("LeftArm, Override", "UtilityPlatform", "UtilityPlatform.playbackRate", 0.65f);
                 base.skillLocator.special.UnsetSkillOverride(gameObject, FishermanSurvivor.specialRecallHookBomb, RoR2.GenericSkill.SkillOverridePriority.Upgrade);
                 base.skillLocator.special.DeductStock(1); // may change this to deduct all stocks if all stocks are fired at once.
-                gameObject.GetComponent<FishermanSkillObjectTracker>().HookAllBombs();
+                gameObject.GetComponent<SkillObjectTracker>().HookAllBombs();
                 
             }
             outer.SetNextStateToMain();

@@ -12,22 +12,23 @@ using static R2API.SoundAPI.Music.CustomMusicTrackDef;
 
 namespace FishermanMod.Characters.Survivors.Fisherman.Components
 {
-    public class FishermanSkillObjectTracker : MonoBehaviour
+    public class SkillObjectTracker : MonoBehaviour
     {
         public List<FishHookController> deployedHooks;
         public List<HookBombController> deployedBombs;
-        public List<FishermanPlatformMinionController> deployedPlatforms;
+        public List<PlatformMinionController> deployedPlatforms;
         public GameObject platformPosTargetIndicator;
         public GameObject platformAimTargetIndicator;
         public RoR2.CharacterBody characterBody;
         public const string COMMAND_SKILL_DRIVER_NAME = "FollowCommand";
         public const string LEASH_SKILL_DRIVER_NAME = "LeashLeader";
         public const string STOP_SKILL_DRIVER_NAME = "StandStill";
-
+        public Transform fishingPoleTip;
 
         public void Start()
         {
             characterBody = GetComponent<RoR2.CharacterBody>();
+            fishingPoleTip = characterBody.modelLocator.modelTransform.GetComponent<ChildLocator>().FindChild("PoleEnd");
         }
 
         public void RecallAllHooks()
@@ -51,10 +52,10 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Components
 
         public bool DirectAllPlatforms()
         {
-            List<FishermanPlatformMinionController> toRemove = new List<FishermanPlatformMinionController>();
-            foreach (FishermanPlatformMinionController platform in deployedPlatforms)
+            List<PlatformMinionController> toRemove = new List<PlatformMinionController>();
+            foreach (PlatformMinionController platform in deployedPlatforms)
             {
-                Debug.Log("Platform instance: " + platform);
+                //Debug.Log("Platform instance: " + platform);
                 if (platform == null || !platform.characterBody.healthComponent.alive)
                 {
                     toRemove.Add(platform);
@@ -111,7 +112,7 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Components
 
         public void DestroyAllPlatforms()
         {
-            foreach (FishermanPlatformMinionController platform in deployedPlatforms)
+            foreach (PlatformMinionController platform in deployedPlatforms)
             {
                 platform.characterBody.master.TrueKill();
             }

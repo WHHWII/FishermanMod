@@ -11,7 +11,7 @@ using UnityEngine.Networking;
 
 namespace FishermanMod.Survivors.Fisherman.SkillStates
 {
-    public class SummonPlatform : BaseState
+    public class SummonWhale : BaseState
     {
         private struct PlacementInfo
         {
@@ -32,7 +32,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
         public GameObject blueprintPrefab = FishermanAssets.shantyBlueprintPrefab;
 
         [SerializeField]
-        public GameObject platformMasterPrefab = FishermanAssets.shantyMasterPrefab;
+        public GameObject platformMasterPrefab = FishermanAssets.whaleMisslePrefab;
 
         private GameObject wristDisplayObject;
 
@@ -50,7 +50,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
 
         public override void OnEnter()
         {
-            //Log.Debug("platform placement skill entered ---------------------");
+            Log.Debug("whale placement skill entered ---------------------");
             base.OnEnter();
             if (base.isAuthority)
             {
@@ -94,7 +94,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
         {
             if ((bool)blueprints)
             {
-                //Log.Debug("destroying blueprints");
+                Log.Debug("destroying blueprints");
                 EntityState.Destroy(blueprints.gameObject);
                 blueprints = null;
             }
@@ -103,7 +103,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
         public override void OnExit()
         {
             base.OnExit();
-            //Log.Debug("exiting skillstate  ---------------------");
+            Log.Debug("exiting skillstate  ---------------------");
             PlayAnimation("LeftArm, Override", "Utility", "Utility.playbackRate", 0.65f);
             if ((bool)wristDisplayObject)
             {
@@ -132,7 +132,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
                 exitCountdown -= Time.fixedDeltaTime;
                 if (exitCountdown <= 0f)
                 {
-                    //Log.Debug("Exiting platform placement");
+                    Log.Debug("Exiting platform placement");
                     if(exitedFromUse)
                     {
                         base.skillLocator.utility.SetSkillOverride(gameObject, FishermanSurvivor.utilityDirectPlatform, RoR2.GenericSkill.SkillOverridePriority.Upgrade);
@@ -156,9 +156,9 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
                             GenericSkill skill = base.skillLocator.GetSkill(SkillSlot.Utility);
                             if (skill)
                             {
-                                //Log.Debug("Deducting Stock");
+                                Log.Debug("Deducting Stock");
                                 //skill.DeductStock(1);
-                                //Log.Debug("Attempting Spawn");
+                                Log.Debug("Attempting Spawn");
                                 //base.characterBody.SendConstructTurret(base.characterBody, currentPlacementInfo.position, currentPlacementInfo.rotation, MasterCatalog.FindMasterIndex(platformMasterPrefab));
                                 MasterSummon masterSummon = new MasterSummon();
                                 masterSummon.masterPrefab = platformMasterPrefab;
@@ -184,7 +184,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
                         //mpc.direction = direction;
                       
                     }
-                    //Log.Debug("exiting skill from use");
+                    Log.Debug("exiting skill from use");
                     Util.PlaySound(placeSoundString, base.gameObject);
                     DestroyBlueprints();
                     exitPending = true;
@@ -194,7 +194,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
                 if (base.inputBank.skill2.justPressed || base.inputBank.skill4.justPressed)
                 {
                     DestroyBlueprints();
-                    //Log.Debug("exiting skill from other-skill cancelation");
+                    Log.Debug("exiting skill from other-skill cancelation");
                     exitPending = true;
                 }
             }

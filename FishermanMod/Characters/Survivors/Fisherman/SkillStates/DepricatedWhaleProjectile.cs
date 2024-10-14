@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace FishermanMod.Survivors.Fisherman.SkillStates
 {
-    public class ReleaseWhaleState : GenericProjectileBaseState
+    public class DepricatedWhaleProjectile : GenericProjectileBaseState
     {
 
         public static float BaseDuration = 0.65f;

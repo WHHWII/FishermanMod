@@ -17,7 +17,7 @@ using UnityEngine.XR.WSA;
 
 namespace FishermanMod.Survivors.Fisherman.Components
 {
-    public class FishermanPlatformMinionController : MonoBehaviour
+    public class PlatformMinionController : MonoBehaviour
     {
         public bool debug = false;
 
@@ -27,12 +27,15 @@ namespace FishermanMod.Survivors.Fisherman.Components
         public LineRenderer aimVisual;
         public Transform cannonEnd;
         public EntityStateMachine stateMachine;
-        public FishermanSkillObjectTracker objTracker;
+        public SkillObjectTracker objTracker;
         public BaseAIState aiState;
         public Vector3 direction;
         public CharacterMaster ownerMaster;
         public TeamIndex team;
         public BaseAI baseAi;
+        public float commandAge;
+        public float commandAgeLimit = 30f;
+
 
         LineRenderer lineRenderer;
         GameObject stupidzone;
@@ -51,9 +54,9 @@ namespace FishermanMod.Survivors.Fisherman.Components
             //something somehting euler angles cross productud vector3 up 
             baseAi = GetComponent<CharacterBody>().master.GetComponent<RoR2.CharacterAI.BaseAI>();
             ownerMaster = baseAi.GetComponent<AIOwnership>()?.ownerMaster;
-            objTracker = ownerMaster?.GetBodyObject().GetComponent<FishermanSkillObjectTracker>();
+            objTracker = ownerMaster?.GetBodyObject().GetComponent<SkillObjectTracker>();
             objTracker?.deployedPlatforms.Add(this);
-            characterBody.AddBuff(BuffCatalog.GetBuffDef(BuffCatalog.FindBuffIndex("HiddenRejectAllDamage")));
+            characterBody.AddBuff(RoR2.RoR2Content.Buffs.Immune);
             //for (int i = 0; i < baseAi.skillDrivers.Length; i++)
             //{
             //    baseAi.skillDrivers[i].ignoreNodeGraph = true;
@@ -69,7 +72,12 @@ namespace FishermanMod.Survivors.Fisherman.Components
                 lineRenderer.material = FishermanAssets.chainMat;
             }
 
-            //if (!objTracker.platformAimTargetIndicator) objTracker.platformAimTargetIndicator = UnityEngine.GameObject.Instantiate(FishermanAssets.shantyBlueprintPrefab);
+            if (!objTracker.platformAimTargetIndicator) objTracker.platformAimTargetIndicator = UnityEngine.GameObject.Instantiate(FishermanAssets.shantyBlueprintPrefab);
+            if (!objTracker.platformPosTargetIndicator)
+            {
+                objTracker.platformPosTargetIndicator = UnityEngine.GameObject.Instantiate(FishermanAssets.shantyBlueprintPrefab);
+            }
+            SetHover();
 
         }
         public void Update()
@@ -82,9 +90,17 @@ namespace FishermanMod.Survivors.Fisherman.Components
                 lineRenderer.SetPosition(1, baseAi.localNavigator.targetPosition);
             }
 
-
-
-
+            if (!objTracker) return;
+            if (baseAi.currentEnemy?.characterBody && baseAi.currentEnemy?.gameObject != objTracker?.gameObject)
+            {
+                if (!objTracker.platformAimTargetIndicator) objTracker.platformAimTargetIndicator = UnityEngine.GameObject.Instantiate(FishermanAssets.shantyBlueprintPrefab);
+                if (!objTracker.platformAimTargetIndicator.activeSelf) objTracker.platformAimTargetIndicator.SetActive(true);
+                objTracker.platformAimTargetIndicator.transform.position = baseAi.currentEnemy.characterBody.footPosition + (Vector3.up * 0.5f);
+            }
+            else
+            {
+                objTracker?.platformAimTargetIndicator?.SetActive(false);
+            }
 
 
             //if (baseAi.currentEnemy == null && (bool)objTracker?.platformAimTargetIndicator.activeSelf)
@@ -115,39 +131,46 @@ namespace FishermanMod.Survivors.Fisherman.Components
 
         void FixedUpdate()
         {
+            if (!objTracker) return;
+            if (baseAi.customTarget.gameObject) commandAge += Time.fixedDeltaTime;
+
             bool closeToLeader = Vector3.Distance(transform.position, objTracker.transform.position) <= 65;
             bool closeToTarget = baseAi.customTarget.gameObject && Vector3.Distance(transform.position, baseAi.customTarget.gameObject.transform.position) <= 3;
-            if (baseAi.customTarget.gameObject && closeToTarget && !closeToLeader)
+            if (baseAi.customTarget.gameObject && closeToTarget && !closeToLeader || commandAge >= commandAgeLimit)
             {
                 baseAi.customTarget.gameObject = null;
                 baseAi.customTarget.lastKnownBullseyePosition = null;
                 objTracker.platformPosTargetIndicator.gameObject.SetActive(false);
-                Log.Debug("Clearing Custom Target");
+                commandAge = 0;
             }
             if (!baseAi.customTarget.gameObject && closeToLeader)
             {
-                Log.Debug("assigning leash Custom Target");
-                RaycastHit hit;
-                Vector3 hoverPos = objTracker.transform.position;
-                Ray hoverRay = new Ray(objTracker.transform.position, Vector3.up);
-                if(Physics.Raycast(hoverRay, out hit, 30))
-                {
-                    hoverPos = hit.point + hit.normal * commandPointOffset;
-                }
-                else
-                {
-                    hoverPos = hoverRay.GetPoint(30);
-                }
-
-                if (objTracker.platformPosTargetIndicator)
-                {
-                    objTracker.platformPosTargetIndicator.transform.position = hoverPos;
-                    baseAi.customTarget.gameObject = objTracker.platformPosTargetIndicator.gameObject;
-                    baseAi.customTarget.lastKnownBullseyePosition = hoverPos;
-                    objTracker.platformPosTargetIndicator.gameObject.SetActive(true);
-                }
+                SetHover();
+            }
 
 
+
+        }
+        void SetHover()
+        {
+            RaycastHit hit;
+            Vector3 hoverPos = objTracker.transform.position;
+            Ray hoverRay = new Ray(objTracker.transform.position, Vector3.up);
+            if (Physics.Raycast(hoverRay, out hit, 30))
+            {
+                hoverPos = hit.point + hit.normal * commandPointOffset;
+            }
+            else
+            {
+                hoverPos = hoverRay.GetPoint(30);
+            }
+
+            if (objTracker.platformPosTargetIndicator)
+            {
+                objTracker.platformPosTargetIndicator.transform.position = hoverPos;
+                baseAi.customTarget.gameObject = objTracker.platformPosTargetIndicator.gameObject;
+                baseAi.customTarget.lastKnownBullseyePosition = hoverPos;
+                objTracker.platformPosTargetIndicator.gameObject.SetActive(true);
             }
         }
     }

@@ -73,7 +73,7 @@ namespace FishermanMod.Survivors.Fisherman
 
             #region Utility
             Language.Add(prefix + "UTILITY_PLATFORM_NAME", Tokens.FishermanText("F153 Mobile Shanty Platform",3));
-            Language.Add(prefix + "UTILITY_PLATFORM_DESCRIPTION", $"<style=cIsUtility>Soulbound.</style> Deploy a <style=cIsUtility>directable</style> drone that <style=cIsUtility>you can stand on.</style> It slowly fires explosive rounds for <style=cIsDamage>{100f * FishermanStaticValues.shantyCannonDamage}% damage.</style>");
+            Language.Add(prefix + "UTILITY_PLATFORM_DESCRIPTION", $"Deploy a <style=cIsUtility>Directable</style> drone that <style=cIsUtility>you can stand on.</style> It slowly fires explosive rounds for <style=cIsDamage>{100f * FishermanStaticValues.shantyCannonDamage}% damage.</style>");
             Language.Add(prefix + "UTILITY_MINION_NAME", "Junior");
 
             Language.Add(prefix + "UTILITY_DIRECT_NAME", Tokens.FishermanText("Direct Platform", 3));

@@ -46,19 +46,26 @@ namespace FishermanMod.Survivors.Fisherman
         //projectiles
         public static GameObject bottleProjectilePrefab;
         public static GameObject hookProjectilePrefab;
-        public static GameObject shantyBlueprintPrefab;
-        public static GameObject shantyBodyPrefab;
-        public static GameObject shantyMasterPrefab;
         public static GameObject shantyCannonShotPrefab;
         public static GameObject hookBombProjectilePrefab;
         public static GameObject hookScannerPrefab;
-        public static GameObject whaleMisslePrefab;
         public static GameObject floatingBombletPrefab;
         public static GameObject floatingBombletPrefab2;
 
+        public static GameObject whaleMisslePrefab; // depricated
+
+        //minion from dispicable me
+        public static GameObject shantyBlueprintPrefab;
+        public static GameObject shantyBodyPrefab;
+        public static GameObject shantyMasterPrefab;
+
+        public static GameObject whaleBlueprintPrefab;
+        public static GameObject whaleBodyPrefab;
+        public static GameObject whaleMasterPrefab;
 
         //materials
         public static Material chainMat;
+        public static Material hookGreenMat;
 
         private static AssetBundle _assetBundle;
         public static void Init(AssetBundle assetBundle)
@@ -71,9 +78,9 @@ namespace FishermanMod.Survivors.Fisherman
 
             CreateEffects();
 
-            CreateProjectiles();
-
             CreateMaterials();
+
+            CreateProjectiles();
 
             CreateMinions();
 
@@ -156,7 +163,7 @@ namespace FishermanMod.Survivors.Fisherman
             UnityEngine.Object.Destroy(bottleProjectilePrefab.GetComponent<ProjectileImpactExplosion>());
             ProjectileImpactExplosion bombImpactExplosion = bottleProjectilePrefab.AddComponent<ProjectileImpactExplosion>();
             
-            bombImpactExplosion.blastRadius = 1f;
+            bombImpactExplosion.blastRadius = 4f;
             bombImpactExplosion.blastDamageCoefficient = 1f;
             bombImpactExplosion.falloffModel = BlastAttack.FalloffModel.None;
             bombImpactExplosion.destroyOnEnemy = true;
@@ -191,7 +198,6 @@ namespace FishermanMod.Survivors.Fisherman
             //rb.useGravity = true;
             //rb.mass = 100;
             //hookProjectilePrefab.layer = 0;
-
 
             ProjectileSimple ps = hookProjectilePrefab.GetComponent<ProjectileSimple>();
             //ps.desiredForwardSpeed = 80;
@@ -275,15 +281,19 @@ namespace FishermanMod.Survivors.Fisherman
             fishHook.hookCollider = collider;
             fishHook.projOverlap = piss;
             fishHook.projSimple = ps;
+            fishHook.lineRenderer = hookProjectilePrefab.GetComponent<LineRenderer>();
 
 
-           //fishHook.stickComponent.stickEvent.AddListener(() => {
-           //    Log.Info("=-----------------HOOK IMPACT EVENT CALLED");
-           //    //fishHook.collider.radius = 0.1f; ;
-           //    fishHook.rb.velocity = Vector3.zero;
-           //    ps.enabled = false;
-           //    }
-           //);
+            hookProjectilePrefab.layer = LayerIndex.projectile.intVal;
+
+
+            //fishHook.stickComponent.stickEvent.AddListener(() => {
+            //    Log.Info("=-----------------HOOK IMPACT EVENT CALLED");
+            //    //fishHook.collider.radius = 0.1f; ;
+            //    fishHook.rb.velocity = Vector3.zero;
+            //    ps.enabled = false;
+            //    }
+            //);
 
             //fishHook.enemyTaunter = enemyTaunter;
             //fishHook.hookBody = hookBody;
@@ -381,7 +391,7 @@ namespace FishermanMod.Survivors.Fisherman
             var startEvent = hookBombProjectilePrefab.GetComponent<RoR2.EntityLogic.DelayedEvent>();
             startEvent.CallDelayed(0.5f);
 
-            //hookBombProjectilePrefab.layer = LayerIndex.projectile.intVal;
+            hookBombProjectilePrefab.layer = LayerIndex.projectile.intVal;
             //hookBombProjectilePrefab.transform.Find("")
 
             var stick = hookBombProjectilePrefab.AddComponent<ProjectileStickOnImpact>();
@@ -423,6 +433,15 @@ namespace FishermanMod.Survivors.Fisherman
             bomb.explodeOnLifeTimeExpiration = false;
             #endregion Explosion
 
+            //// TODO use triggers to allow hook to throw hook bomb after it sticks.
+            //GameObject hookInteractor = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            //hookInteractor.transform.parent = hookBombProjectilePrefab.transform;
+            //UnityEngine.Object.Destroy(hookInteractor.GetComponent<MeshRenderer>());
+            //UnityEngine.Object.Destroy(hookInteractor.GetComponent<MeshFilter>());
+            //hookInteractor.GetComponent<SphereCollider>().isTrigger = true;
+            //hookInteractor.transform.localPosition = Vector3.zero;
+            //hookInteractor.transform.localScale = Vector3.one * 6;
+            //hookInteractor.layer = LayerIndex.pickups.intVal;
 
             //keeps track of all relevant components for later reference
             #region custom component
@@ -490,6 +509,7 @@ namespace FishermanMod.Survivors.Fisherman
         private static void CreateMaterials()
         {
             chainMat = Addressables.LoadAssetAsync<Material>("RoR2/Base/Gravekeeper/matGravekeeperHookChain.mat").WaitForCompletion();
+            hookGreenMat = _assetBundle.LoadMaterial("HookGreen");
         }
         #endregion
 
@@ -499,6 +519,9 @@ namespace FishermanMod.Survivors.Fisherman
             CreateMovingPlatform();
             Content.AddCharacterBodyPrefab(shantyBodyPrefab);
             Content.AddMasterPrefab(shantyMasterPrefab);
+            CreateWhale();
+            Content.AddCharacterBodyPrefab(whaleBodyPrefab);
+            Content.AddMasterPrefab(whaleMasterPrefab);
         }
         private static void CreateMovingPlatform()
         {
@@ -516,7 +539,7 @@ namespace FishermanMod.Survivors.Fisherman
             shantyBodyPrefab = _assetBundle.LoadAsset<GameObject>("ShantyMinionBody") ;//PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Drones/EmergencyDroneBody.prefab").WaitForCompletion(), "ShantyBody");
             shantyBodyPrefab.gameObject.layer = LayerIndex.entityPrecise.intVal;
 
-            var mpc = shantyBodyPrefab.AddComponent<FishermanPlatformMinionController>();
+            var mpc = shantyBodyPrefab.AddComponent<PlatformMinionController>();
             mpc.characterBody = shantyBodyPrefab.GetComponent<CharacterBody>();
 
 
@@ -525,11 +548,7 @@ namespace FishermanMod.Survivors.Fisherman
             CharacterMaster master = shantyMasterPrefab.GetComponent<CharacterMaster>();
             master.spawnOnStart = false;
             master.bodyPrefab = shantyBodyPrefab;
-            //foreach(BaseAI ai in master.aiComponents)
-            //{
-            //    //ai.skillDrivers.
-            //}
-            UnityEngine.Object.Destroy(shantyMasterPrefab.GetComponent<SetDontDestroyOnLoad>());
+
 
             IL.RoR2.LocalNavigator.Update += ShantyMinion_LocalNavigator_ObstructionBypass;
 
@@ -579,6 +598,22 @@ namespace FishermanMod.Survivors.Fisherman
             var shantyAI = FishermanAssets.shantyMasterPrefab.GetComponent<RoR2.CharacterAI.BaseAI>();
             #endregion ShantyMinionSkills
             PrefabAPI.RegisterNetworkPrefab(shantyBodyPrefab);
+        }
+
+        private static void CreateWhale()
+        {
+            whaleBlueprintPrefab = shantyBlueprintPrefab; // temp
+
+            whaleBodyPrefab = _assetBundle.LoadAsset<GameObject>("WhaleMinionBody");
+            whaleBodyPrefab.layer = LayerIndex.entityPrecise.intVal;
+
+            WhaleMinionController wmc = whaleBodyPrefab.AddComponent<WhaleMinionController>();
+            wmc.characterBody = wmc.GetComponent<CharacterBody>();
+
+            whaleMasterPrefab = _assetBundle.LoadAsset<GameObject>("WhaleMinionMaster");
+            CharacterMaster master = whaleMasterPrefab.GetComponent<CharacterMaster>();
+            master.spawnOnStart = false;
+            master.bodyPrefab = whaleBodyPrefab;
         }
         #endregion
         static void InitializeMinionSkins()
@@ -639,7 +674,7 @@ namespace FishermanMod.Survivors.Fisherman
                 c.EmitDelegate<Func<BodyComponents, bool>>((body) =>                            // black magic (add additional conditions to the if statement)
                 {
                     //TODO optimize this by finding a better way to determine if the body is the platform. This check is run on every single ai every frame so it matters.
-                    return !body.body.GetComponent<FishermanPlatformMinionController>();        // check if the body contains the platform's unique component, and return false if it does to stop the navigator from being obstructed
+                    return !body.body.GetComponent<PlatformMinionController>();        // check if the body contains the platform's unique component, and return false if it does to stop the navigator from being obstructed
                 });
                 c.Emit(OpCodes.Brfalse, label);                                                 // pop this value to change it to the result of the delegate
                 Log.Debug("Platform Obstruction Prevention IL hook Succeeded");

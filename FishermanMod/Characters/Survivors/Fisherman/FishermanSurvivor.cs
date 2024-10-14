@@ -66,14 +66,14 @@ namespace FishermanMod.Survivors.Fisherman
             crosshair = ModAssetManager.LoadCrosshair("Standard"),
             podPrefab = LegacyResourcesAPI.Load<GameObject>("Prefabs/NetworkedObjects/SurvivorPod"),
 
-            maxHealth = 130,
+            maxHealth = 160,
             healthRegen = 2.5f,
-            armor = 10f,
-            damage = 12,
-            damageGrowth = 2.2f,
-            healthGrowth = 39,
+            armor = 20f,
+            damage = 14,
+            damageGrowth = 2.8f,
+            healthGrowth = 48,
             regenGrowth = 0.5f,
-
+            
 
             jumpCount = 1,
         };
@@ -158,7 +158,7 @@ namespace FishermanMod.Survivors.Fisherman
             bodyPrefab.AddComponent<HenryWeaponComponent>();
             var drinkmdl = characterModelObject.GetComponent<ChildLocator>().FindChild("Drink");
             drinkmdl.gameObject.SetActive(false);
-            bodyPrefab.AddComponent<FishermanSkillObjectTracker>();
+            bodyPrefab.AddComponent<SkillObjectTracker>();
             //bodyPrefab.AddComponent<HuntressTrackerComopnent>();
             //anything else here
         }
@@ -430,7 +430,7 @@ namespace FishermanMod.Survivors.Fisherman
                 skillIcon = assetBundle.LoadAsset<Sprite>("Shanty Icon"),
                 keywordTokens = new string[] { FISHERMAN_PREFIX + "KEYWORD_UNFINISHED", FISHERMAN_PREFIX + "KEYWORD_SMACK" },
 
-                activationState = new EntityStates.SerializableEntityStateType(typeof(SkillStates.ReleaseWhaleState)),
+                activationState = new EntityStates.SerializableEntityStateType(typeof(SkillStates.SummonWhale)),
                 activationStateMachineName = "Weapon",
                 interruptPriority = EntityStates.InterruptPriority.Skill,
 
@@ -456,7 +456,7 @@ namespace FishermanMod.Survivors.Fisherman
             });
             
             Skills.AddUtilitySkills(bodyPrefab, utilitySummonPlatform);
-            Skills.AddUtilitySkills(bodyPrefab, whaleMissle);
+            //Skills.AddUtilitySkills(bodyPrefab, whaleMissle);
 
 
         }
@@ -810,8 +810,8 @@ namespace FishermanMod.Survivors.Fisherman
 
 
             Vector3 throwVelocity = FishermanSurvivor.GetHookThrowVelocity(targetPos,enemyPosition, isFlyer);
-            Log.Debug($"[HOOK][Effect] owner {targetPos} Enemy position {enemyPosition}");
-            Log.Debug($"[HOOK][Effect] throwvel {throwVelocity}");
+            //Log.Debug($"[HOOK][Effect] owner {targetPos} Enemy position {enemyPosition}");
+            //Log.Debug($"[HOOK][Effect] throwvel {throwVelocity}");
 
             #endregion 
 

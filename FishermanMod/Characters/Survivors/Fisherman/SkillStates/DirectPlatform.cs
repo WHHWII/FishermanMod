@@ -26,7 +26,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
         }
         public override void FixedUpdate()
         {
-            FishermanSkillObjectTracker objTracker = characterBody.GetComponent<FishermanSkillObjectTracker>();
+            SkillObjectTracker objTracker = characterBody.GetComponent<SkillObjectTracker>();
 
             if (base.isAuthority)
             {
