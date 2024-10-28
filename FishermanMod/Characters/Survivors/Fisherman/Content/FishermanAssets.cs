@@ -559,7 +559,7 @@ namespace FishermanMod.Survivors.Fisherman
 
             //InitializeMinionSkins();
             #region ShantyMinionSkills
-            FishermanSurvivor.primaryShantyCannon = Skills.CreateSkillDef(new SkillDefInfo
+            FishermanSurvivor.primaryShantyCannon = Skills.CreateReloadSkillDef(new SkillDefInfo
             {
                 skillName = "FireShantyCannon",
                 skillNameToken = "UTILITY_PLATFORM_NAME",
@@ -588,6 +588,7 @@ namespace FishermanMod.Survivors.Fisherman
                 canceledFromSprinting = false,
                 cancelSprintingOnActivation = false,
                 forceSprintDuringState = false,
+                
 
 
             });
@@ -674,7 +675,7 @@ namespace FishermanMod.Survivors.Fisherman
                 c.EmitDelegate<Func<BodyComponents, bool>>((body) =>                            // black magic (add additional conditions to the if statement)
                 {
                     //TODO optimize this by finding a better way to determine if the body is the platform. This check is run on every single ai every frame so it matters.
-                    return !body.body.GetComponent<PlatformMinionController>();        // check if the body contains the platform's unique component, and return false if it does to stop the navigator from being obstructed
+                    return !PlatformMinionController.allDeployedPlatforms.Contains(body.body.gameObject); // check if the body contains the platform's unique component, and return false if it does to stop the navigator from being obstructed
                 });
                 c.Emit(OpCodes.Brfalse, label);                                                 // pop this value to change it to the result of the delegate
                 Log.Debug("Platform Obstruction Prevention IL hook Succeeded");

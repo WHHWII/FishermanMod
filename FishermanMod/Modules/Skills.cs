@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using FishermanMod;
 using UnityEngine;
+using FishermanMod.Survivors.Fisherman.SkillStates;
 
 namespace FishermanMod.Modules
 {
@@ -134,6 +135,10 @@ namespace FishermanMod.Modules
         {
             return CreateSkillDef<SkillDef>(skillDefInfo);
         }
+        public static ShantyMinionCannonDef CreateReloadSkillDef (SkillDefInfo skillDefInfo)
+        {
+            return CreateSkillDef<ShantyMinionCannonDef>(skillDefInfo);
+        } 
 
         public static T CreateSkillDef<T>(SkillDefInfo skillDefInfo) where T : SkillDef
         {

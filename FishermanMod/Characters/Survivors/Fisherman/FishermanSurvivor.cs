@@ -287,7 +287,7 @@ namespace FishermanMod.Survivors.Fisherman
                 stockToConsume = 1,
 
                 resetCooldownTimerOnUse = false,
-                fullRestockOnAssign = true,
+                fullRestockOnAssign = false,
                 dontAllowPastMaxStocks = false,
                 mustKeyPress = true,
                 beginSkillCooldownOnSkillEnd = true,
@@ -378,8 +378,8 @@ namespace FishermanMod.Survivors.Fisherman
                 stockToConsume = 1,
 
                 resetCooldownTimerOnUse = false,
-                fullRestockOnAssign = true,
-                dontAllowPastMaxStocks = false,
+                fullRestockOnAssign = false,
+                dontAllowPastMaxStocks = true,
                 mustKeyPress = true,
                 beginSkillCooldownOnSkillEnd = true,
 
@@ -475,11 +475,24 @@ namespace FishermanMod.Survivors.Fisherman
                 //setting this to the "weapon2" EntityStateMachine allows us to cast this skill at the same time primary, which is set to the "weapon" EntityStateMachine
                 activationStateMachineName = "Weapon2", interruptPriority = EntityStates.InterruptPriority.Skill,
 
+
+                baseRechargeInterval = 10, // change
                 baseMaxStock = 1,
-                baseRechargeInterval = 10f,
+
+                rechargeStock = 1,
+                requiredStock = 1,
+                stockToConsume = 1,
+
+                resetCooldownTimerOnUse = false,
+                fullRestockOnAssign = false,
+                dontAllowPastMaxStocks = false,
+                mustKeyPress = true,
+                beginSkillCooldownOnSkillEnd = true,
 
                 isCombatSkill = true,
-                mustKeyPress = true,
+                canceledFromSprinting = true,
+                cancelSprintingOnActivation = true,
+                forceSprintDuringState = false,
             });
             specialRecallHookBomb = Skills.CreateSkillDef(new SkillDefInfo
             {
@@ -664,7 +677,22 @@ namespace FishermanMod.Survivors.Fisherman
             On.RoR2.HealthComponent.TakeDamage += HealthComponent_TakeDamage;
             On.RoR2.CharacterBody.RecalculateStats += CharacterBody_RecalculateStats;
             On.RoR2.CharacterMaster.OnBodyStart += CharacterMaster_OnBodyStart;
+            On.RoR2.GenericSkill.SetBonusStockFromBody += GenericSkill_SetBonusStockFromBody;
+            //On.RoR2.CharacterBody.addbuff
+
         }
+
+        private void GenericSkill_SetBonusStockFromBody(On.RoR2.GenericSkill.orig_SetBonusStockFromBody orig, GenericSkill self, int newBonusStockFromBody)
+        {
+            orig(self, newBonusStockFromBody);
+            if(self.skillDef == FishermanSurvivor.utilityDirectPlatform || self.skillDef == FishermanSurvivor.utilitySummonPlatform)
+            {
+                var objTracker = self.characterBody.GetComponent<SkillObjectTracker>();
+                objTracker?.ModifyPlayformStock(newBonusStockFromBody);
+            }
+
+        }
+
         private void CharacterMaster_OnBodyStart(On.RoR2.CharacterMaster.orig_OnBodyStart orig, CharacterMaster self, CharacterBody body)
         {
             orig(self, body);

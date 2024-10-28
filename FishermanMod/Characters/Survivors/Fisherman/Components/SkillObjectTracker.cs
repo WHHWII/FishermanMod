@@ -2,6 +2,7 @@
 using FishermanMod.Modules;
 using FishermanMod.Survivors.Fisherman;
 using FishermanMod.Survivors.Fisherman.Components;
+using On.RoR2.Skills;
 using RoR2;
 using RoR2.CharacterAI;
 using System;
@@ -118,6 +119,52 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Components
             }
             deployedPlatforms.Clear();
         }
-    }
 
+        public bool ModifyPlayformStock(int stocks)
+        {
+            if (deployedPlatforms.Count <= 0) return false;
+            List<PlatformMinionController> toRemove = new List<PlatformMinionController>();
+            foreach (PlatformMinionController platform in deployedPlatforms)
+            {
+                //Debug.Log("Platform instance: " + platform);
+                if (platform == null || !platform.characterBody.healthComponent.alive)
+                {
+                    toRemove.Add(platform);
+                    Debug.Log("Platform was null. Removing");
+                }
+                else
+                {
+                    
+                    platform.characterBody.skillLocator.primary.SetBonusStockFromBody(stocks);
+     
+                }
+
+
+
+                
+
+            }
+            deployedPlatforms.RemoveAll((x) => toRemove.Contains(x));
+            if (deployedPlatforms.Count == 0)
+            {
+                return false;
+            }
+            toRemove.Clear();
+            return true;
+        }
+
+        //pretend this list is populated somwhere in your setup
+        List<RoR2.Skills.SkillDef> AllSpells = new List<RoR2.Skills.SkillDef>();
+        //would convert this to your custom skilldef or wrapper later
+        RoR2.Skills.SkillDef[] spellSlots = new RoR2.Skills.SkillDef[4];
+
+
+       
+
+
+    }
 }
+
+
+
+

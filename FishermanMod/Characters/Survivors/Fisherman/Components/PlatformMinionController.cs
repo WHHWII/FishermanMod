@@ -19,7 +19,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
 {
     public class PlatformMinionController : MonoBehaviour
     {
-        public bool debug = false;
+        public bool debug = true;
 
         float commandPointOffset = 3;
         public bool wasStuckByHook;
@@ -35,17 +35,21 @@ namespace FishermanMod.Survivors.Fisherman.Components
         public BaseAI baseAi;
         public float commandAge;
         public float commandAgeLimit = 30f;
-
+        
 
         LineRenderer lineRenderer;
         GameObject stupidzone;
+
+
+        public static HashSet<GameObject> allDeployedPlatforms = new HashSet<GameObject>();
+
 
 
         Rigidbody rb;
 
         void Start()
         {
-
+            allDeployedPlatforms.Add(gameObject);
             //StartCoroutine(DestroyPlatform());
             rb = GetComponent<Rigidbody>();
             //AISkillDriver driver;
@@ -172,6 +176,11 @@ namespace FishermanMod.Survivors.Fisherman.Components
                 baseAi.customTarget.lastKnownBullseyePosition = hoverPos;
                 objTracker.platformPosTargetIndicator.gameObject.SetActive(true);
             }
+        }
+
+        void OnDestroy()
+        {
+            allDeployedPlatforms.Remove(gameObject);
         }
     }
 }
