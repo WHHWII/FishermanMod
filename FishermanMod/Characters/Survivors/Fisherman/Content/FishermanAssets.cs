@@ -571,7 +571,7 @@ namespace FishermanMod.Survivors.Fisherman
                 activationStateMachineName = "Weapon",
                 interruptPriority = EntityStates.InterruptPriority.Skill,
 
-                baseRechargeInterval = 5f, // change
+                baseRechargeInterval = 5f,
                 baseMaxStock = 1,
 
                 rechargeStock = 1,
