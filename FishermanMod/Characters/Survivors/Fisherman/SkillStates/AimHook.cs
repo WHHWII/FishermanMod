@@ -16,6 +16,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
     {
         float hookRangeGrowRate = 0.5f;
         float hookRangeMax = 80;
+        
        // private static EntityStates.Toolbot.AimStunDrone _goodState;
         public override void OnEnter()
         {
@@ -30,7 +31,8 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
             damageCoefficient = 0;
             baseMinimumDuration = _goodState.baseMinimumDuration;
             useGravity = true;
-            projectileBaseSpeed = _goodState.projectileBaseSpeed;
+            //projectileBaseSpeed = _goodState.projectileBaseSpeed;
+            projectileBaseSpeed = FishermanAssets.hookBombProjectilePrefab.GetComponent<ProjectileSimple>().desiredForwardSpeed;
             //comes after modification to working AimThrowableBase
             base.OnEnter();
             if (base.isAuthority && !KeyIsDown() && !base.IsKeyDownAuthority()) { }

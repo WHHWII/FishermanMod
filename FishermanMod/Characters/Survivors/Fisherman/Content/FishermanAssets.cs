@@ -273,6 +273,14 @@ namespace FishermanMod.Survivors.Fisherman
             //enemyTaunter.layer = 15;
 
 
+            var indicator = hookProjectilePrefab.GetComponent<PositionIndicator>();
+            var visual = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Common/NPCPositionIndicator.prefab").WaitForCompletion();
+            indicator.alwaysVisibleObject = visual;
+            indicator.outsideViewObject = visual;
+            indicator.insideViewObject = visual;
+
+
+
             FishHookController fishHook = hookProjectilePrefab.AddComponent<FishHookController>();
             fishHook.rb = rb;
             fishHook.stickComponent = stickOnImpact;
@@ -285,6 +293,8 @@ namespace FishermanMod.Survivors.Fisherman
 
 
             hookProjectilePrefab.layer = LayerIndex.projectile.intVal;
+
+            
 
 
             //fishHook.stickComponent.stickEvent.AddListener(() => {
