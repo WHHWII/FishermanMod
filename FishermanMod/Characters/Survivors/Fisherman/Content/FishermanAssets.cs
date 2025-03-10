@@ -220,15 +220,15 @@ namespace FishermanMod.Survivors.Fisherman
             CapsuleCollider collider = hookProjectilePrefab.GetComponent<CapsuleCollider>();
             
 
-
-            GameObject ItemInteractor = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            ItemInteractor.transform.parent = hookProjectilePrefab.transform;
-            UnityEngine.Object.Destroy(ItemInteractor.GetComponent<MeshRenderer>());
-            UnityEngine.Object.Destroy(ItemInteractor.GetComponent<MeshFilter>());
-            ItemInteractor.GetComponent<SphereCollider>().isTrigger = true;
-            ItemInteractor.transform.localPosition = Vector3.zero;
-            ItemInteractor.transform.localScale = Vector3.one * 6;
-            ItemInteractor.layer = 15;
+            //item grabber
+            //GameObject ItemInteractor = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            //ItemInteractor.transform.parent = hookProjectilePrefab.transform;
+            //UnityEngine.Object.Destroy(ItemInteractor.GetComponent<MeshRenderer>());
+            //UnityEngine.Object.Destroy(ItemInteractor.GetComponent<MeshFilter>());
+            //ItemInteractor.GetComponent<SphereCollider>().isTrigger = true;
+            //ItemInteractor.transform.localPosition = Vector3.zero;
+            //ItemInteractor.transform.localScale = Vector3.one * 6;
+            //ItemInteractor.layer = 15;
 
             ProjectileOverlapAttack piss = hookProjectilePrefab.GetComponent<ProjectileOverlapAttack>();
             //piss.onServerHit.RemoveAllListeners();
@@ -273,11 +273,11 @@ namespace FishermanMod.Survivors.Fisherman
             //enemyTaunter.layer = 15;
 
 
-            var indicator = hookProjectilePrefab.GetComponent<PositionIndicator>();
-            var visual = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Common/NPCPositionIndicator.prefab").WaitForCompletion();
-            indicator.alwaysVisibleObject = visual;
-            indicator.outsideViewObject = visual;
-            indicator.insideViewObject = visual;
+            //var indicator = hookProjectilePrefab.GetComponent<PositionIndicator>();
+            //var visual = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Common/NPCPositionIndicator.prefab").WaitForCompletion();
+            //indicator.alwaysVisibleObject = visual;
+            //indicator.outsideViewObject = visual;
+            //indicator.insideViewObject = visual;
 
 
 

@@ -495,7 +495,6 @@ namespace FishermanMod.Modules
             }
 
             ChildLocator childLocator = model.GetComponent<ChildLocator>();
-
             if (!childLocator.FindChild("MainHurtbox"))
             {
                 Log.Error("Could not set up main hurtbox: make sure you have a transform pair in your prefab's ChildLocator called 'MainHurtbox'");
