@@ -8,6 +8,7 @@ namespace FishermanMod.Survivors.Fisherman
         //passive
         public const float hookMaxMass = 700f;
         public const float hookBleedCoefficient = 0.5f;
+        public const float hookFlinchChance = 0.75f;
 
         //primary
         public const float swipeDamageCoefficient = 2.6f;
@@ -18,6 +19,7 @@ namespace FishermanMod.Survivors.Fisherman
 
         //utility
         public const float shantyCannonDamage = 3.5f;
+        public const float shantyCannonFlinchChance = 0.2f;
 
         public const float whaleMissleDotDamage = 0.1f;
         public const float whaleMissleDotInterval = 0.1f;

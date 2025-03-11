@@ -36,7 +36,7 @@ namespace FishermanMod.Survivors.Fisherman
         public override string displayPrefabName => "FishermanDisplay";
 
         public const string FISHERMAN_PREFIX = FishermanPlugin.DEVELOPER_PREFIX + "_FISHERMAN_";
-        
+
         //used when registering your survivor's language tokens
         public override string survivorTokenPrefix => FISHERMAN_PREFIX;
 
@@ -73,7 +73,8 @@ namespace FishermanMod.Survivors.Fisherman
             damageGrowth = 2.8f,
             healthGrowth = 48,
             regenGrowth = 0.5f,
-            
+            jumpPower = 16.2f,
+
 
             jumpCount = 1,
         };
@@ -104,7 +105,7 @@ namespace FishermanMod.Survivors.Fisherman
         };
 
         public override UnlockableDef characterUnlockableDef => FishermanUnlockables.characterUnlockableDef;
-        
+
         public override ItemDisplaysBase itemDisplays => new FishermanItemDisplays();
 
         //set in base classes
@@ -171,23 +172,23 @@ namespace FishermanMod.Survivors.Fisherman
             Transform swipeHitBoxTransform = childLocator.FindChild("SwipeHitbox");
             Transform stabHitBoxTransform = childLocator.FindChild("StabHitbox");
             Transform uppercutHitboxTransform = childLocator.FindChild("UppercutHitbox");
-            
+
             Prefabs.SetupHitBoxGroup(characterModelObject, "SwipeGroup", swipeHitBoxTransform);
             Prefabs.SetupHitBoxGroup(characterModelObject, "StabGroup", stabHitBoxTransform);
             Prefabs.SetupHitBoxGroup(characterModelObject, "UppercutGroup", uppercutHitboxTransform);
         }
 
-        public override void InitializeEntityStateMachines() 
+        public override void InitializeEntityStateMachines()
         {
             //clear existing state machines from your cloned body (probably commando)
             //omit all this if you want to just keep theirs
             Prefabs.ClearEntityStateMachines(bodyPrefab);
 
             //if you set up a custom main characterstate, set it up here
-                //don't forget to register custom entitystates in your HenryStates.cs
+            //don't forget to register custom entitystates in your HenryStates.cs
             //the main "body" state machine has some special properties
             Prefabs.AddMainEntityStateMachine(bodyPrefab, "Body", typeof(EntityStates.GenericCharacterMain), typeof(EntityStates.SpawnTeleporterState));
-            
+
             Prefabs.AddEntityStateMachine(bodyPrefab, "Weapon");
             Prefabs.AddEntityStateMachine(bodyPrefab, "Weapon2");
             Prefabs.AddEntityStateMachine(bodyPrefab, "FishookRecall");
@@ -242,8 +243,8 @@ namespace FishermanMod.Survivors.Fisherman
 
 
 
-           
-            
+
+
         }
 
         //private void CreateShantySpawnCard()
@@ -264,8 +265,8 @@ namespace FishermanMod.Survivors.Fisherman
 
         private void AddSecondarySkills()
         {
-            
-            
+
+
             //here is a basic skill def with all fields accounted for
             FishermanSurvivor.secondaryFireFishHook = Skills.CreateSkillDef(new SkillDefInfo
             {
@@ -296,7 +297,7 @@ namespace FishermanMod.Survivors.Fisherman
                 canceledFromSprinting = true,
                 cancelSprintingOnActivation = true,
                 forceSprintDuringState = false,
-                
+
 
             });
 
@@ -305,7 +306,7 @@ namespace FishermanMod.Survivors.Fisherman
                 skillName = "RecallFishHook",
                 skillNameToken = FISHERMAN_PREFIX + "SECONDARY_GUN_NAME",
                 skillDescriptionToken = FISHERMAN_PREFIX + "SECONDARY_GUN_DESCRIPTION",
-                keywordTokens = new string[] { "KEYWORD_AGILE"  },
+                keywordTokens = new string[] { "KEYWORD_AGILE" },
                 skillIcon = assetBundle.LoadAsset<Sprite>("texUtilityIcon"),
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(SkillStates.RecallHook)),
@@ -454,7 +455,7 @@ namespace FishermanMod.Survivors.Fisherman
 
 
             });
-            
+
             Skills.AddUtilitySkills(bodyPrefab, utilitySummonPlatform);
             //Skills.AddUtilitySkills(bodyPrefab, whaleMissle);
 
@@ -473,7 +474,8 @@ namespace FishermanMod.Survivors.Fisherman
                 keywordTokens = new string[] { FISHERMAN_PREFIX + "KEYWORD_TETHER" },
                 activationState = new EntityStates.SerializableEntityStateType(typeof(SkillStates.ThrowBomb)),
                 //setting this to the "weapon2" EntityStateMachine allows us to cast this skill at the same time primary, which is set to the "weapon" EntityStateMachine
-                activationStateMachineName = "Weapon2", interruptPriority = EntityStates.InterruptPriority.Skill,
+                activationStateMachineName = "Weapon2",
+                interruptPriority = EntityStates.InterruptPriority.Skill,
 
 
                 baseRechargeInterval = 10, // change
@@ -602,9 +604,9 @@ namespace FishermanMod.Survivors.Fisherman
                 prefabCharacterModel.gameObject);
 
             //these are your Mesh Replacements. The order here is based on your CustomRendererInfos from earlier
-                //pass in meshes as they are named in your assetbundle
+            //pass in meshes as they are named in your assetbundle
             //currently not needed as with only 1 skin they will simply take the default meshes
-                //uncomment this when you have another skin
+            //uncomment this when you have another skin
             //defaultSkin.meshReplacements = Modules.Skins.getMeshReplacements(assetBundle, defaultRendererinfos,
             //    "meshHenrySword",
             //    "meshHenryGun",
@@ -616,7 +618,7 @@ namespace FishermanMod.Survivors.Fisherman
 
             //uncomment this when you have a mastery skin
             #region MasterySkin
-            
+
             ////creating a new skindef as we did before
             //SkinDef masterySkin = Modules.Skins.CreateSkinDef(HENRY_PREFIX + "MASTERY_SKIN_NAME",
             //    assetBundle.LoadAsset<Sprite>("texMasteryAchievement"),
@@ -649,7 +651,7 @@ namespace FishermanMod.Survivors.Fisherman
             ////simply find an object on your child locator you want to activate/deactivate and set if you want to activate/deacitvate it with this skin
 
             //skins.Add(masterySkin);
-            
+
             #endregion
 
             skinController.skins = skins.ToArray();
@@ -685,7 +687,7 @@ namespace FishermanMod.Survivors.Fisherman
         private void GenericSkill_SetBonusStockFromBody(On.RoR2.GenericSkill.orig_SetBonusStockFromBody orig, GenericSkill self, int newBonusStockFromBody)
         {
             orig(self, newBonusStockFromBody);
-            if(self.skillDef == FishermanSurvivor.utilityDirectPlatform || self.skillDef == FishermanSurvivor.utilitySummonPlatform)
+            if (self.skillDef == FishermanSurvivor.utilityDirectPlatform || self.skillDef == FishermanSurvivor.utilitySummonPlatform)
             {
                 var objTracker = self.characterBody.GetComponent<SkillObjectTracker>();
                 objTracker?.ModifyPlayformStock(newBonusStockFromBody);
@@ -745,7 +747,7 @@ namespace FishermanMod.Survivors.Fisherman
 
         private void RecalculateStatsAPI_GetStatCoefficients(CharacterBody sender, R2API.RecalculateStatsAPI.StatHookEventArgs args)
         {
-            
+
             if (sender.HasBuff(FishermanBuffs.armorBuff)) // your buff
             {
                 args.moveSpeedReductionMultAdd -= args.moveSpeedReductionMultAdd;
@@ -765,7 +767,7 @@ namespace FishermanMod.Survivors.Fisherman
                     args.armorAdd += 2;
                     args.regenMultAdd += .1f;
                     if (args.attackSpeedReductionMultAdd > -0.2f)
-                        args.attackSpeedReductionMultAdd -= (Mathf.Max(0,args.attackSpeedReductionMultAdd) * buffcount * 0.2f) + 0.1f;
+                        args.attackSpeedReductionMultAdd -= (Mathf.Max(0, args.attackSpeedReductionMultAdd) * buffcount * 0.2f) + 0.1f;
                     if (args.moveSpeedReductionMultAdd > -0.2f)
                     {
                         args.moveSpeedReductionMultAdd -= (Mathf.Max(0, args.moveSpeedReductionMultAdd) * buffcount * 0.2f) + 0.1f;
@@ -773,7 +775,7 @@ namespace FishermanMod.Survivors.Fisherman
                     }
                     if (sender.cursePenalty > 1f && args.baseCurseAdd > -.8f)
                         args.baseCurseAdd -= .1f;
-                    
+
                 }
             }
         }
@@ -781,7 +783,7 @@ namespace FishermanMod.Survivors.Fisherman
         private void CharacterBody_RecalculateStats(On.RoR2.CharacterBody.orig_RecalculateStats orig, CharacterBody self)
         {
             orig(self);
-            
+
 
             int buffcount = self.GetBuffCount(FishermanBuffs.steadyNervesBuff);
             //float temp = self.baseAcceleration * Mathf.Max(self.baseAcceleration * 0.33f, 1f / (buffcount * 0.2f + 1f));
@@ -803,16 +805,16 @@ namespace FishermanMod.Survivors.Fisherman
             CharacterBody body = enemyHurtBox.healthComponent.body;
             Vector3 enemyPosition = enemyHurtBox.transform.position;
             Rigidbody bodyRB = enemyHurtBox.healthComponent.GetComponent<Rigidbody>();
-            float bodyMass = (bodyRB ? bodyRB.mass : maxMass+1); // no rigid body = too heavy to hook 
+            float bodyMass = (bodyRB ? bodyRB.mass : maxMass + 1); // no rigid body = too heavy to hook 
             bool isHookImmune = body.HasBuff(FishermanBuffs.hookImmunityBuff);
 
             if (bodyMass < maxMass && isHookImmune) return -1; // stop early if target is unhookable and unbleedable
             //flying vermin seems to be the only flyer in the game that doesnt use a VectorPID to fly.
             bool isFlyer = body.isFlying || (body.characterMotor && (body.characterMotor.isFlying || !body.characterMotor.isGrounded));//body.gameObject.GetComponent<VectorPID>() != null  || body.name == "FlyingVerminBody(Clone)"? true: false;
-            
+
             float dist = Vector3.Distance(enemyPosition, targetPos);
 
-            
+
             //Vector2 distanceVector2D = new Vector2(distanceVector.x, distanceVector.z);
             //float horizontalDist = distanceVector2D.magnitude;
             //Vector2 horizontalDir = distanceVector2D / horizontalDist;
@@ -837,7 +839,7 @@ namespace FishermanMod.Survivors.Fisherman
             //force = newDistanceVector * bodyMass * bonusPower;
 
 
-            Vector3 throwVelocity = FishermanSurvivor.GetHookThrowVelocity(targetPos,enemyPosition, isFlyer);
+            Vector3 throwVelocity = FishermanSurvivor.GetHookThrowVelocity(targetPos, enemyPosition, isFlyer);
             //Log.Debug($"[HOOK][Effect] owner {targetPos} Enemy position {enemyPosition}");
             //Log.Debug($"[HOOK][Effect] throwvel {throwVelocity}");
 
@@ -863,23 +865,21 @@ namespace FishermanMod.Survivors.Fisherman
             //    //$"\n\t>Final Force: {force}"
             //);
 
+            damageInfo.force = Vector3.up;
+            damageInfo.procCoefficient = 0;
+            damageInfo.procChainMask = new ProcChainMask();
+            damageInfo.procChainMask.AddProc(ProcType.Behemoth);
+            damageInfo.procChainMask.RemoveProc(ProcType.BleedOnHit);
+            damageInfo.canRejectForce = false;
+            enemyHurtBox.healthComponent.TakeDamageForce(damageInfo); // apply weak pull no damage to prevent double hit
+
             if (bodyMass > maxMass)
             {
                 //Log.Info($"Attacker: {attacker.name} Inflictor {inflictor.name}");
                 //play hook fail sound effect
                 //show hook hook fail decal on enemy
                 //damageInfo.force = force * 0.1f;
-                throwVelocity *= 0.1f;
-                damageInfo.force = throwVelocity;
-                damageInfo.procCoefficient = 0;
-                damageInfo.procChainMask = new ProcChainMask();
-                damageInfo.procChainMask.AddProc(ProcType.Behemoth);
-                damageInfo.procChainMask.RemoveProc(ProcType.BleedOnHit);
-                damageInfo.damageType = DamageType.BleedOnHit;
-                enemyHurtBox.healthComponent.TakeDamageForce(damageInfo); // apply weak pull no damage to prevent double hit
-                damageInfo.damage = hookFailDamage;  //add damage for bleed calcution
 
-                enemyHurtBox.healthComponent.TakeDamageForce(damageInfo);
 
                 enemyHurtBox.healthComponent.ApplyDot(attacker, DotController.DotIndex.Bleed, 3, FishermanStaticValues.hookBleedCoefficient);
                 //Log.Debug($"Mass too large, hook failed. New force: {damageInfo.force} HookfailDamage: {hookFailDamage}");
@@ -891,6 +891,7 @@ namespace FishermanMod.Survivors.Fisherman
                 //show hook success decal on enemy
                 //Log.Debug("Hook Succeeded");
                 body.AddTimedBuff(FishermanBuffs.hookImmunityBuff, 0.3f);
+                TryFlinch(body, FishermanStaticValues.hookFlinchChance);
                 if (body.characterMotor)
                 {
                     if (body.characterMotor.isGrounded) body.characterMotor.Motor.ForceUnground();
@@ -903,12 +904,41 @@ namespace FishermanMod.Survivors.Fisherman
                     body.rigidbody.AddForce(throwVelocity, ForceMode.VelocityChange);
                 }
 
+                //SetStateOnHurt st = body.GetComponent<SetStateOnHurt>();
+                //if (st)
+                //{
+                //    Log.Debug("setstate found");
+                //    st.SetShock(0.1f);
+                //}
+                //else
+                //{
+                //    Log.Debug("setstate not found");
+
+                //}
 
                 return 1;
             }
             return -1;
 
 
+        }
+
+        public static void TryFlinch(CharacterBody body, float flinchChance = 1.1f)
+        {
+            if (UnityEngine.Random.value < flinchChance && body.TryGetComponent(out SetStateOnHurt setStateOnHurt))
+            {
+                if (setStateOnHurt.targetStateMachine)
+                {
+                    HurtState flinch = new HurtState();
+                    flinch.duration = 0.1f;
+                    setStateOnHurt.targetStateMachine.SetInterruptState(flinch, InterruptPriority.Frozen);
+                }
+                EntityStateMachine[] array = setStateOnHurt.idleStateMachine;
+                for (int i = 0; i < array.Length; i++)
+                {
+                    array[i].SetNextStateToMain();
+                };
+            }
         }
 
         static HashSet<String> GrabableInteractablesWhitelist = new HashSet<String>();
@@ -942,7 +972,8 @@ namespace FishermanMod.Survivors.Fisherman
                 name.Contains("Chest") ||
                 name.Contains("Barrel");
 
-            if (isGrabable) {
+            if (isGrabable)
+            {
                 isGrabable = !GrabableInteractablesBlacklist.Contains(name);
             }
             return isGrabable;
@@ -957,7 +988,7 @@ namespace FishermanMod.Survivors.Fisherman
             float timeToTarget = Mathf.Min(distanceToTarget * 0.05f, 2);
 
             Vector2 normailzedDistvec = xzDistanceVec / distanceToTarget;
-            float y = isFlyer ? distanceVector.y : Mathf.Max(Trajectory.CalculateInitialYSpeed(timeToTarget, distanceVector.y),6);
+            float y = isFlyer ? distanceVector.y : Mathf.Max(Trajectory.CalculateInitialYSpeed(timeToTarget, distanceVector.y), 6);
             float travelRate = distanceToTarget / timeToTarget;
             Vector3 direction = new Vector3(normailzedDistvec.x * travelRate, y, normailzedDistvec.y * travelRate);
             return direction;

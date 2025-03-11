@@ -77,6 +77,7 @@ namespace FishermanMod.Modules
                 if(damageReport.victimBody && damageReport.victimBody.characterMotor && damageReport.victimBody.characterMotor.isGrounded)
                 {
                     damageInfo.force = (damageReport.victimBody.rigidbody && damageReport.victimBody.rigidbody.mass < FishermanStaticValues.hookMaxMass ? damageReport.victimBody.rigidbody.mass : 0.1f) * damageInfo.force;
+                    FishermanSurvivor.TryFlinch(damageReport.victimBody, FishermanStaticValues.shantyCannonFlinchChance);
                 }
                 else
                 {

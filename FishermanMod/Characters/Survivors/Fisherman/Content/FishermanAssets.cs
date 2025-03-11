@@ -24,6 +24,7 @@ using MonoMod.Cil;
 using static RoR2.LocalNavigator;
 using Newtonsoft.Json.Utilities;
 using static UnityEngine.UIElements.UIR.BestFitAllocator;
+using IL.RoR2.UI;
 
 namespace FishermanMod.Survivors.Fisherman
 {
@@ -197,7 +198,7 @@ namespace FishermanMod.Survivors.Fisherman
             Rigidbody rb = hookProjectilePrefab.GetComponent<Rigidbody>();
             //rb.useGravity = true;
             //rb.mass = 100;
-            //hookProjectilePrefab.layer = 0;
+            hookProjectilePrefab.layer = LayerIndex.projectile.intVal;
 
             ProjectileSimple ps = hookProjectilePrefab.GetComponent<ProjectileSimple>();
             //ps.desiredForwardSpeed = 80;
@@ -218,68 +219,32 @@ namespace FishermanMod.Survivors.Fisherman
             ProjectileController pc = hookProjectilePrefab.GetComponent<ProjectileController>();
 
             CapsuleCollider collider = hookProjectilePrefab.GetComponent<CapsuleCollider>();
-            
+
 
             //item grabber
-            //GameObject ItemInteractor = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            //ItemInteractor.transform.parent = hookProjectilePrefab.transform;
-            //UnityEngine.Object.Destroy(ItemInteractor.GetComponent<MeshRenderer>());
-            //UnityEngine.Object.Destroy(ItemInteractor.GetComponent<MeshFilter>());
-            //ItemInteractor.GetComponent<SphereCollider>().isTrigger = true;
-            //ItemInteractor.transform.localPosition = Vector3.zero;
-            //ItemInteractor.transform.localScale = Vector3.one * 6;
-            //ItemInteractor.layer = 15;
+            GameObject ItemInteractor = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            ItemInteractor.transform.parent = hookProjectilePrefab.transform;
+            UnityEngine.Object.Destroy(ItemInteractor.GetComponent<MeshRenderer>());
+            UnityEngine.Object.Destroy(ItemInteractor.GetComponent<MeshFilter>());
+            ItemInteractor.GetComponent<SphereCollider>().isTrigger = true;
+            ItemInteractor.transform.localPosition = Vector3.zero;
+            ItemInteractor.transform.localScale = Vector3.one * 6;
+            ItemInteractor.layer = 15;
 
             ProjectileOverlapAttack piss = hookProjectilePrefab.GetComponent<ProjectileOverlapAttack>();
-            //piss.onServerHit.RemoveAllListeners();
-            //piss.enabled = false;
-            //GameObject hbobj = new GameObject();
-            //hbobj.transform.localScale = new Vector3(2, 2, 2);
-            //HitBox hb = hbobj.AddComponent<HitBox>();
-            //HitBoxGroup hbgroup = hookProjectilePrefab.AddComponent<HitBoxGroup>();
-            //hbgroup.hitBoxes.AddItem(hb);
-            //piss.damageCoefficient = FishermanStaticValues.castDamageCoefficient;
 
-
-            //hbobj.transform.parent = hookProjectilePrefab.transform;
-
-            var damageTypeComp = hookProjectilePrefab.AddComponent<DamageAPI.ModdedDamageTypeHolderComponent>();
-            damageTypeComp.Add(DamageTypes.FishermanHookPassive);
             ProjectileDamage projectileDamage = ps.GetComponent<ProjectileDamage>();
-            projectileDamage.damageType = DamageType.NonLethal;
+            DamageTypeCombo hookDmg = new DamageTypeCombo
+            {
+                damageType = DamageType.NonLethal,
+                damageTypeExtended = DamageTypeExtended.Generic,
+                damageSource = DamageSource.Secondary,
+            };
+            hookDmg.AddModdedDamageType(DamageTypes.FishermanHookPassive);
+            projectileDamage.damageType = hookDmg;
+            //hookDmg.
 
-
-
-            //this was used for taunt
-            //TeamComponent teamComp = hookProjectilePrefab.AddComponent<TeamComponent>();
-            //teamComp.teamIndex = TeamIndex.Player;
-            //CharacterBody hookBody = hookProjectilePrefab.AddComponent<CharacterBody>();
-            //hookBody.baseRegen = int.MaxValue;
-            //hookBody.baseMaxHealth = int.MaxValue;
-            //hookBody.baseArmor = int.MinValue;
-            //HealthComponent healthComp = hookProjectilePrefab.AddComponent<HealthComponent>();
-            //healthComp.health = int.MaxValue;
-            //healthComp.dontShowHealthbar = true;
-
-
-
-            //GameObject enemyTaunter = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            //enemyTaunter.transform.parent = hookProjectilePrefab.transform;
-            ////UnityEngine.Object.Destroy(enemyTaunter.GetComponent<MeshRenderer>());
-            ////UnityEngine.Object.Destroy(enemyTaunter.GetComponent<MeshFilter>());
-            //enemyTaunter.GetComponent<SphereCollider>().isTrigger = true;
-            //enemyTaunter.transform.localPosition = Vector3.zero;
-            //enemyTaunter.transform.localScale = Vector3.one * 30;
-            //enemyTaunter.layer = 15;
-
-
-            //var indicator = hookProjectilePrefab.GetComponent<PositionIndicator>();
-            //var visual = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Common/NPCPositionIndicator.prefab").WaitForCompletion();
-            //indicator.alwaysVisibleObject = visual;
-            //indicator.outsideViewObject = visual;
-            //indicator.insideViewObject = visual;
-
-
+        
 
             FishHookController fishHook = hookProjectilePrefab.AddComponent<FishHookController>();
             fishHook.rb = rb;
@@ -290,9 +255,6 @@ namespace FishermanMod.Survivors.Fisherman
             fishHook.projOverlap = piss;
             fishHook.projSimple = ps;
             fishHook.lineRenderer = hookProjectilePrefab.GetComponent<LineRenderer>();
-
-
-            hookProjectilePrefab.layer = LayerIndex.projectile.intVal;
 
             
 
