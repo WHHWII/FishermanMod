@@ -41,8 +41,8 @@ namespace FishermanMod.Survivors.Fisherman
             LanguageAPI.Add(prefix + "KEYWORD_TREASURE", $" <style=cKeywordName>Treasure</style><style=cSub> Cast can {Tokens.HookText("Hook")} drones, items, chests, and more...");
             LanguageAPI.Add(prefix + "KEYWORD_NONLETHAL", $" <style=cKeywordName>Non-Lethal</style><style=cSub> Cannot kill.");
             LanguageAPI.Add(prefix + "KEYWORD_TETHER", $" <style=cKeywordName>Tether</style><style=cSub> Reduces movement speed by <style=cIsDamage>30%.</style>");
-            LanguageAPI.Add(prefix + "KEYWORD_UNFINISHED", $" <style=cKeywordName>UNFINISHED</style><style=cSub> Ability is still in development, meaning it probably functions poorly and is likley to change");
-            LanguageAPI.Add(prefix + "KEYWORD_DAUNTLESS", $" <style=cKeywordName>Steady</style><style=cSub>Resist most negative effects and gain a <style=cIsDamage>{100 * FishermanStaticValues.bottleDamageBuff}%</style> increase to all damage for each one currently effecting you.");
+            LanguageAPI.Add(prefix + "KEYWORD_UNFINISHED", $" <style=cKeywordName>UNFINISHED</style><style=cSub>Ability is still in development, meaning it probably functions poorly and is likley to change");
+            LanguageAPI.Add(prefix + "KEYWORD_DAUNTLESS", $" <style=cKeywordName>Regenerative</style><style=cSub>Heal for 5% of your maximum life over 0.5s");
             LanguageAPI.Add(prefix + "KEYWORD_SMACK", $" <style=cKeywordName>Smackable</style><style=cSub>This minon can be damaged and pushed by your abilities.");
             LanguageAPI.Add(prefix + "KEYWORD_LINKED", $"<style=cKeywordName>Soulbound</style><style=cSub>This minion does not inherit your items, but all damage they deal " + $"is treated as your own.</style>");
             LanguageAPI.Add(prefix + "KEYWORD_DIRECT", $"<style=cKeywordName>Directable</style><style=cSub> Re-Activate this ability to direct the platform to a targeted location. Hold the ability to destroy it.");
@@ -91,7 +91,7 @@ namespace FishermanMod.Survivors.Fisherman
 
             #region Special
             Language.Add(prefix + "SPECIAL_DRINK_NAME", Tokens.FishermanText("Steady The Nerves", 4));
-            Language.Add(prefix + "SPECIAL_DRINK_DESCRIPTION", $"<style=cIsDamage>Stunning</style>. Take a drink for <style=cIsDamage>{100f * FishermanStaticValues.bottleUppercutDamageCoefficient}% damage</style> and become <style=cIsUtility>Steady</style>. Then throw the bottle for <style=cIsDamage>{100f * FishermanStaticValues.bottleDamageCoefficient}% damage.</style>");
+            Language.Add(prefix + "SPECIAL_DRINK_DESCRIPTION", $"<style=cIsDamage>Stunning</style>. <style=cIsDamage>Regenerative.</style> Perform a forceful uppercut for <style=cIsDamage>{100f * FishermanStaticValues.bottleUppercutDamageCoefficient}% damage</style>. Then throw a bottle for <style=cIsDamage>{100f * FishermanStaticValues.bottleDamageCoefficient}% damage.</style>");
             #endregion
 
             #region Achievements

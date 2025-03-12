@@ -122,7 +122,7 @@ namespace FishermanMod.Survivors.Fisherman
                 frequency = 40f,
                 cycleOffset = 0f
             };
-
+            
         }
 
         private static void CreateBottleImpactEffect()
@@ -178,6 +178,7 @@ namespace FishermanMod.Survivors.Fisherman
             var ps = bottleProjectilePrefab.GetComponent<ProjectileSimple>();
             ProjectileDamage projectileDamage = ps.GetComponent<ProjectileDamage>();
             projectileDamage.damageType = DamageType.Stun1s;
+            projectileDamage.damageType.AddModdedDamageType(DamageTypes.FishermanGrantSteady);
 
 
             ProjectileController bombController = bottleProjectilePrefab.GetComponent<ProjectileController>();
@@ -543,7 +544,7 @@ namespace FishermanMod.Survivors.Fisherman
                 activationStateMachineName = "Weapon",
                 interruptPriority = EntityStates.InterruptPriority.Skill,
 
-                baseRechargeInterval = 5f,
+                baseRechargeInterval = 6f,
                 baseMaxStock = 1,
 
                 rechargeStock = 1,

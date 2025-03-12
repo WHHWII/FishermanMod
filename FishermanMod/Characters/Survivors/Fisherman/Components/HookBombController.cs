@@ -99,9 +99,9 @@ namespace FishermanMod.Survivors.Fisherman.Components
                 if(!target) continue;
                 FishermanSurvivor.ApplyFishermanPassiveFishHookEffect(
                     owner, gameObject,
-                    damageComponent.damage,
                     transform.position,
-                    target.body.mainHurtBox
+                    target.body.mainHurtBox,
+                    false
                 );
                 if (target.body.HasBuff(FishermanBuffs.hookTetherDebuff))
                 {

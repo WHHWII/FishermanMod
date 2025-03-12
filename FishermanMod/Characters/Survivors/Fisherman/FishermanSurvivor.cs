@@ -69,8 +69,8 @@ namespace FishermanMod.Survivors.Fisherman
             maxHealth = 160,
             healthRegen = 2.5f,
             armor = 20f,
-            damage = 14,
-            damageGrowth = 2.8f,
+            damage = 13,
+            damageGrowth = 2f,
             healthGrowth = 48,
             regenGrowth = 0.5f,
             jumpPower = 16.2f,
@@ -160,6 +160,7 @@ namespace FishermanMod.Survivors.Fisherman
             var drinkmdl = characterModelObject.GetComponent<ChildLocator>().FindChild("Drink");
             drinkmdl.gameObject.SetActive(false);
             bodyPrefab.AddComponent<SkillObjectTracker>();
+
             //bodyPrefab.AddComponent<HuntressTrackerComopnent>();
             //anything else here
         }
@@ -533,7 +534,7 @@ namespace FishermanMod.Survivors.Fisherman
                 skillName = "SteadyTheNerves",
                 skillNameToken = FISHERMAN_PREFIX + "SPECIAL_DRINK_NAME",
                 skillDescriptionToken = FISHERMAN_PREFIX + "SPECIAL_DRINK_DESCRIPTION",
-                keywordTokens = new string[] { "KEYWORD_STUNNING", FISHERMAN_PREFIX + "KEYWORD_DAUNTLESS" },
+                keywordTokens = new string[] { "KEYWORD_STUNNING", "KEYWORD_REGENERATIVE" },
                 skillIcon = assetBundle.LoadAsset<Sprite>("Jelly Bomb Icon"),
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(SkillStates.NervesDrinkState)),
@@ -542,7 +543,7 @@ namespace FishermanMod.Survivors.Fisherman
                 interruptPriority = EntityStates.InterruptPriority.Skill,
 
                 baseMaxStock = 1,
-                baseRechargeInterval = 10f,
+                baseRechargeInterval = 8f,
 
                 isCombatSkill = false,
                 mustKeyPress = true,
@@ -795,7 +796,7 @@ namespace FishermanMod.Survivors.Fisherman
         }
 
 
-        public static int ApplyFishermanPassiveFishHookEffect(GameObject attacker, GameObject inflictor, float hookFailDamage, Vector3 targetPos, HurtBox enemyHurtBox)
+        public static int ApplyFishermanPassiveFishHookEffect(GameObject attacker, GameObject inflictor, Vector3 targetPos, HurtBox enemyHurtBox, bool joltAttackerOnFail = true)
         {
             //TODO Re-work hook Arc
             //TODO Prevent super mega multihit from behemoth.
@@ -844,15 +845,6 @@ namespace FishermanMod.Survivors.Fisherman
             //Log.Debug($"[HOOK][Effect] throwvel {throwVelocity}");
 
             #endregion 
-
-            DamageInfo damageInfo = new DamageInfo
-            {
-                attacker = attacker,
-                inflictor = inflictor,
-                //force = force,
-                position = enemyHurtBox.transform.position,
-            };
-
             //Log.Debug($"\nHookInfo: " +
             //    $"\n\tName: {body.name}" +
             //    $"\n\tIsFlyer: {isFlyer}" +
@@ -865,22 +857,32 @@ namespace FishermanMod.Survivors.Fisherman
             //    //$"\n\t>Final Force: {force}"
             //);
 
-            damageInfo.force = Vector3.up;
-            damageInfo.procCoefficient = 0;
-            damageInfo.procChainMask = new ProcChainMask();
-            damageInfo.procChainMask.AddProc(ProcType.Behemoth);
-            damageInfo.procChainMask.RemoveProc(ProcType.BleedOnHit);
-            damageInfo.canRejectForce = false;
-            enemyHurtBox.healthComponent.TakeDamageForce(damageInfo); // apply weak pull no damage to prevent double hit
 
             if (bodyMass > maxMass)
             {
+
+                var wave = new Wave
+                {
+                    amplitude = 5f,
+                    frequency = 10f,
+                    cycleOffset = 0.2f
+                };
+
+                ShakeEmitter localShaker = ShakeEmitter.CreateSimpleShakeEmitter(attacker.transform.position, wave, 0.1f, 10, true);
+                if (joltAttackerOnFail)
+                {
+                    var bod = attacker.GetComponent<CharacterBody>();
+                    if (bod && bod.characterMotor)
+                    {
+                        if (bod.characterMotor.isGrounded) bod.characterMotor.Motor.ForceUnground();
+                        bod.characterMotor.velocity = Vector3.zero;
+                        bod.characterMotor.velocity = -throwVelocity * 0.3f;
+                    }
+                }
                 //Log.Info($"Attacker: {attacker.name} Inflictor {inflictor.name}");
                 //play hook fail sound effect
                 //show hook hook fail decal on enemy
                 //damageInfo.force = force * 0.1f;
-
-
                 enemyHurtBox.healthComponent.ApplyDot(attacker, DotController.DotIndex.Bleed, 3, FishermanStaticValues.hookBleedCoefficient);
                 //Log.Debug($"Mass too large, hook failed. New force: {damageInfo.force} HookfailDamage: {hookFailDamage}");
                 return 0;
@@ -903,6 +905,16 @@ namespace FishermanMod.Survivors.Fisherman
                 {
                     body.rigidbody.AddForce(throwVelocity, ForceMode.VelocityChange);
                 }
+
+
+                var wave = new Wave
+                {
+                    amplitude = 1f,
+                    frequency = 10f,
+                    cycleOffset = 0.2f
+                };
+
+                ShakeEmitter localShaker = ShakeEmitter.CreateSimpleShakeEmitter(attacker.transform.position, wave, 0.1f, 10, true);
 
                 //SetStateOnHurt st = body.GetComponent<SetStateOnHurt>();
                 //if (st)

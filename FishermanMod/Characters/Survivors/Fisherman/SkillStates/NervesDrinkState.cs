@@ -18,6 +18,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
 
         protected string uppercutHitbox = "UppercutGroup";
         protected DamageType damageType = DamageType.Generic;
+        
         protected float damageCoefficient = FishermanStaticValues.bottleUppercutDamageCoefficient;
         protected float procCoefficient = 1f;
         protected float pushForce = 300f;
@@ -79,17 +80,14 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
             attack.isCrit = RollCrit();
             attack.impactSound = impactSound;
             attack.hitBoxGroup = FindHitBoxGroup(uppercutHitbox);
+            attack.AddModdedDamageType(DamageTypes.FishermanGrantSteady);
             attack.AddModdedDamageType(DamageTypes.FishermanUppercut);
+            
 
             ChildLocator childLocator = characterBody.modelLocator.modelTransform.gameObject.GetComponent<ChildLocator>();
             childLocator.FindChild("Drink").gameObject.SetActive(true);
             PlayAnimation("Gesture, Override", "SpecialDrink", "SpecialDrink.playbackRate", duration);
             //Util.PlaySound(dodgeSoundString, gameObject);
-
-            if (NetworkServer.active)
-            {
-                AddBuffForeachDebuff();
-            }
             base.skillLocator.special.SetSkillOverride(gameObject, FishermanSurvivor.specialThrowFlask, RoR2.GenericSkill.SkillOverridePriority.Upgrade);
         }
 
@@ -203,6 +201,8 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
             }
 
             ApplyHitstop();
+            base.characterBody.AddTimedBuffAuthority(RoR2Content.Buffs.CrocoRegen.buffIndex, 0.5f);
+
         }
         // RoR2/Base/Merc/MercSwordUppercutSlash.prefab
 
