@@ -51,18 +51,16 @@ namespace FishermanMod.Modules
             if (damageInfo.HasModdedDamageType(FishermanTether))
             {
                 //Log.Info("TetherDamageTypeInvoked");
-                if (!victim.body) return;
+                if (!victim.body || !damageReport.damageInfo.inflictor) return;
                 victim.body.AddBuff(FishermanBuffs.hookTetherDebuff);
                 HookBombTetherVisual tetherVisual = victim.gameObject.AddComponent<HookBombTetherVisual>();
-                tetherVisual.lineTerminationObject = damageReport.damageInfo.inflictor ? damageReport.damageInfo.inflictor : damageReport.attacker;
+                tetherVisual.lineTerminationObject = damageReport.damageInfo.inflictor;
             }
 
             if (damageInfo.HasModdedDamageType(FishermanHookPassive))
             {
                 // Log.Info("HookDamageTypeInvoked");
                 if (!victim.body) return;
-                if (damageReport.victimBody.characterMotor) damageReport.victimBody.characterMotor.velocity = Vector3.zero;
-
                 FishermanSurvivor.ApplyFishermanPassiveFishHookEffect(
                     damageReport.attacker,
                     damageInfo.inflictor,
