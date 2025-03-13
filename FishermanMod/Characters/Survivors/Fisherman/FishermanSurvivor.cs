@@ -159,7 +159,9 @@ namespace FishermanMod.Survivors.Fisherman
             bodyPrefab.AddComponent<HenryWeaponComponent>();
             var drinkmdl = characterModelObject.GetComponent<ChildLocator>().FindChild("Drink");
             drinkmdl.gameObject.SetActive(false);
-            bodyPrefab.AddComponent<SkillObjectTracker>();
+            SkillObjectTracker objTracker = bodyPrefab.AddComponent<SkillObjectTracker>();
+
+
 
             //bodyPrefab.AddComponent<HuntressTrackerComopnent>();
             //anything else here
@@ -816,30 +818,6 @@ namespace FishermanMod.Survivors.Fisherman
             float dist = Vector3.Distance(enemyPosition, targetPos);
 
 
-            //Vector2 distanceVector2D = new Vector2(distanceVector.x, distanceVector.z);
-            //float horizontalDist = distanceVector2D.magnitude;
-            //Vector2 horizontalDir = distanceVector2D / horizontalDist;
-            //float timeToTarget = 1;
-            //float travelRate = horizontalDist / timeToTarget;
-
-            //float ySpeed =  Trajectory.CalculateInitialYSpeed(timeToTarget, distanceVector.y);
-            //force = new Vector3(distanceVector.x * travelRate, ySpeed, distanceVector.z * travelRate) * bodyMass;
-
-
-            //Vector3 halfDistVec = distanceVector * 0.5f;
-            //Vector3 centerAdjEPos = halfDistVec + enemyPosition;
-            //Vector3 hookTarget = centerAdjEPos;
-            //if (!isFlyer)
-            //{
-            //    hookTarget.y += dist * 0.5f;
-            //}
-            //Vector3 newDistanceVector = (hookTarget - enemyPosition);
-            ////float bonusPower = Mathf.Clamp(Mathf.Log(-dist + 262, 1.1f) - 55, 1, 5); //this one is really good
-            //float bonusPower = Mathf.Clamp(Mathf.Log(-dist + 312, 1.1f) - 57.2f, 1, 5);
-            //// if (isFlyer) { bonusPower += 0.1f; }
-            //force = newDistanceVector * bodyMass * bonusPower;
-
-
             Vector3 throwVelocity = FishermanSurvivor.GetHookThrowVelocity(targetPos, enemyPosition, isFlyer);
             //Log.Debug($"[HOOK][Effect] owner {targetPos} Enemy position {enemyPosition}");
             //Log.Debug($"[HOOK][Effect] throwvel {throwVelocity}");
@@ -878,6 +856,7 @@ namespace FishermanMod.Survivors.Fisherman
                         bod.characterMotor.velocity = Vector3.zero;
                         bod.characterMotor.velocity = -throwVelocity * 0.3f;
                     }
+                    FishermanStaticValues.hitStopMod = 2;
                 }
                 //Log.Info($"Attacker: {attacker.name} Inflictor {inflictor.name}");
                 //play hook fail sound effect
@@ -916,17 +895,6 @@ namespace FishermanMod.Survivors.Fisherman
 
                 ShakeEmitter localShaker = ShakeEmitter.CreateSimpleShakeEmitter(attacker.transform.position, wave, 0.1f, 10, true);
 
-                //SetStateOnHurt st = body.GetComponent<SetStateOnHurt>();
-                //if (st)
-                //{
-                //    Log.Debug("setstate found");
-                //    st.SetShock(0.1f);
-                //}
-                //else
-                //{
-                //    Log.Debug("setstate not found");
-
-                //}
 
                 return 1;
             }

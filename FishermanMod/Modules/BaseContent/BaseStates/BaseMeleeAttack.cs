@@ -89,6 +89,7 @@ namespace FishermanMod.Modules.BaseStates
             else
             {
                 attack.hitBoxGroup = FindHitBoxGroup(stabGroupName);
+                hitStopDuration = FishermanStaticValues.CurHitStop;
                 attack.AddModdedDamageType(DamageTypes.FishermanHookPassive);
             }
             attack.isCrit = RollCrit();
@@ -226,6 +227,7 @@ namespace FishermanMod.Modules.BaseStates
             ConsumeHitStopCachedState(hitStopCachedState, characterMotor, animator);
             inHitPause = false;
             characterMotor.velocity = storedVelocity;
+            FishermanStaticValues.hitStopMod = 1;
         }
 
         public override InterruptPriority GetMinimumInterruptPriority()

@@ -21,6 +21,8 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Components
         public GameObject platformPosTargetIndicator;
         public GameObject platformAimTargetIndicator;
         public RoR2.CharacterBody characterBody;
+        public RoR2.CharacterMotor characterMotor;
+        public Animator animator;
         public const string COMMAND_SKILL_DRIVER_NAME = "FollowCommand";
         public const string LEASH_SKILL_DRIVER_NAME = "LeashLeader";
         public const string STOP_SKILL_DRIVER_NAME = "StandStill";
@@ -29,8 +31,11 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Components
         public void Start()
         {
             characterBody = GetComponent<RoR2.CharacterBody>();
+            characterMotor = GetComponent<CharacterMotor>();
+            animator = characterBody.modelLocator.modelTransform.GetComponent<Animator>();
             fishingPoleTip = characterBody.modelLocator.modelTransform.GetComponent<ChildLocator>().FindChild("PoleEnd");
         }
+
 
         public void RecallAllHooks()
         {

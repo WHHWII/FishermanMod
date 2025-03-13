@@ -13,6 +13,8 @@ using Newtonsoft.Json.Utilities;
 using UnityEngine.UI;
 using UnityEngine.Assertions.Must;
 using UnityEngine.Events;
+using static EntityStates.BaseState;
+using EntityStates;
 
 namespace FishermanMod.Survivors.Fisherman.Components
 {
@@ -71,6 +73,8 @@ namespace FishermanMod.Survivors.Fisherman.Components
             stickComponent.stickEvent.AddListener(OnStickEvent);
             projectileDamage.force = 0;
             onHookEvent.AddListener(SpawnRadar);
+            onHookEvent.AddListener(ApplyHitStop);
+            projOverlap.onServerHit.AddListener(() => ApplyHitStop(null));
         }
         void OnStickEvent()
         {
@@ -126,7 +130,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
                     projSimple.lifetime = 0.0001f;
 
                 }
-
+                UpdateHitStop();
             }
         }
         public IEnumerator FlyBack()
@@ -296,6 +300,66 @@ namespace FishermanMod.Survivors.Fisherman.Components
             EffectData effectData = new EffectData();
             effectData.origin = obj.transform.position;
             EffectManager.SpawnEffect(FishermanAssets.hookScannerPrefab, effectData, true);
+        }
+
+        bool inHitPause;
+        float hitStopDuration = 0.05f;
+        Vector3 storedVelocity;
+        HitStopCachedState hitStopCachedState;
+        float hitPauseTimer;
+        string playbackRateParam = "SecondaryCast.playbackRate";
+
+        void ApplyHitStop(GameObject gameObject)
+        {
+            Log.Debug("HookProj hitstop : STARTED");
+            if (!inHitPause && FishermanStaticValues.CurHitStop > 0f)
+            {
+                storedVelocity = objTracker.characterMotor.velocity;
+                hitStopCachedState = CreateHitStopCachedState(objTracker.characterMotor, objTracker.animator, playbackRateParam);
+                hitPauseTimer = FishermanStaticValues.CurHitStop / objTracker.characterBody.attackSpeed;
+                inHitPause = true;
+            }
+        }
+
+        protected void UpdateHitStop()
+        {
+            hitPauseTimer -= Time.fixedDeltaTime;
+
+            if (hitPauseTimer <= 0f && inHitPause)
+            {
+                RemoveHitstop();
+            }
+
+            if(inHitPause)
+            {
+                Log.Debug("HookProj hitstop : ACTIVE: " + FishermanStaticValues.CurHitStop);
+                objTracker.characterMotor.velocity = Vector3.zero;
+                objTracker.animator.SetFloat(playbackRateParam, 0f);
+            }
+        }
+
+        private void RemoveHitstop()
+        {
+            Log.Debug("HookProj hitstop : ENDED");
+            ConsumeHitStopCachedState(hitStopCachedState, objTracker.characterMotor, objTracker.animator);
+            inHitPause = false;
+            objTracker.characterMotor.velocity = storedVelocity;
+            FishermanStaticValues.hitStopMod = 1;
+        }
+
+        protected HitStopCachedState CreateHitStopCachedState(CharacterMotor characterMotor, Animator animator, string playbackRateAnimationParameter)
+        {
+            HitStopCachedState result = default(HitStopCachedState);
+            result.characterVelocity = new Vector3(characterMotor.velocity.x, Mathf.Max(0f, characterMotor.velocity.y), characterMotor.velocity.z);
+            result.playbackName = playbackRateAnimationParameter;
+            result.playbackRate = animator.GetFloat(result.playbackName);
+            return result;
+        }
+
+        protected void ConsumeHitStopCachedState(HitStopCachedState hitStopCachedState, CharacterMotor characterMotor, Animator animator)
+        {
+            characterMotor.velocity = hitStopCachedState.characterVelocity;
+            animator.SetFloat(hitStopCachedState.playbackName, hitStopCachedState.playbackRate);
         }
     }
 
