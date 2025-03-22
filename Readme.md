@@ -5,9 +5,26 @@ Fisherman's mobility is weak, but he offers powerful crowd control and utility t
 ## Kit
 Fisherman currently has his Passive, 4 core abilities, and 1 alternative special. 
 
-![Alt text](../FishermanBanner.png?raw=true "Optional Title")
+![
+Passive - The Hooks
+Certain attacks Hook fish, pulling them close. If a fish is too heavy to be Hooked, bleed them for 120% damage.
 
-![Alt text](../FishermanAltSkillBanner.png?raw=true "Optional Title")
+Primary - Debone
+Thwack in front for 260% damage. Every 3rd Attack is a long range stab that Hooks fish.
+
+Secondary - Cast 
+Non-Lethal. Charge up and cast out an arcing hook. Recall it to hook fish for 385% damage. Can Hook all kinds of Treasure...
+
+Utility - F153 Mobile Shanty Platform
+Deploy a Directable Drone that you can stand on. It slowly fires explosive rounds for 350% damage.
+
+Special - Launch a sticky bomb that Tethers fish. Re-Activate to Hook Tethered fish inwards and detonate for 2x500% damage.
+](../FishermanBanner.png?raw=true "Optional Title")
+
+![
+Alt Special - Steady The Nerves 
+Stunning. Regenerative. Perform a forceful uppercut for 400% damage. Then throw the bottle for 150% damage.
+](../FishermanAltSkillBanner.png?raw=true "Optional Title")
 
 ## Beta
 Fisherman is currently in BETA, meaning:
