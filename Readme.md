@@ -21,6 +21,8 @@ Alt Special - Steady The Nerves
 Stunning. Regenerative. Perform a forceful uppercut for 400% damage. Then throw the bottle for 150% damage.
 ](FishermanAltSkillBanner.png?raw=true "Optional Title")
 
+![Fisherman Grabs an unsuspecting Chest] (FishermanTreasure.gif)
+
 ## Beta
 Fisherman is currently in BETA, meaning:
  - Untested Multiplayer compatibility
