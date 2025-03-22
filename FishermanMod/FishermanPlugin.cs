@@ -20,8 +20,8 @@ namespace FishermanMod
         //  please change the names to your own stuff, thanks
         //   this shouldn't even have to be said
         public const string MODUID = "com.wunt.FishermanMod";
-        public const string MODNAME = "FishermanMod";
-        public const string MODVERSION = "1.0.0";
+        public const string MODNAME = "Wunt-FishermanMod";
+        public const string MODVERSION = "0.3.0";
 
         // a prefix for name tokens to prevent conflicts- please capitalize all name tokens for convention
         public const string DEVELOPER_PREFIX = "WUNT";

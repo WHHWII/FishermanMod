@@ -59,7 +59,7 @@ namespace FishermanMod.Survivors.Fisherman
             bodyNameToken = FISHERMAN_PREFIX + "NAME",
             subtitleNameToken = FISHERMAN_PREFIX + "SUBTITLE",
 
-            characterPortrait = assetBundle.LoadAsset<Texture>("texWIPFishermanIcon"),
+            characterPortrait = assetBundle.LoadAsset<Texture>("FishermanIcon"),
             bodyColor = new Color32(198, 184, 2, 255),
             sortPosition = 100,
 

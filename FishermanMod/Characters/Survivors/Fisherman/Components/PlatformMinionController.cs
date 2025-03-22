@@ -23,7 +23,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
 {
     public class PlatformMinionController : MonoBehaviour
     {
-        public bool debug = true;
+        public bool debug = false;
 
         float commandPointOffset = 3;
         public bool wasStuckByHook;
@@ -108,6 +108,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
         float flashdur = 0.5f;
         public void Update()
         {
+            //direaction indicator
             if (debug)
             {
                 lineRenderer.SetPosition(0, baseAi.localNavigator.currentSnapshot.chestPosition);
@@ -122,12 +123,12 @@ namespace FishermanMod.Survivors.Fisherman.Components
                     lineRenderer.enabled = true;
                 }
             }
-
             if (Time.time >= timeStamp)
             {
                 lineRenderer.enabled = false;
             }
 
+            //aim indicator
             if (!objTracker) return;
             if (baseAi.currentEnemy?.characterBody && baseAi.currentEnemy?.gameObject != objTracker?.gameObject)
             {
@@ -172,8 +173,9 @@ namespace FishermanMod.Survivors.Fisherman.Components
             if (!objTracker) return;
             if (baseAi.customTarget.gameObject) commandAge += Time.fixedDeltaTime;
 
-            bool closeToLeader = Vector3.Distance(transform.position, objTracker.transform.position) <= 65;
-            bool closeToTarget = baseAi.customTarget.gameObject && Vector3.Distance(transform.position, baseAi.customTarget.gameObject.transform.position) <= 3;
+            float distToLeader = Vector3.Distance(transform.position, objTracker.transform.position);
+            bool closeToLeader = distToLeader <= 65 && distToLeader > 10;
+            bool closeToTarget = baseAi.customTarget.gameObject && Vector3.Distance(transform.position, baseAi.customTarget.gameObject.transform.position) <= 5;
             if (baseAi.customTarget.gameObject && closeToTarget && !closeToLeader || commandAge >= commandAgeLimit)
             {
                 baseAi.customTarget.gameObject = null;
@@ -181,7 +183,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
                 objTracker.platformPosTargetIndicator.gameObject.SetActive(false);
                 commandAge = 0;
             }
-            if (!baseAi.customTarget.gameObject && closeToLeader)
+            if (!baseAi.customTarget.gameObject && closeToLeader && commandAge >= 5f)
             {
                 SetHover();
             }
@@ -225,7 +227,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
         }
 
 
-
+        #region UI
 
         void CreateOwnerOverlay(HUD hud)
         {
@@ -272,5 +274,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
 
             instance.GetComponent<SkillIcon>().targetSkill = characterBody.skillLocator.primary;
         }
+
+        #endregion UI
     }
 }
