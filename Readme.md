@@ -5,9 +5,9 @@ Fisherman's mobility is weak, but he offers powerful crowd control and utility t
 ## Kit
 Fisherman currently has his Passive, 4 core abilities, and 1 alternative special. 
 
-![Alt text](FishermanBanner.png?raw=true "Optional Title")
+![Alt text](../FishermanBanner.png?raw=true "Optional Title")
 
-![Alt text](FishermanAltSkillBanner.png?raw=true "Optional Title")
+![Alt text](../FishermanAltSkillBanner.png?raw=true "Optional Title")
 
 ## Beta
 Fisherman is currently in BETA, meaning:
