@@ -15,11 +15,11 @@ Non-Lethal. Charge up and cast out an arcing hook. Recall it to hook fish for 38
 Utility - F153 Mobile Shanty Platform
 Deploy a Directable Drone that you can stand on. It slowly fires explosive rounds for 350% damage.
 Special - Launch a sticky bomb that Tethers fish. Re-Activate to Hook Tethered fish inwards and detonate for 2x500% damage.
-](../FishermanBanner.png?raw=true "Optional Title")
+](FishermanBanner.png?raw=true "Optional Title")
 ![
 Alt Special - Steady The Nerves 
 Stunning. Regenerative. Perform a forceful uppercut for 400% damage. Then throw the bottle for 150% damage.
-](../FishermanAltSkillBanner.png?raw=true "Optional Title")
+](FishermanAltSkillBanner.png?raw=true "Optional Title")
 
 ## Beta
 Fisherman is currently in BETA, meaning:
