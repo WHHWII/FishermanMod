@@ -25,6 +25,8 @@ using static RoR2.LocalNavigator;
 using Newtonsoft.Json.Utilities;
 using static UnityEngine.UIElements.UIR.BestFitAllocator;
 using IL.RoR2.UI;
+using UnityEngine.UI;
+using KinematicCharacterController;
 
 namespace FishermanMod.Survivors.Fisherman
 {
@@ -39,10 +41,17 @@ namespace FishermanMod.Survivors.Fisherman
         public static GameObject bombExplosionEffect;
         public static GameObject bottleImpactEffect;
         public static GameObject shantyShotGhost;
-       
 
+        public static GameObject objectViewerOverlay;
+        public static GameObject hookVisualizer;
+        public static GameObject hookIndicator;
+        public static GameObject bombIndicator;
         // networked hit sounds
         public static NetworkSoundEventDef swordHitSoundEvent;
+        public static NetworkSoundEventDef hookSuccessSoundEvent;
+        public static NetworkSoundEventDef hookFailSoundEvent;
+
+
 
         //projectiles
         public static GameObject bottleProjectilePrefab;
@@ -76,6 +85,8 @@ namespace FishermanMod.Survivors.Fisherman
 
             //sots
             swordHitSoundEvent = Content.CreateAndAddNetworkSoundEventDef("HenrySwordHit");
+            hookSuccessSoundEvent = Content.CreateAndAddNetworkSoundEventDef("HenrySwordHit");
+            hookFailSoundEvent = Content.CreateAndAddNetworkSoundEventDef("HenrySwordHit");
 
             CreateEffects();
 
@@ -89,6 +100,8 @@ namespace FishermanMod.Survivors.Fisherman
         }
 
         #region effects
+
+
         private static void CreateEffects()
         {
             CreateBombExplosionEffect();
@@ -98,11 +111,46 @@ namespace FishermanMod.Survivors.Fisherman
             swordStabEffect = _assetBundle.LoadEffect("HenryBazookaMuzzleFlash", true);
             //swordStabEffect.GetComponent<ParticleSystemRenderer>().sharedMaterial = Addressables.LoadAssetAsync<UnityEngine.Material>("RoR2/Base/Commando/matCommandoFMJRing.mat").WaitForCompletion();
 
-            uppercutEffect = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Merc/MercSwordUppercutSlash.prefab").WaitForCompletion();
+            uppercutEffect = _assetBundle.LoadEffect("FishermanUppercutEffect", true);
 
             swordHitImpactEffect = _assetBundle.LoadEffect("ImpactHenrySlash");
+
+            CreateHookTrackerOverlay();
         }
 
+        private static void CreateHookTrackerOverlay()
+        {
+            // hook visual overlay
+            objectViewerOverlay = Addressables.LoadAssetAsync<GameObject>("RoR2/DLC1/Railgunner/RailgunnerScopeLightOverlay.prefab").WaitForCompletion().InstantiateClone("FishermanObjectOverlay", false);
+            RoR2.UI.SniperTargetViewer viewer = objectViewerOverlay.GetComponentInChildren<RoR2.UI.SniperTargetViewer>();
+            objectViewerOverlay.transform.Find("ScopeOverlay").gameObject.SetActive(false);
+
+            hookVisualizer = viewer.visualizerPrefab.InstantiateClone("FishermanObjectViewer", false);
+            hookVisualizer.transform.Find("Scaler/Outer").gameObject.SetActive(false);
+
+            Image headshotImage = hookVisualizer.transform.Find("Scaler/Rectangle").GetComponent<Image>();
+            headshotImage.color = Color.green;
+            headshotImage.sprite = Addressables.LoadAssetAsync<Sprite>("RoR2/Base/Captain/texCaptainCrosshairInner.png").WaitForCompletion();
+
+            var visualizer = viewer.gameObject.AddComponent<FishermanObjectViewer>();
+            visualizer.visualizerPrefab = hookVisualizer;
+            MonoBehaviour.Destroy(viewer);
+            Debug.Log(visualizer);
+
+
+            //hookIndicator
+            hookIndicator = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Common/PoiPositionIndicator.prefab").WaitForCompletion().InstantiateClone("FishermanHookIndicator", false);
+            Transform inframe = hookIndicator.GetComponent<PositionIndicator>().insideViewObject.transform;
+            inframe.Rotate(0, 0, 180);
+            inframe.localScale = new Vector3(-inframe.localScale.x, inframe.localScale.y, inframe.localScale.z);
+
+            //bombIndicator
+            bombIndicator = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Common/BossPositionIndicator.prefab").WaitForCompletion().InstantiateClone("FishermanHookIndicator", false);
+            SpriteRenderer inframeSprite = bombIndicator.GetComponent<PositionIndicator>().insideViewObject.GetComponentInChildren<SpriteRenderer>();
+            inframeSprite.color = Color.green;
+            SpriteRenderer outframeSprite = bombIndicator.GetComponent<PositionIndicator>().outsideViewObject.GetComponentInChildren<SpriteRenderer>();
+            outframeSprite.color = Color.green;
+        }
         private static void CreateBombExplosionEffect()
         {
             bombExplosionEffect = _assetBundle.LoadEffect("BombExplosionEffect", "HenryBombExplosion");
@@ -194,43 +242,19 @@ namespace FishermanMod.Survivors.Fisherman
         private static void CreateHookProjectile()
         {
             hookProjectilePrefab = _assetBundle.LoadAndAddProjectilePrefab("FishermanHookProjectile");
-            //hookProjectilePrefab = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Engi/EngiMine.prefab").WaitForCompletion();
-            //hookProjectilePrefab = Assets.CloneProjectilePrefab("FMJRamping", "FishermanHookProjectile");
-            Rigidbody rb = hookProjectilePrefab.GetComponent<Rigidbody>();
-            //rb.useGravity = true;
-            //rb.mass = 100;
             hookProjectilePrefab.layer = LayerIndex.projectile.intVal;
 
+            Rigidbody rb = hookProjectilePrefab.GetComponent<Rigidbody>();
+
             ProjectileSimple ps = hookProjectilePrefab.GetComponent<ProjectileSimple>();
-            //ps.desiredForwardSpeed = 80;
-            //ps.lifetime = 999999;
             
-            
-            
-
             ProjectileStickOnImpact stickOnImpact = hookProjectilePrefab.GetComponent<ProjectileStickOnImpact>();
-            //stickOnImpact.ignoreCharacters = false;
-            //stickOnImpact.alignNormals = false;
-          
-            //ProjectileSingleTargetImpact pstImpact = hookProjectilePrefab.GetComponent<ProjectileSingleTargetImpact>();
-            //if(pstImpact) UnityEngine.Object.Destroy(pstImpact);
-            //pstImpact.enabled = false;
-
 
             ProjectileController pc = hookProjectilePrefab.GetComponent<ProjectileController>();
 
             CapsuleCollider collider = hookProjectilePrefab.GetComponent<CapsuleCollider>();
 
 
-            //item grabber
-            GameObject ItemInteractor = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            ItemInteractor.transform.parent = hookProjectilePrefab.transform;
-            UnityEngine.Object.Destroy(ItemInteractor.GetComponent<MeshRenderer>());
-            UnityEngine.Object.Destroy(ItemInteractor.GetComponent<MeshFilter>());
-            ItemInteractor.GetComponent<SphereCollider>().isTrigger = true;
-            ItemInteractor.transform.localPosition = Vector3.zero;
-            ItemInteractor.transform.localScale = Vector3.one * 6;
-            ItemInteractor.layer = 15;
 
             ProjectileOverlapAttack piss = hookProjectilePrefab.GetComponent<ProjectileOverlapAttack>();
 
@@ -246,7 +270,6 @@ namespace FishermanMod.Survivors.Fisherman
             //hookDmg.
 
         
-
             FishHookController fishHook = hookProjectilePrefab.AddComponent<FishHookController>();
             fishHook.rb = rb;
             fishHook.stickComponent = stickOnImpact;
@@ -257,39 +280,16 @@ namespace FishermanMod.Survivors.Fisherman
             fishHook.projSimple = ps;
             fishHook.lineRenderer = hookProjectilePrefab.GetComponent<LineRenderer>();
 
-            
 
-
-            //fishHook.stickComponent.stickEvent.AddListener(() => {
-            //    Log.Info("=-----------------HOOK IMPACT EVENT CALLED");
-            //    //fishHook.collider.radius = 0.1f; ;
-            //    fishHook.rb.velocity = Vector3.zero;
-            //    ps.enabled = false;
-            //    }
-            //);
-
-            //fishHook.enemyTaunter = enemyTaunter;
-            //fishHook.hookBody = hookBody;
-
-            //fishHook.pstImpact = pstImpact;
-
-
-            //if (_assetBundle.LoadAsset<GameObject>("CastHookGhost") != null)
-            //{
-            //    pc.ghostPrefab = _assetBundle.CreateProjectileGhostPrefab("CastHookGhost");
-            //}
-            //GameObject ghostPrefab = pc.ghostPrefab;
-            //ProjectileGhostController gpc = ghostPrefab.GetComponent<ProjectileGhostController>();
-            //UnityEngine.Object.Destroy(ghostPrefab.GetComponentInChildren<ObjectScaleCurve>()); // this removes the visual disapearing
-            ////want to change this to custom line renderer effect later
-            //AnimateShaderAlpha trailFadeEffect = gpc.GetComponentInChildren<AnimateShaderAlpha>();
-            //trailFadeEffect.timeMax = 20;
-            //TrailRenderer trailEffect = gpc.GetComponentInChildren<TrailRenderer>();
-            //trailEffect.startWidth = 0.2f;
-            //trailEffect.endWidth = 0.01f;
-
-
-
+            //item grabber
+            GameObject ItemInteractor = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            ItemInteractor.transform.parent = hookProjectilePrefab.transform;
+            UnityEngine.Object.Destroy(ItemInteractor.GetComponent<MeshRenderer>());
+            UnityEngine.Object.Destroy(ItemInteractor.GetComponent<MeshFilter>());
+            ItemInteractor.GetComponent<SphereCollider>().isTrigger = true;
+            ItemInteractor.transform.localPosition = Vector3.zero;
+            ItemInteractor.transform.localScale = Vector3.one * 6;
+            ItemInteractor.layer = 15;
         }
 
         private static void CreateHookScannerEffect()
@@ -438,7 +438,7 @@ namespace FishermanMod.Survivors.Fisherman
             //awakeComponent.action.AddListener(hookBomb.ClearHooks);
 
 
-
+            UnityEngine.GameObject.Destroy(hookBombProjectilePrefab.transform.Find("FakeActorCollider"));
 
         }
 
@@ -492,8 +492,10 @@ namespace FishermanMod.Survivors.Fisherman
             CreateMovingPlatform();
             Content.AddCharacterBodyPrefab(shantyBodyPrefab);
             Content.AddMasterPrefab(shantyMasterPrefab);
+
             CreateWhale();
             Content.AddCharacterBodyPrefab(whaleBodyPrefab);
+            //Prefabs.SetupCharacterModel(whaleBodyPrefab);
             Content.AddMasterPrefab(whaleMasterPrefab);
         }
         private static void CreateMovingPlatform()
@@ -510,11 +512,10 @@ namespace FishermanMod.Survivors.Fisherman
 
             //body
             shantyBodyPrefab = _assetBundle.LoadAsset<GameObject>("ShantyMinionBody") ;//PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Drones/EmergencyDroneBody.prefab").WaitForCompletion(), "ShantyBody");
-            shantyBodyPrefab.gameObject.layer = LayerIndex.entityPrecise.intVal;
-
             var mpc = shantyBodyPrefab.AddComponent<PlatformMinionController>();
             mpc.characterBody = shantyBodyPrefab.GetComponent<CharacterBody>();
-
+            mpc.standableRB = shantyBodyPrefab.GetComponentInChildren<PhysicsMover>().transform.GetComponent<Rigidbody>();
+            mpc.lineRenderer = shantyBodyPrefab.GetComponent<LineRenderer>();
 
             //master
             shantyMasterPrefab = _assetBundle.LoadAsset<GameObject>("ShantyMinionMaster");//PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Drones/MegaDroneMaster.prefab").WaitForCompletion(), "ShantyMaster");//

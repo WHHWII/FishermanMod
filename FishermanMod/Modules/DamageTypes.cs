@@ -46,6 +46,13 @@ namespace FishermanMod.Modules
             DamageInfo damageInfo = damageReport.damageInfo;
             HealthComponent victim = damageReport.victim;
 
+
+            //if (PlatformMinionController.allDeployedPlatforms.Contains(damageReport.victim.gameObject))
+            //{
+            //    Log.Debug($"Platform hit {damageReport.damageDealt} ");
+            //}
+
+
             bool canProc = damageInfo.procCoefficient >= Mathf.Epsilon;
 
             if (damageInfo.HasModdedDamageType(FishermanTether))

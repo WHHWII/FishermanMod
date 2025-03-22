@@ -552,6 +552,7 @@ namespace FishermanMod.Modules
 
             foreach (HurtBoxGroup hurtboxGroup in bodyPrefab.GetComponentsInChildren<HurtBoxGroup>())
             {
+                Log.Debug($"hurtboxGroup {hurtboxGroup.gameObject.name}");
                 hurtboxGroup.mainHurtBox.healthComponent = healthComponent;
                 for (int i = 0; i < hurtboxGroup.hurtBoxes.Length; i++)
                 {

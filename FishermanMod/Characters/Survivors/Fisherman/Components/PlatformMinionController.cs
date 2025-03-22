@@ -5,15 +5,19 @@ using FishermanMod.Characters.Survivors.Fisherman.Content;
 using R2API.Networking;
 using RoR2;
 using RoR2.CharacterAI;
+using RoR2.HudOverlay;
+using RoR2.UI;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.PlayerLoop;
 using UnityEngine.UIElements.UIR;
 using UnityEngine.XR.WSA;
+using static UnityEngine.UI.GridLayoutGroup;
 
 namespace FishermanMod.Survivors.Fisherman.Components
 {
@@ -35,9 +39,16 @@ namespace FishermanMod.Survivors.Fisherman.Components
         public BaseAI baseAi;
         public float commandAge;
         public float commandAgeLimit = 30f;
-        
+        public Rigidbody standableRB;
 
-        LineRenderer lineRenderer;
+        Vector3 lastNavTarget = Vector3.zero;
+
+        private OverlayController overlayController;
+        private GameObject overlayInstance;
+        bool hasRiskUI;
+
+
+        public LineRenderer lineRenderer;
         GameObject stupidzone;
 
 
@@ -59,8 +70,8 @@ namespace FishermanMod.Survivors.Fisherman.Components
             baseAi = GetComponent<CharacterBody>().master.GetComponent<RoR2.CharacterAI.BaseAI>();
             ownerMaster = baseAi.GetComponent<AIOwnership>()?.ownerMaster;
             objTracker = ownerMaster?.GetBodyObject().GetComponent<SkillObjectTracker>();
-            objTracker?.deployedPlatforms.Add(this);
-            characterBody.AddBuff(RoR2.RoR2Content.Buffs.Immune);
+            objTracker?.RegisterPlatform(this);
+            //characterBody.AddBuff(RoR2.RoR2Content.Buffs.Immune);
             //for (int i = 0; i < baseAi.skillDrivers.Length; i++)
             //{
             //    baseAi.skillDrivers[i].ignoreNodeGraph = true;
@@ -72,8 +83,12 @@ namespace FishermanMod.Survivors.Fisherman.Components
             if (debug)
             {
                 stupidzone = new GameObject("Platform Debug Line");
-                lineRenderer = stupidzone.AddComponent<LineRenderer>();
-                lineRenderer.material = FishermanAssets.chainMat;
+                var lr = stupidzone.AddComponent<LineRenderer>();
+                lr.material = lineRenderer.material;
+                lr.colorGradient = lineRenderer.colorGradient;
+                lr.widthCurve = lineRenderer.widthCurve;
+                Destroy(lineRenderer);
+                lineRenderer = lr;
             }
 
             if (!objTracker.platformAimTargetIndicator) objTracker.platformAimTargetIndicator = UnityEngine.GameObject.Instantiate(FishermanAssets.shantyBlueprintPrefab);
@@ -82,8 +97,15 @@ namespace FishermanMod.Survivors.Fisherman.Components
                 objTracker.platformPosTargetIndicator = UnityEngine.GameObject.Instantiate(FishermanAssets.shantyBlueprintPrefab);
             }
             SetHover();
+            var ownerHUD = HUD.readOnlyInstanceList.Where(el => el.targetBodyObject == objTracker.gameObject);
+            foreach (HUD hud in ownerHUD)
+            {
+                CreateOwnerOverlay(hud);
+            }
 
         }
+        float timeStamp;
+        float flashdur = 0.5f;
         public void Update()
         {
             if (debug)
@@ -92,6 +114,18 @@ namespace FishermanMod.Survivors.Fisherman.Components
                 Vector3 temp = ownerMaster.GetBody().transform.position;
                 baseAi.customTarget?.GetBullseyePosition(out temp);
                 lineRenderer.SetPosition(1, baseAi.localNavigator.targetPosition);
+
+                if(lastNavTarget != baseAi.localNavigator.targetPosition)
+                {
+                    timeStamp = Time.time + flashdur;
+                    lastNavTarget = baseAi.localNavigator.targetPosition;
+                    lineRenderer.enabled = true;
+                }
+            }
+
+            if (Time.time >= timeStamp)
+            {
+                lineRenderer.enabled = false;
             }
 
             if (!objTracker) return;
@@ -151,10 +185,11 @@ namespace FishermanMod.Survivors.Fisherman.Components
             {
                 SetHover();
             }
-
+            //standableRB.interpolation = RigidbodyInterpolation.Interpolate;
 
 
         }
+
         void SetHover()
         {
             RaycastHit hit;
@@ -180,7 +215,62 @@ namespace FishermanMod.Survivors.Fisherman.Components
 
         void OnDestroy()
         {
+            if (overlayController != null)
+            {
+                overlayController.onInstanceAdded -= OverlayController_onInstanceAdded;
+                HudOverlayManager.RemoveOverlay(overlayController);
+            }
             allDeployedPlatforms.Remove(gameObject);
+            objTracker.ProccessPlatfromDeath();
+        }
+
+
+
+
+        void CreateOwnerOverlay(HUD hud)
+        {
+           
+            GameObject skill4root = Array.Find<SkillIcon>(hud.skillIcons, icon => icon.name == "Skill3Root").gameObject;
+
+            ChildLocator childLocator = hud.GetComponent<ChildLocator>();
+            ChildLocator.NameTransformPair[] newArray = new ChildLocator.NameTransformPair[childLocator.transformPairs.Length + 1];
+            childLocator.transformPairs.CopyTo(newArray, 0);
+            newArray[newArray.Length - 1] = new ChildLocator.NameTransformPair
+            {
+                name = skill4root.transform.parent.name,
+                transform = skill4root.transform.parent
+            };
+            childLocator.transformPairs = newArray;
+
+            OverlayCreationParams overlayCreationParams = new OverlayCreationParams()
+            {
+                prefab = skill4root,
+                childLocatorEntry = skill4root.transform.parent.name
+            };
+
+            overlayController = HudOverlayManager.AddOverlay(objTracker.gameObject, overlayCreationParams);
+            overlayController.onInstanceAdded += OverlayController_onInstanceAdded;
+        }
+
+        private void OverlayController_onInstanceAdded(OverlayController overlayController, GameObject instance)
+        {
+            overlayInstance = instance;
+
+            if (overlayController.creationParams.childLocatorEntry == "SkillIconContainer")
+            {
+                hasRiskUI = true;
+                instance.transform.Find("BottomContainer").Find("SkillBackgroundPanel").gameObject.SetActive(false);
+                instance.GetComponent<RectTransform>().anchoredPosition += new Vector2(80f, 0f);
+            }
+            else
+            {
+                instance.transform.Find("SkillBackgroundPanel").gameObject.SetActive(false);
+                instance.GetComponent<RectTransform>().anchoredPosition += new Vector2(0f, 130f);
+            }
+
+            instance.name = "ShantyPrimaryRoot";
+
+            instance.GetComponent<SkillIcon>().targetSkill = characterBody.skillLocator.primary;
         }
     }
 }

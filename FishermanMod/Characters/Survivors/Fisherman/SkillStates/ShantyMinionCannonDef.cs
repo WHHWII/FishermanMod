@@ -61,7 +61,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
             CharacterMaster master = skillSlot.characterBody.master;
             if (master == null) return baseRechargeInterval;
             GenericSkill masterUtil = master.GetComponent<MinionOwnership>().ownerMaster.GetBody().skillLocator.utility;
-            Log.Debug($" master util fri {master.GetComponent<MinionOwnership>().ownerMaster.GetBody().skillLocator.utility.finalRechargeInterval}, bri {baseRechargeInterval}, final {MathF.Min(master.GetComponent<MinionOwnership>().ownerMaster.GetBody().skillLocator.utility.finalRechargeInterval * 2 * baseRechargeInterval, baseRechargeInterval)}  ");
+            //Log.Debug($" master util fri {master.GetComponent<MinionOwnership>().ownerMaster.GetBody().skillLocator.utility.finalRechargeInterval}, bri {baseRechargeInterval}, final {MathF.Min(master.GetComponent<MinionOwnership>().ownerMaster.GetBody().skillLocator.utility.finalRechargeInterval * 2 * baseRechargeInterval, baseRechargeInterval)}  ");
             //hardcoded and stinky but the utilty will be the direct skill which has a base recharage interval of 0.5. so take that x2 to make 1 * our base of 5;
             return MathF.Min(Mathf.Max(0.5f, masterUtil.cooldownScale * baseRechargeInterval - masterUtil.flatCooldownReduction), baseRechargeInterval);
         }

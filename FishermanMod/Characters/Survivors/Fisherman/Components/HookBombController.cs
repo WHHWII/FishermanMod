@@ -17,7 +17,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
     //TODO: Recall hook bomb is throwing an error on activation
     public class HookBombController : MonoBehaviour
     {
-        
+
         public ProjectileController controller;
         public ProjectileDamage damageComponent;
         public ProjectileProximityBeamController beamController;
@@ -33,7 +33,8 @@ namespace FishermanMod.Survivors.Fisherman.Components
         //public ProjectileExplosion explosionComponent;
         float origAntiGravCoef;
         float origDrag;
-        
+        bool triggerized;
+
 
         void Start()
         {
@@ -44,15 +45,33 @@ namespace FishermanMod.Survivors.Fisherman.Components
             origDrag = body.drag;
             //stickComponent.stickEvent.AddListener(UnStickFromHook);
             stickComponent.stickEvent.AddListener(ResetDragAndGrav);
+            stickComponent.stickEvent.AddListener(TriggerizeAllColliders);
+
+
+
+            GameObject hi = Instantiate(FishermanAssets.bombIndicator, transform);
+            hi.GetComponent<PositionIndicator>().targetTransform = transform;
+            hi.transform.position = Vector3.zero;
         }
 
         public void DisableAllColliders()
         {
-            foreach (var collider in bombColliders)  collider.enabled = false; 
+            foreach (var collider in bombColliders) collider.enabled = false;
+        }
+        public void TriggerizeAllColliders()
+        {
+            triggerized = true;
+            foreach (var collider in bombColliders) collider.isTrigger = true;
+        }
+        public void DeTriggerizeAllColliders()
+        {
+            triggerized = false;
+            foreach (var collider in bombColliders) collider.isTrigger = false;
         }
         public void EnableAllColliders()
         {
-            foreach(var collider in bombColliders) collider.enabled = true; 
+            foreach (var collider in bombColliders) collider.enabled = true;
+
         }
 
         public IEnumerator ResetPhysics()
@@ -64,7 +83,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
             stickComponent.UpdateSticking();
             yield return new WaitForSeconds(1f);
             ResetDragAndGrav();
- 
+
 
         }
         void ResetDragAndGrav()
@@ -77,7 +96,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
             body.angularDrag = 3;
             StartCoroutine(EnableRBcol());
         }
-        
+
         IEnumerator EnableRBcol()
         {
             yield return new WaitForFixedUpdate();
@@ -87,7 +106,11 @@ namespace FishermanMod.Survivors.Fisherman.Components
         void FixedUpdate()
         {
             lastVelocity = body.velocity;
-            if(!body.detectCollisions) body.detectCollisions = true; // TODO not this.
+            if (!body.detectCollisions) body.detectCollisions = true; // TODO not this.
+            if(triggerized && !stickComponent.stuck || !stickComponent.stuckTransform)
+            {
+                DeTriggerizeAllColliders();
+            }
         }
 
         public void HookAllTethers()
@@ -96,15 +119,16 @@ namespace FishermanMod.Survivors.Fisherman.Components
 
             foreach (var target in beamController.previousTargets)
             {
-                if(!target) continue;
-                FishermanSurvivor.ApplyFishermanPassiveFishHookEffect(
-                    owner, gameObject,
-                    transform.position,
-                    target.body.mainHurtBox,
-                    false
-                );
                 if (target.body.HasBuff(FishermanBuffs.hookTetherDebuff))
                 {
+                    if (!target) continue;
+                    FishermanSurvivor.ApplyFishermanPassiveFishHookEffect(
+                        owner, gameObject,
+                        transform.position,
+                        target.body.mainHurtBox,
+                        false
+                    );
+
                     target.body.RemoveBuff(FishermanBuffs.hookTetherDebuff);
                 }
             }

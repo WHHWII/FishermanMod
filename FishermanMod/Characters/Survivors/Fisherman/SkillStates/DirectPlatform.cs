@@ -6,6 +6,8 @@ using FishermanMod.Survivors.Fisherman;
 using FishermanMod.Characters.Survivors.Fisherman.Content;
 using On.RoR2;
 using FishermanMod.Characters.Survivors.Fisherman.Components;
+using FishermanMod.Survivors.Fisherman.Components;
+using System.Collections.Generic;
 
 namespace FishermanMod.Survivors.Fisherman.SkillStates
 {
@@ -33,35 +35,40 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
                 if (base.fixedAge >= chargeDestroyThreshold)
                 {
                     objTracker.DestroyAllPlatforms();
-                    objTracker.platformAimTargetIndicator?.SetActive(false);
-                    skillLocator.utility.UnsetSkillOverride(gameObject, FishermanSurvivor.utilityDirectPlatform, RoR2.GenericSkill.SkillOverridePriority.Upgrade);
-                    skillLocator.utility.DeductStock(1);
                     outer.SetNextStateToMain();
 
                 }
                 else if (!IsKeyDownAuthority())
                 {
                     PlayAnimation("LeftArm, Override", "UtilityPlatform", "UtilityPlatform.playbackRate", 0.65f);
-
-
-                    RaycastHit hitInfo;
-                    Ray aimray = GetAimRay();
-                    aimray.origin = transform.position + Vector3.up + aimray.direction;
-                    //TODO make ping ignore platform
-
-                    bool result = Physics.Raycast(aimray, out hitInfo, 50, RoR2.LayerIndex.world.mask | ~RoR2.LayerIndex.entityPrecise.mask, QueryTriggerInteraction.Ignore);
                     if (!objTracker.platformPosTargetIndicator)
                     {
                         objTracker.platformPosTargetIndicator = UnityEngine.GameObject.Instantiate(FishermanAssets.shantyBlueprintPrefab);
                     }
-                    if (result)
-                    {
 
-                        objTracker.platformPosTargetIndicator.transform.position = hitInfo.point + hitInfo.normal * commandPointOffset;
+                    float range = 50;
+
+                    Ray aimray = GetAimRay();
+                    aimray.origin = transform.position + Vector3.up + aimray.direction;
+                    //TODO make ping ignore platform
+
+                    RaycastHit[] hitInfos = Physics.RaycastAll(aimray, range, RoR2.LayerIndex.world.mask | ~RoR2.LayerIndex.entityPrecise.mask, QueryTriggerInteraction.Ignore);
+                    List<RaycastHit> tits = new List<RaycastHit>();
+                    if (hitInfos.Length > 0)
+                    {
+                        tits.AddRange(hitInfos);
+                        tits.RemoveAll((x) => PlatformMinionController.allDeployedPlatforms.Contains(x.transform.gameObject) || x.transform.name.Contains("Shanty"));
+                        tits.Sort((a, b) => a.distance.CompareTo(b.distance));
+                    }
+                    // if still popualted
+                    if (tits.Count > 0)
+                    {
+                        Log.Debug($" Direct Skill Impact: {tits[0].transform.name}");
+                        objTracker.platformPosTargetIndicator.transform.position = tits[0].point + tits[0].normal * commandPointOffset;
                     }
                     else
                     {
-                        objTracker.platformPosTargetIndicator.transform.position = aimray.GetPoint(50);
+                        objTracker.platformPosTargetIndicator.transform.position = aimray.GetPoint(range);
                     }
                     if (!objTracker.DirectAllPlatforms())
                     {

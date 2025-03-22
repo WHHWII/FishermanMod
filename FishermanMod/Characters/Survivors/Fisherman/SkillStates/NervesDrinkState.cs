@@ -36,7 +36,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
 
         protected string swingSoundString = "";
         protected string hitSoundString = "";
-        protected string muzzleString = "SwingCenter";
+        protected string muzzleString = "StabMuzzle";
         protected string playbackRateParam = "SpecialDrink.playbackRate";
         protected GameObject swingEffectPrefab;
         protected GameObject hitEffectPrefab;
@@ -226,7 +226,9 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
                 Vector3 direction = GetAimRay().direction;
                 direction.y = Mathf.Max(direction.y, direction.y * 0.5f);
                 hitBoxOrienter.rotation = Util.QuaternionSafeLookRotation(direction);
-
+                characterMotor.velocity = Vector3.zero;
+                characterMotor.Motor.ForceUnground();
+                characterMotor.velocity = 4f * hitBoxOrienter.forward + Vector3.up * 5f;
 
                 if (attack.Fire(hitresults))
                 {

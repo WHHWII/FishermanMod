@@ -69,11 +69,11 @@ namespace FishermanMod.Survivors.Fisherman
             maxHealth = 160,
             healthRegen = 2.5f,
             armor = 20f,
-            damage = 13,
-            damageGrowth = 2f,
+            damage = 14,
+            damageGrowth = 2.5f,
             healthGrowth = 48,
             regenGrowth = 0.5f,
-            jumpPower = 16.2f,
+            jumpPower = 16.5f,
 
 
             jumpCount = 1,
@@ -160,7 +160,7 @@ namespace FishermanMod.Survivors.Fisherman
             var drinkmdl = characterModelObject.GetComponent<ChildLocator>().FindChild("Drink");
             drinkmdl.gameObject.SetActive(false);
             SkillObjectTracker objTracker = bodyPrefab.AddComponent<SkillObjectTracker>();
-
+            
 
 
             //bodyPrefab.AddComponent<HuntressTrackerComopnent>();
@@ -545,7 +545,7 @@ namespace FishermanMod.Survivors.Fisherman
                 interruptPriority = EntityStates.InterruptPriority.Skill,
 
                 baseMaxStock = 1,
-                baseRechargeInterval = 8f,
+                baseRechargeInterval = 7f,
 
                 isCombatSkill = false,
                 mustKeyPress = true,
@@ -849,12 +849,12 @@ namespace FishermanMod.Survivors.Fisherman
                 ShakeEmitter localShaker = ShakeEmitter.CreateSimpleShakeEmitter(attacker.transform.position, wave, 0.1f, 10, true);
                 if (joltAttackerOnFail)
                 {
-                    var bod = attacker.GetComponent<CharacterBody>();
-                    if (bod && bod.characterMotor)
+                    var attackerBody = attacker.GetComponent<CharacterBody>();
+                    if (attackerBody && attackerBody.characterMotor)
                     {
-                        if (bod.characterMotor.isGrounded) bod.characterMotor.Motor.ForceUnground();
-                        bod.characterMotor.velocity = Vector3.zero;
-                        bod.characterMotor.velocity = -throwVelocity * 0.3f;
+                        if (attackerBody.characterMotor.isGrounded) attackerBody.characterMotor.Motor.ForceUnground();
+                        attackerBody.characterMotor.velocity = Vector3.zero;
+                        attackerBody.characterMotor.velocity = -throwVelocity * 0.3f;
                     }
                     FishermanStaticValues.hitStopMod = 2;
                 }

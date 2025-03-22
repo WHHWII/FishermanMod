@@ -5,6 +5,7 @@ using FishermanMod.Survivors.Fisherman.Components;
 using On.RoR2.Skills;
 using RoR2;
 using RoR2.CharacterAI;
+using RoR2.HudOverlay;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -27,6 +28,7 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Components
         public const string LEASH_SKILL_DRIVER_NAME = "LeashLeader";
         public const string STOP_SKILL_DRIVER_NAME = "StandStill";
         public Transform fishingPoleTip;
+        OverlayController objectViewerOverlay;
 
         public void Start()
         {
@@ -34,8 +36,21 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Components
             characterMotor = GetComponent<CharacterMotor>();
             animator = characterBody.modelLocator.modelTransform.GetComponent<Animator>();
             fishingPoleTip = characterBody.modelLocator.modelTransform.GetComponent<ChildLocator>().FindChild("PoleEnd");
+
+            objectViewerOverlay = HudOverlayManager.AddOverlay(this.gameObject, new OverlayCreationParams
+            {
+                prefab = FishermanAssets.objectViewerOverlay,
+                childLocatorEntry = "ScopeContainer"
+            });
         }
 
+        public void ProccessPlatfromDeath()
+        {
+            platformAimTargetIndicator?.SetActive(false);
+            characterBody.skillLocator.utility.UnsetSkillOverride(gameObject, FishermanSurvivor.utilityDirectPlatform, RoR2.GenericSkill.SkillOverridePriority.Upgrade);
+            characterBody.skillLocator.utility.DeductStock(1);
+            deployedPlatforms.Clear();
+        }
 
         public void RecallAllHooks()
         {
@@ -116,13 +131,22 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Components
             
         }
 
+        public void RegisterPlatform(PlatformMinionController newMinion)
+        {
+            if(deployedPlatforms.Count > 0)
+            {
+                DestroyAllPlatforms();
+            }
+            deployedPlatforms.Add(newMinion);
+        }
+
         public void DestroyAllPlatforms()
         {
             foreach (PlatformMinionController platform in deployedPlatforms)
             {
                 platform.characterBody.master.TrueKill();
             }
-            deployedPlatforms.Clear();
+            ProccessPlatfromDeath();
         }
 
         public bool ModifyPlayformStock(int stocks)

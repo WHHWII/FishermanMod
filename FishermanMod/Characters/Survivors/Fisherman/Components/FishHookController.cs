@@ -60,7 +60,9 @@ namespace FishermanMod.Survivors.Fisherman.Components
         void Awake()
         {
             //Log.Debug("[HOOK] New Hook Created ------------------------------------------------------------------------------------------------------------");
-
+            GameObject hi = Instantiate(FishermanAssets.hookIndicator, transform);
+            hi.GetComponent<PositionIndicator>().targetTransform = transform;
+            hi.transform.position = Vector3.zero;
         }
 
         void Start()
@@ -169,6 +171,20 @@ namespace FishermanMod.Survivors.Fisherman.Components
             projOverlap.enabled = true;
             projectileDamage.damage =  objTracker.characterBody.damage * FishermanStaticValues.castDamageCoefficient;
             projOverlap.damageCoefficient = 1;
+
+            float startWidth = lineRenderer.startWidth;
+            float endWidth = lineRenderer.endWidth;
+
+            lineRenderer.startWidth *= 10f;
+            lineRenderer.endWidth *= 10f;
+            yield return new WaitForEndOfFrame();
+            yield return new WaitForEndOfFrame();
+            yield return new WaitForEndOfFrame();
+            yield return new WaitForEndOfFrame();
+            yield return new WaitForEndOfFrame();
+            lineRenderer.startWidth = startWidth;
+            lineRenderer.endWidth = endWidth;
+
         }
         bool CanThrow(GameObject gameObject)
         {
@@ -181,7 +197,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
         void OnCollisionEnter(UnityEngine.Collision collision)
         {
             //if (collision.gameObject.GetComponent<MapZone>()) //Log.Debug("[HOOK] Hit bounds box: col enter");
-            //Log.Debug($"[HOOK] Collision Enter {collision.gameObject.name} C<==");
+           // Log.Debug($"[HOOK] Collision Enter {collision.gameObject.name} C<==");
             HookBombController hookBomb = collision.gameObject.GetComponent<HookBombController>();
             if(!isFlying && hookBomb)
             {
@@ -194,7 +210,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
         }
         void OnCollisionExit(UnityEngine.Collision collision)
         {
-            //Log.Debug($"[HOOK] Collision Exit {collision.gameObject.name} C==>");
+           // Log.Debug($"[HOOK] Collision Exit {collision.gameObject.name} C==>");
             HookBombController hookBomb = collision.gameObject.GetComponent<HookBombController>();
             if (hookBomb && CanThrow(hookBomb.gameObject))
             {
@@ -205,18 +221,35 @@ namespace FishermanMod.Survivors.Fisherman.Components
         void OnTriggerEnter(Collider collider)
         {
             //if (collider.gameObject.GetComponent<MapZone>()) //Log.Debug("[HOOK] Hit bounds box: trig enter");
-            //Log.Debug($"[HOOK] Trigger Enter {collider.gameObject.name} T<==");
+           // Log.Debug($"[HOOK] Trigger Enter {collider.gameObject.name} T<==");
 
             if (!CanThrow(collider.gameObject)) return;
+            HookBombController hookBomb = collider.transform.parent?.GetComponent<HookBombController>();
+            if (!isFlying && hookBomb)
+            {
+                bombsToThrow.Add(hookBomb);
+            }
+            if (hookBomb && CanThrow(hookBomb.gameObject))
+            {
+                StartCoroutine(ThrowHookBomb(hookBomb));
+            }
             if (ThrowItem(collider)) return;
             ThrowInteractable(collider);
         }
         void OnTriggerExit(Collider collider)
         {
             //if (collider.gameObject.GetComponent<MapZone>()) //Log.Debug("[HOOK] exit bounds box: trig exit");
-            //Log.Debug($"[HOOK] Trigger Exit {collider.gameObject.name} T==>");
+           // Log.Debug($"[HOOK] Trigger Exit {collider.gameObject.name} T==>");
             if (!CanThrow(collider.gameObject)) return;
-            ThrowHookBomb(collider.transform.parent?.GetComponent<HookBombController>());
+            HookBombController hookBomb = collider.transform.parent?.GetComponent<HookBombController>();
+            if (!isFlying && hookBomb)
+            {
+                bombsToThrow.Add(hookBomb);
+            }
+            if (hookBomb && CanThrow(hookBomb.gameObject))
+            {
+                StartCoroutine(ThrowHookBomb(hookBomb));
+            }
             if (ThrowItem(collider)) return;
             ThrowInteractable(collider);
         }
@@ -311,7 +344,6 @@ namespace FishermanMod.Survivors.Fisherman.Components
 
         void ApplyHitStop(GameObject gameObject)
         {
-            Log.Debug("HookProj hitstop : STARTED");
             if (!inHitPause && FishermanStaticValues.CurHitStop > 0f)
             {
                 storedVelocity = objTracker.characterMotor.velocity;
@@ -332,7 +364,6 @@ namespace FishermanMod.Survivors.Fisherman.Components
 
             if(inHitPause)
             {
-                Log.Debug("HookProj hitstop : ACTIVE: " + FishermanStaticValues.CurHitStop);
                 objTracker.characterMotor.velocity = Vector3.zero;
                 objTracker.animator.SetFloat(playbackRateParam, 0f);
             }
@@ -340,7 +371,6 @@ namespace FishermanMod.Survivors.Fisherman.Components
 
         private void RemoveHitstop()
         {
-            Log.Debug("HookProj hitstop : ENDED");
             ConsumeHitStopCachedState(hitStopCachedState, objTracker.characterMotor, objTracker.animator);
             inHitPause = false;
             objTracker.characterMotor.velocity = storedVelocity;

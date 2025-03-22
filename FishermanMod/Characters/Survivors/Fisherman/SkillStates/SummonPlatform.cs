@@ -161,6 +161,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
                                 //Log.Debug("Attempting Spawn");
                                 //base.characterBody.SendConstructTurret(base.characterBody, currentPlacementInfo.position, currentPlacementInfo.rotation, MasterCatalog.FindMasterIndex(platformMasterPrefab));
                                 MasterSummon masterSummon = new MasterSummon();
+                                masterSummon.useAmbientLevel = true;
                                 masterSummon.masterPrefab = platformMasterPrefab;
                                 masterSummon.ignoreTeamMemberLimit = false;
                                 masterSummon.teamIndexOverride = TeamIndex.Player;
