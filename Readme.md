@@ -24,6 +24,7 @@ Stunning. Regenerative. Perform a forceful uppercut for 400% damage. Then throw 
 ## Beta
 Fisherman is currently in BETA, meaning:
  - Untested Multiplayer compatibility
+ - Untested Compatibility with many mods.
  - Unfinished Assets 
  - Missing Content 
  - **Bugs**
