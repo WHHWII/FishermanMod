@@ -536,7 +536,7 @@ namespace FishermanMod.Survivors.Fisherman
                 skillName = "SteadyTheNerves",
                 skillNameToken = FISHERMAN_PREFIX + "SPECIAL_DRINK_NAME",
                 skillDescriptionToken = FISHERMAN_PREFIX + "SPECIAL_DRINK_DESCRIPTION",
-                keywordTokens = new string[] { "KEYWORD_STUNNING", "KEYWORD_REGENERATIVE" },
+                keywordTokens = new string[] { "KEYWORD_STUNNING", "KEYWORD_RAPID_REGEN" },
                 skillIcon = assetBundle.LoadAsset<Sprite>("Jelly Bomb Icon"),
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(SkillStates.NervesDrinkState)),

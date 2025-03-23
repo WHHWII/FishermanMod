@@ -21,7 +21,7 @@ Alt Special - Steady The Nerves
 Stunning. Regenerative. Perform a forceful uppercut for 400% damage. Then throw the bottle for 150% damage.
 ](https://github.com/WHHWII/FishermanMod/blob/Post-Sots/ReadmeAssets/FishermanAltSkillBanner.png?raw=true "Optional Title")
 
-![Fisherman Grabs an unsuspecting Chest](https://github.com/WHHWII/FishermanMod/blob/Post-Sots/ReadmeAssets/FishermanTreasure.gif)
+![Fisherman Grabs an unsuspecting Chest](https://github.com/WHHWII/FishermanMod/blob/Post-Sots/ReadmeAssets/FishermanTreasure.gif?raw=true)
 
 ## Beta
 Fisherman is currently in BETA, meaning:

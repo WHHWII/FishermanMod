@@ -63,7 +63,7 @@ namespace FishermanMod.Survivors.Fisherman
 
             #region Primary
             Language.Add(prefix + "PRIMARY_SLASH_NAME", Tokens.FishermanText("Debone",1));
-            Language.Add(prefix + "PRIMARY_SLASH_DESCRIPTION", $"Thwack in front for <style=cIsDamage>{100f * FishermanStaticValues.swipeDamageCoefficient}% damage.</style> The 1st of 3 attacks is a long range stab that {Tokens.HookText("Hooks")} fish.");
+            Language.Add(prefix + "PRIMARY_SLASH_DESCRIPTION", $"Thwack in front for <style=cIsDamage>{100f * FishermanStaticValues.swipeDamageCoefficient}% damage.</style> The 1st attack is a long range stab that {Tokens.HookText("Hooks")} fish.");
             #endregion
 
             #region Secondary
