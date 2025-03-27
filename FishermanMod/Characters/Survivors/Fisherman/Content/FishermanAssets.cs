@@ -309,7 +309,7 @@ namespace FishermanMod.Survivors.Fisherman
             shantyCannonShotPrefab = ModAssetManager.CloneProjectilePrefab("MageFireboltBasic", "FishermanShantyCannonShot");
             //UnityEngine.Object.Destroy(shantyCannonShotPrefab.GetComponent<ProjectileOverlapAttack>());
             var projectileController = shantyCannonShotPrefab.GetComponent<ProjectileController>();
-            projectileController.ghostPrefab = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Commando/FMJRampingGhost.prefab").WaitForCompletion();
+            projectileController.ghostPrefab = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Commando/FMJRampingGhost.prefab").WaitForCompletion().InstantiateClone("ShantyCannon");
             var impactExplosion = shantyCannonShotPrefab.GetComponent<ProjectileImpactExplosion>();
             impactExplosion.blastRadius = 14;
             impactExplosion.blastDamageCoefficient = 1f;

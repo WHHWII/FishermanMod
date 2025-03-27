@@ -133,7 +133,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
                 if (exitCountdown <= 0f)
                 {
                     //Log.Debug("Exiting platform placement");
-                    if(exitedFromUse)
+                    if(exitedFromUse || objTracker.deployedPlatforms.Count > 0)
                     {
                         base.skillLocator.utility.SetSkillOverride(gameObject, FishermanSurvivor.utilityDirectPlatform, RoR2.GenericSkill.SkillOverridePriority.Upgrade);
                         base.skillLocator.utility.DeductStock(1); // may change this to deduct all stocks if all hooks are fired at once.
@@ -154,7 +154,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
                         if (base.skillLocator)
                         {
                             GenericSkill skill = base.skillLocator.GetSkill(SkillSlot.Utility);
-                            if (skill)
+                            if (skill && objTracker.deployedPlatforms.Count == 0)
                             {
                                 //Log.Debug("Deducting Stock");
                                 //skill.DeductStock(1);

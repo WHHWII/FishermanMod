@@ -241,13 +241,7 @@ namespace FishermanMod.Survivors.Fisherman
             primaryFishingPoleMelee.stepGraceDuration = 0.5f;
             primaryFishingPoleMelee.canceledFromSprinting = true;
             primaryFishingPoleMelee.cancelSprintingOnActivation = true;
-
             Skills.AddPrimarySkills(bodyPrefab, primaryFishingPoleMelee);
-
-
-
-
-
         }
 
         //private void CreateShantySpawnCard()

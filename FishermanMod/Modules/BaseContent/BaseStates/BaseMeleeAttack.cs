@@ -84,11 +84,13 @@ namespace FishermanMod.Modules.BaseStates
             attack.pushAwayForce = pushForce;
             if (swingIndex > 0)
             {
+                attack.damageType = DamageTypeCombo.GenericPrimary;
                 attack.hitBoxGroup = FindHitBoxGroup(swipeGroupName);
             }
             else
             {
                 attack.hitBoxGroup = FindHitBoxGroup(stabGroupName);
+                attack.damageType = DamageTypeCombo.GenericPrimary;
                 hitStopDuration = FishermanStaticValues.CurHitStop;
                 attack.AddModdedDamageType(DamageTypes.FishermanHookPassive);
             }

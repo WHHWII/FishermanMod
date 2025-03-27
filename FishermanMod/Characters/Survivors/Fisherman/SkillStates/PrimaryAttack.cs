@@ -1,4 +1,6 @@
-﻿using FishermanMod.Modules.BaseStates;
+﻿using FishermanMod.Modules;
+using FishermanMod.Modules.BaseStates;
+using R2API;
 using RoR2;
 using UnityEngine;
 
@@ -15,7 +17,14 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
                 drunkBuffCnt = characterBody.GetBuffCount(FishermanBuffs.steadyNervesBuff);
                 drunkDeviation = Mathf.Clamp(UnityEngine.Random.Range(-drunkBuffCnt * 0.001f, drunkBuffCnt * 0.001f), -0.5f, 0.5f);
             }
-            damageType = DamageType.Generic;
+
+            DamageTypeCombo hookDmg = new DamageTypeCombo
+            {
+                damageType = DamageType.Generic,
+                damageTypeExtended = DamageTypeExtended.Generic,
+                damageSource = DamageSource.Primary,
+            };
+            damageType = hookDmg;
             damageCoefficient = FishermanStaticValues.swipeDamageCoefficient + drunkDeviation;
             procCoefficient = 1f + drunkDeviation;
             pushForce = 300f + drunkDeviation;
