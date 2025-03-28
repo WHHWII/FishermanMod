@@ -1,6 +1,6 @@
 {
   "name": "Fisherman",
-  "version_number": "0.3.3",
+  "version_number": "0.3.4",
   "website_url": "",
   "description": "Catch Fish. BETA, not networked.",
   "dependencies": [

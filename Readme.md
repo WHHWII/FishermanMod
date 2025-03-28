@@ -39,6 +39,7 @@ If you would like to report a bug with Fisherman, Please visit the [Fisherman Di
  - If you are a filthy autosprint user, Fisherman's Primary will not work with RTAutoSprintEx or autosprint via Aerolt. **.score's alternative [AutoSprint](https://thunderstore.io/package/score/AutoSprint/) mod does work.**
  - The Custom UI element for Fisherman's Utility does not work properly with RiskUI, and may not work with other HUD mods. 
  - Fisherman's platform doesn't work properly with KCCdownpatcher, causing it to become slippery and hard to stand on.
+ - AllyAttackBlock interferes with intended synergies between Fisherman's abilities and his platform.
 
 ## Credits
  - Original Idea, Code, Ability Design, and Icons - Me
@@ -47,6 +48,7 @@ If you would like to report a bug with Fisherman, Please visit the [Fisherman Di
  - Rig and Animations - JestAnAnimator
  - head honcho - Buns
  - Henry Template - TheTimesweeper/Rob
+ - Logbook - PlNK
  - Additional thanks to Tsuyoikenko, Timesweeper again, .score, RandomlyAwesome, Synodii, Mystical Chicken, Yori, Hippo, and many others on the modding discord for coding assistance, early playtesting, feedback, and support.
 
 ## Contact
