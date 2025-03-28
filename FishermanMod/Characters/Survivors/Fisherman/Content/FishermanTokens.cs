@@ -9,7 +9,7 @@ namespace FishermanMod.Survivors.Fisherman
     {
         public static void Init()
         {
-            AddHenryTokens();
+            AddFishermanTokens();
 
             ////uncomment this to spit out a lanuage file with all the above tokens that people can translate
             ////make sure you set Language.usingLanguageFolder and printingEnabled to true
@@ -17,7 +17,7 @@ namespace FishermanMod.Survivors.Fisherman
             ////refer to guide on how to build and distribute your mod with the proper folders
         }
 
-        public static void AddHenryTokens()
+        public static void AddFishermanTokens()
         {
             string prefix = FishermanSurvivor.FISHERMAN_PREFIX;
 
@@ -25,7 +25,8 @@ namespace FishermanMod.Survivors.Fisherman
              + "< ! > Debone can be used to snatch enemies out of the air and throw attackers out of position"                                                                   + Environment.NewLine + Environment.NewLine
              + "< ! > Cast can be used to grab faraway enemies, chests, drones and all sorts of things in order to clear stages quickly. It can also grab some of your abilties" + Environment.NewLine + Environment.NewLine
              + "< ! > The F153 Mobile Shanty plaform may not help you dodge attacks, but can help you navigate large gaps, sheer cliffs, and can provide aerial support."        + Environment.NewLine + Environment.NewLine
-             + "< ! > Man o' War can be used to group up pesky flyers or throw enemies off stage."                                                                               + Environment.NewLine + Environment.NewLine;
+             + "< ! > Man o' War can be used to group up pesky flyers or throw enemies off stage."                                                                               + Environment.NewLine + Environment.NewLine
+             + "< ! > Steady the Nerves is good for comboing enemies and staying alive."                                                                               + Environment.NewLine + Environment.NewLine;
 
             string outro = "..and so he left, with what little time he had.";
             string outroFailure = "..and so he vanished, lost at sea.";
@@ -33,7 +34,7 @@ namespace FishermanMod.Survivors.Fisherman
             Language.Add(prefix + "NAME", "Fisherman");
             Language.Add(prefix + "DESCRIPTION", desc);
             Language.Add(prefix + "SUBTITLE", "Sickly Poacher");
-            Language.Add(prefix + "LORE", "stinky");
+            Language.Add(prefix + "LORE", "UES Safe Travels Brig Logs\r\n \r\nIncident Report\r\n \r\nDefendant became belligerent after breakfast, confirmed reports of alcohol ingestion and intoxication.\r\nAttempted to initiate fistfight with eleven fellow crew members, simultaneously.\r\nSecurity was unable to restrain Defendant.\r\nDefendant collapsed from intoxication and was moved to brig for detoxification protocols.\r\nLoader suit was required to move Defendant due to excess weight.\r\n \r\nNotes\r\nWhose idea was it to put this lardass on the crew? I've seen the guy's records. Old, drunkard, divorced, lazy. Is this where \"seniority\" gets you? Who cares about his naval record, he's a loose cannon! We saw what happened when he was drunk, and it can only get worse if we tell him he can't have any. Just keep this wino locked away until we get to the planet. Maybe we can \"accidentally\" leave him there when this rescue mission's over.\r\n \r\n \r\nIncident Report\r\n \r\nDefendant broke brig containment.\r\nPresumed cause: leaning on cell door caused loss of structural integrity.\r\nDefendant found after brief search, asleep atop the broken cell door, half outside of holding cell.\r\nLoader suit again required to move Defendant to new cell. Instructed not to lean on door.\r\n \r\nNotes\r\nThis is ridiculous, what is this guy MADE of? I'm not even sure we could control him if he really lost his cool. I'm starting to be thankful he spends most of his days drinking and napping.\r\n \r\n \r\nIncident Report\r\n \r\nDefendant became belligerent inside holding cell.\r\nPresumed cause: Alcohol withdrawal.\r\nDefendant noted saying, \"I wanna make ma phone call! Get me on the horn with the gosh dern Cap'n. We's buds, he'll sort this out!\"\r\nCaptain briefed on incidents involving Defendant, noted to have heavily sighed and instructed officers to \"throw away the key\"\r\nDefendant remanded to brig until further notice.\r\n \r\nNotes\r\n \r\n \r\nIncident Report\r\n \r\nDefendant broke brig containment.\r\nSecurity Officer noted broken cell door and misplacement of Defendant.\r\nNote found in Defendant's cell, reading \"Gone Fishin'\".\r\nSecurity alerted to Defendant's escape.\r\nSearch conducted ship-wide for Defendant.\r\nSecurity footage showed Defendant moving to cargo hold.\r\nConfirmed misplacement of items in cargo hold:\r\n \r\n\t1 (one) F135 Platform Drone (F135 Mobile Survey Platform?)\r\n\t6 (six) Cargo pallets containing crew's alcohol rations for entire mission\r\n\t1 (one) Cargo pallet containing food rations for planet-side crews\r\n \r\nSecurity mainframe notes unauthorized drop pod bay activity.\r\nConfirmed misplacement of 1 (one) drop pod.\r\nDefendant has not been located.\r\n \r\nNotes\r\nI'm getting court martialed for this, aren't I?\r\n");
             Language.Add(prefix + "OUTRO_FLAVOR", outro);
             Language.Add(prefix + "OUTRO_FAILURE", outroFailure);
 

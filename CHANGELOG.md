@@ -1,3 +1,11 @@
+-   **0.3.4**  - 3/28/25
+
+    -   readme changes.
+    -   Hook effects can no longer flinch enemies that cant be stunned (Mithrix)
+    -   Logbook added (Thanks @plnk.)
+    -   Minor token changes.
+    -   Fisherman will now properly become invisible from effects like Volcanic Egg or Strides of Heresy.
+
 -   **0.3.3**  - 3/24/25
 
     -   readme changes

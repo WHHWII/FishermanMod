@@ -901,7 +901,7 @@ namespace FishermanMod.Survivors.Fisherman
         {
             if (UnityEngine.Random.value < flinchChance && body.TryGetComponent(out SetStateOnHurt setStateOnHurt))
             {
-                if (setStateOnHurt.targetStateMachine)
+                if (setStateOnHurt.targetStateMachine && setStateOnHurt.canBeStunned)
                 {
                     HurtState flinch = new HurtState();
                     flinch.duration = 0.1f;
