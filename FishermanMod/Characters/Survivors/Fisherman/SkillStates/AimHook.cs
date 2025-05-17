@@ -63,10 +63,10 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
             }, 0.5f);
             AimRequest newAimRequest = new AimRequest(AimType.OverTheShoulder, delegate (AimRequest aimRequest)
             {
-                cameraTargetParams.RemoveRequest(aimRequest);
+                //cameraTargetParams.RemoveRequest(aimRequest);
                 cameraTargetParams.RemoveParamsOverride(overrideHandle, 0.5f);
             });
-            cameraTargetParams.aimRequestStack.Add(newAimRequest);
+            //cameraTargetParams.aimRequestStack.Add(newAimRequest);
             return newAimRequest;
         }
         public override void OnExit() 

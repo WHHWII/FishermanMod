@@ -1,3 +1,13 @@
+-   **0.3.5**  - 03/31/24
+
+    -  Fixed Error in logbook
+    -  Fixed Dependencies so that Fisherman will work if installed on a fresh profile.
+    -  Small change to platform's AI intended to make it better at finding targets.
+    -  Reduced Fisherman's Base Regen by a small amount.
+    -  Increased Platform Minion's Defensive Scaling with ambient level.
+    -  Platform Minion now gains a small amount of movement speed for each level. (Experimental)
+    -  Reduced Cooldown on Steady the Nerves.
+
 -   **0.3.4**  - 3/28/25
 
     -   readme changes.

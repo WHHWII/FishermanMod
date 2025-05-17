@@ -7,6 +7,7 @@ using RoR2;
 using RoR2.CharacterAI;
 using RoR2.HudOverlay;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
@@ -189,7 +190,22 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Components
 
 
        
-
+        public void CleanupHookBombTethers(List<HealthComponent> previousTargets)
+        {
+            StartCoroutine(Cleanup());
+            IEnumerator Cleanup()
+            {
+                yield return new WaitForEndOfFrame();
+                yield return new WaitForFixedUpdate();
+                for (int i = 0; i < previousTargets.Count; i++)
+                {
+                    if (previousTargets[i]?.body && previousTargets[i].body.HasBuff(FishermanBuffs.hookTetherDebuff))
+                    {
+                        previousTargets[i].body.RemoveBuff(FishermanBuffs.hookTetherDebuff);
+                    }
+                }
+            }
+        }
 
     }
 }

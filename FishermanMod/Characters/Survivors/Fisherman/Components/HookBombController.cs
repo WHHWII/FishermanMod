@@ -30,6 +30,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
         public DamageAPI.ModdedDamageTypeHolderComponent moddedDamageComp;
         public SphereCollider[] bombColliders;
         public bool wasStuckByHook;
+        SkillObjectTracker tracker;
         //public ProjectileExplosion explosionComponent;
         float origAntiGravCoef;
         float origDrag;
@@ -39,7 +40,8 @@ namespace FishermanMod.Survivors.Fisherman.Components
         void Start()
         {
             owner = controller.owner;
-            owner.GetComponent<SkillObjectTracker>().deployedBombs.Add(this);
+            tracker = owner.GetComponent<SkillObjectTracker>();
+            tracker.deployedBombs.Add(this);
             body = controller.rigidbody;
             origAntiGravCoef = antiGrav.antiGravityCoefficient;
             origDrag = body.drag;
@@ -149,18 +151,12 @@ namespace FishermanMod.Survivors.Fisherman.Components
             //RoR2.Projectile.ProjectileManager.instance.FireProjectile(FishermanAssets.floatingBombletPrefab, transform.position, transform.rotation, owner, 100, 0, false);
 
             //Destroy(gameObject);
-
+            
         }
 
         void OnDestroy()
         {
-            foreach (var target in beamController.previousTargets)
-            {
-                if (target.body.HasBuff(FishermanBuffs.hookTetherDebuff))
-                {
-                    target.body.RemoveBuff(FishermanBuffs.hookTetherDebuff);
-                }
-            }
+            if(beamController) tracker.CleanupHookBombTethers(beamController.previousTargets);
             //FishermanSurvivor.SetDeployedHookBomb(null);
         }
 

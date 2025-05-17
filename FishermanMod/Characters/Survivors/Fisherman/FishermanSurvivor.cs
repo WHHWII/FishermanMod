@@ -67,7 +67,7 @@ namespace FishermanMod.Survivors.Fisherman
             podPrefab = LegacyResourcesAPI.Load<GameObject>("Prefabs/NetworkedObjects/SurvivorPod"),
 
             maxHealth = 160,
-            healthRegen = 2.5f,
+            healthRegen = 1.5f,
             armor = 20f,
             damage = 14,
             damageGrowth = 2.5f,
@@ -244,21 +244,6 @@ namespace FishermanMod.Survivors.Fisherman
             Skills.AddPrimarySkills(bodyPrefab, primaryFishingPoleMelee);
         }
 
-        //private void CreateShantySpawnCard()
-        //{
-        //    CharacterSpawnCard card = ScriptableObject.CreateInstance<CharacterSpawnCard>();
-        //    card.name = "cscFishermanShanty";
-        //    card.prefab = FishermanAssets.movingPlatformBodyPrefab;
-        //    card.sendOverNetwork = true;
-        //    card.hullSize = HullClassification.Human;
-        //    card.nodeGraphType = RoR2.Navigation.MapNodeGroup.GraphType.Air;
-        //    card.requiredFlags = RoR2.Navigation.NodeFlags.None;
-        //    card.forbiddenFlags = RoR2.Navigation.NodeFlags.NoCharacterSpawn;
-        //    card.eliteRules = SpawnCard.EliteRules.Default;
-        //    card.occupyPosition = false;
-
-        //    GhoulMinion.ghoulSpawnCard = card;
-        //}
 
         private void AddSecondarySkills()
         {
@@ -335,27 +320,6 @@ namespace FishermanMod.Survivors.Fisherman
 
         private void AddUtiitySkills()
         {
-            //here's a skilldef of a typical movement skill. some fields are omitted and will just have default values
-            //FishermanSurvivor.utilitySummonPlatform = Skills.CreateSkillDef(new SkillDefInfo
-            //{
-            //    skillName = "HenryRoll",
-            //    skillNameToken = FISHERMAN_PREFIX + "UTILITY_PLATFORM_NAME",
-            //    skillDescriptionToken = FISHERMAN_PREFIX + "UTILITY_PLATFORM_DESCRIPTION",
-            //    skillIcon = assetBundle.LoadAsset<Sprite>("texUtilityIcon"),
-
-            //    activationState = new EntityStates.SerializableEntityStateType(typeof(Roll)),
-            //    activationStateMachineName = "Weapon2",
-            //    interruptPriority = EntityStates.InterruptPriority.PrioritySkill,
-
-            //    baseMaxStock = 1,
-            //    baseRechargeInterval = 4f,
-
-            //    isCombatSkill = false,
-            //    mustKeyPress = false,
-            //    forceSprintDuringState = true,
-            //    cancelSprintingOnActivation = false,
-            //});
-
             FishermanSurvivor.utilitySummonPlatform = Skills.CreateSkillDef(new SkillDefInfo
             {
                 skillName = "F135 Mobile Shanty Platfrom",
@@ -539,7 +503,7 @@ namespace FishermanMod.Survivors.Fisherman
                 interruptPriority = EntityStates.InterruptPriority.Skill,
 
                 baseMaxStock = 1,
-                baseRechargeInterval = 7f,
+                baseRechargeInterval = 5f,
 
                 isCombatSkill = false,
                 mustKeyPress = true,
@@ -674,7 +638,7 @@ namespace FishermanMod.Survivors.Fisherman
         {
             R2API.RecalculateStatsAPI.GetStatCoefficients += RecalculateStatsAPI_GetStatCoefficients;
             On.RoR2.HealthComponent.TakeDamage += HealthComponent_TakeDamage;
-            On.RoR2.CharacterBody.RecalculateStats += CharacterBody_RecalculateStats;
+            //On.RoR2.CharacterBody.RecalculateStats += CharacterBody_RecalculateStats;
             On.RoR2.CharacterMaster.OnBodyStart += CharacterMaster_OnBodyStart;
             On.RoR2.GenericSkill.SetBonusStockFromBody += GenericSkill_SetBonusStockFromBody;
             //On.RoR2.CharacterBody.addbuff
@@ -683,12 +647,12 @@ namespace FishermanMod.Survivors.Fisherman
 
         private void GenericSkill_SetBonusStockFromBody(On.RoR2.GenericSkill.orig_SetBonusStockFromBody orig, GenericSkill self, int newBonusStockFromBody)
         {
-            orig(self, newBonusStockFromBody);
-            if (self.skillDef == FishermanSurvivor.utilityDirectPlatform || self.skillDef == FishermanSurvivor.utilitySummonPlatform)
+            if (self && self.skillDef && (self.skillDef == FishermanSurvivor.utilityDirectPlatform || self.skillDef == FishermanSurvivor.utilitySummonPlatform))
             {
                 var objTracker = self.characterBody.GetComponent<SkillObjectTracker>();
                 objTracker?.ModifyPlayformStock(newBonusStockFromBody);
             }
+            orig(self, newBonusStockFromBody);
 
         }
 
@@ -777,25 +741,23 @@ namespace FishermanMod.Survivors.Fisherman
             }
         }
 
-        private void CharacterBody_RecalculateStats(On.RoR2.CharacterBody.orig_RecalculateStats orig, CharacterBody self)
-        {
-            orig(self);
+        //private void CharacterBody_RecalculateStats(On.RoR2.CharacterBody.orig_RecalculateStats orig, CharacterBody self)
+        //{
+        //    orig(self);
 
 
-            int buffcount = self.GetBuffCount(FishermanBuffs.steadyNervesBuff);
-            //float temp = self.baseAcceleration * Mathf.Max(self.baseAcceleration * 0.33f, 1f / (buffcount * 0.2f + 1f));
-            //temp = self.baseAcceleration - temp;
-            //self.acceleration -= self.acceleration > self.baseAcceleration * .3f ? temp : 0;
-            self.acceleration -= self.acceleration > 10 ? self.baseAcceleration * Mathf.Min(25, buffcount) * 0.05f : 0;
+        //    int buffcount = self.GetBuffCount(FishermanBuffs.steadyNervesBuff);
+        //    //float temp = self.baseAcceleration * Mathf.Max(self.baseAcceleration * 0.33f, 1f / (buffcount * 0.2f + 1f));
+        //    //temp = self.baseAcceleration - temp;
+        //    //self.acceleration -= self.acceleration > self.baseAcceleration * .3f ? temp : 0;
+        //    self.acceleration -= self.acceleration > 10 ? self.baseAcceleration * Mathf.Min(25, buffcount) * 0.05f : 0;
 
 
-        }
+        //}
 
 
         public static int ApplyFishermanPassiveFishHookEffect(GameObject attacker, GameObject inflictor, Vector3 targetPos, HurtBox enemyHurtBox, bool joltAttackerOnFail = true)
         {
-            //TODO Re-work hook Arc
-            //TODO Prevent super mega multihit from behemoth.
             if (!attacker || !inflictor || !enemyHurtBox) return -1;
             #region calculuateThrowingArc 
             float maxMass = FishermanStaticValues.hookMaxMass;
@@ -927,8 +889,8 @@ namespace FishermanMod.Survivors.Fisherman
             GrabableInteractablesBlacklist.UnionWith(new[] {
                 "MegaDroneBroken",
                 //"Chest2",
-                "LunarChest",
-                "GoldChest",
+                //"LunarChest",
+                //"GoldChest",
                 //"CategoryChest2Damage",
                 //"CategoryChest2Utility",
                 //"CategoryChest2Healing",
