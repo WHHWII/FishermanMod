@@ -372,7 +372,7 @@ namespace FishermanMod.Survivors.Fisherman
 
                 resetCooldownTimerOnUse = false,
                 fullRestockOnAssign = true,
-                dontAllowPastMaxStocks = true,
+                dontAllowPastMaxStocks = false,
                 mustKeyPress = false,
                 beginSkillCooldownOnSkillEnd = true,
 
@@ -637,12 +637,9 @@ namespace FishermanMod.Survivors.Fisherman
         private void AddHooks()
         {
             R2API.RecalculateStatsAPI.GetStatCoefficients += RecalculateStatsAPI_GetStatCoefficients;
-            On.RoR2.HealthComponent.TakeDamage += HealthComponent_TakeDamage;
+            //On.RoR2.HealthComponent.TakeDamage += HealthComponent_TakeDamage;
             //On.RoR2.CharacterBody.RecalculateStats += CharacterBody_RecalculateStats;
-            On.RoR2.CharacterMaster.OnBodyStart += CharacterMaster_OnBodyStart;
             On.RoR2.GenericSkill.SetBonusStockFromBody += GenericSkill_SetBonusStockFromBody;
-            //On.RoR2.CharacterBody.addbuff
-
         }
 
         private void GenericSkill_SetBonusStockFromBody(On.RoR2.GenericSkill.orig_SetBonusStockFromBody orig, GenericSkill self, int newBonusStockFromBody)
@@ -655,55 +652,32 @@ namespace FishermanMod.Survivors.Fisherman
             orig(self, newBonusStockFromBody);
 
         }
+        //private void HealthComponent_TakeDamage(On.RoR2.HealthComponent.orig_TakeDamage orig, HealthComponent self, DamageInfo damageInfo)
+        //{
+        //    if (self && self.body)
+        //    {
+        //        //ripped right from spacetime skein in tinkers satchel.
+        //        if (self.body.HasBuff(FishermanBuffs.steadyNervesBuff))
+        //        {
+        //            int buffstacks = self.body.GetBuffCount(FishermanBuffs.steadyNervesBuff);
+        //            //resist knockback
+        //            var forceMultiplier = Mathf.Max(0, 100 - buffstacks * 20);
+        //            if (damageInfo.canRejectForce)
+        //                damageInfo.force *= forceMultiplier * 0.01f;
 
-        private void CharacterMaster_OnBodyStart(On.RoR2.CharacterMaster.orig_OnBodyStart orig, CharacterMaster self, CharacterBody body)
-        {
-            orig(self, body);
-            //if (self && self.GetBody() && self.GetBody().isPlayerControlled) // this causes bugs with other characters. fix or rework later.
-            //{
-            //    MinionOwnership.MinionGroup minionGroup = MinionOwnership.MinionGroup.FindGroup(body.master.netId);
-            //    if (minionGroup != null)
-            //    {
-            //        var members = minionGroup.members;
-            //        foreach (var member in members)
-            //        {
-            //            CharacterMaster master = member?.GetComponent<CharacterMaster>();
-            //            if (master.name.Contains("ShantyMaster") && body.skillLocator.utility != FishermanSurvivor.utilityDirectPlatform)
-            //            {
-            //                body.skillLocator.utility.SetSkillOverride(this, FishermanSurvivor.utilityDirectPlatform, RoR2.GenericSkill.SkillOverridePriority.Upgrade);
-            //                body.skillLocator.utility.DeductStock(1); // may change this to deduct all stocks if all hooks are fired at once.
-            //                break;
-            //            }
-            //        }
-            //    }
-            //}
-        }
-        private void HealthComponent_TakeDamage(On.RoR2.HealthComponent.orig_TakeDamage orig, HealthComponent self, DamageInfo damageInfo)
-        {
-            if (self && self.body)
-            {
-                //ripped right from spacetime skein in tinkers satchel.
-                if (self.body.HasBuff(FishermanBuffs.steadyNervesBuff))
-                {
-                    int buffstacks = self.body.GetBuffCount(FishermanBuffs.steadyNervesBuff);
-                    //resist knockback
-                    var forceMultiplier = Mathf.Max(0, 100 - buffstacks * 20);
-                    if (damageInfo.canRejectForce)
-                        damageInfo.force *= forceMultiplier * 0.01f;
+        //            //reduce incoming damage
+        //            damageInfo.damage = Mathf.Max(1, damageInfo.damage - buffstacks);
 
-                    //reduce incoming damage
-                    damageInfo.damage = Mathf.Max(1, damageInfo.damage - buffstacks);
-
-                    //change freeze to slow
-                    if ((damageInfo.damageType & DamageType.Freeze2s) != DamageType.Generic)
-                    {
-                        damageInfo.damageType = damageInfo.damageType | DamageType.SlowOnHit;
-                        damageInfo.damageType = damageInfo.damageType & ~DamageType.Freeze2s;
-                    }
-                }
-            }
-            orig(self, damageInfo);
-        }
+        //            //change freeze to slow
+        //            if ((damageInfo.damageType & DamageType.Freeze2s) != DamageType.Generic)
+        //            {
+        //                damageInfo.damageType = damageInfo.damageType | DamageType.SlowOnHit;
+        //                damageInfo.damageType = damageInfo.damageType & ~DamageType.Freeze2s;
+        //            }
+        //        }
+        //    }
+        //    orig(self, damageInfo);
+        //}
 
 
         private void RecalculateStatsAPI_GetStatCoefficients(CharacterBody sender, R2API.RecalculateStatsAPI.StatHookEventArgs args)

@@ -42,18 +42,16 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
 
         public override int GetMaxStock(GenericSkill skillSlot)
         {
-            CharacterMaster master = skillSlot.characterBody.master;
+            CharacterMaster master = skillSlot?.characterBody?.master;
             if (master == null) return baseMaxStock;
-            //MinionOwnership minionOwner = master.GetComponent<MinionOwnership>();
-            ////if (minionOwner != null) Log.Debug("minionOwner" + minionOwner);
-            //CharacterMaster ownerMaster = minionOwner.ownerMaster;
-            ////if (ownerMaster != null) Log.Debug("OwnerMaster" + ownerMaster);
-            //CharacterBody ownerBody = ownerMaster.GetBody();
-            ////if (ownerBody != null) Log.Debug("ownerbody" + ownerBody);
-            //GenericSkill util = ownerBody.skillLocator.utility;
-            //if (util) Log.Debug($"util {util.maxStock}");
 
-            return master.GetComponent<MinionOwnership>().ownerMaster.GetBody().skillLocator.utility.maxStock;
+            GenericSkill masterSkill = master.minionOwnership?.ownerMaster?.GetBody()?.skillLocator?.utility;
+            if (masterSkill)
+            {
+                return masterSkill.maxStock;
+            }
+
+            return baseMaxStock;
         }
 
         public override float GetRechargeInterval(GenericSkill skillSlot)
@@ -68,7 +66,8 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
 
         public override int GetRechargeStock(GenericSkill skillSlot)
         {
-            return GetMaxStock(skillSlot);
+            int stocks = this.GetMaxStock(skillSlot)-skillSlot.stock;
+            return stocks;
         }
     }
 }

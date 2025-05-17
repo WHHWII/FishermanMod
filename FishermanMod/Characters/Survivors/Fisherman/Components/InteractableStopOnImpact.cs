@@ -25,8 +25,11 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Components
             //Log.Debug($"Thrown Interactable colldided with {collision.gameObject.name}");
             if (collision.gameObject && collision.gameObject.layer == LayerIndex.world.intVal)
             {
-                rb.useGravity = false;
-                rb.velocity = Vector3.zero;
+                if (rb)
+                {
+                    rb.useGravity = false;
+                    rb.velocity = Vector3.zero;
+                }
                 UnityEngine.Object.Destroy(rb);
                 UnityEngine.Object.Destroy(collider);
                 UnityEngine.Object.Destroy(this);

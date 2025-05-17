@@ -108,7 +108,6 @@ namespace FishermanMod.Survivors.Fisherman.Components
         float flashdur = 0.5f;
         public void Update()
         {
-            characterBody.RecalculateStats();
             //direaction indicator
             if (debug)
             {
