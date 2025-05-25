@@ -232,20 +232,20 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Content
                 bodyInputs.moveVector *= moveinputScale;
                 if (!requiresAimConfirmation || base.ai.hasAimConfirmation)
                 {
-                    bool flag4 = true;
+                    bool canUseSkill = true;
                     if (skillDriverEvaluation.target == skillDriverEvaluation.aimTarget && requiresTargetLos && requiresAimLos)
                     {
                         requiresAimLos = false;
                     }
-                    if (flag4 && requiresTargetLos)
+                    if (canUseSkill && requiresTargetLos)
                     {
-                        flag4 = skillDriverEvaluation.target.TestLOSNow();
+                        canUseSkill = skillDriverEvaluation.target.TestLOSNow();
                     }
-                    if (flag4 && requiresAimLos)
+                    if (canUseSkill && requiresAimLos)
                     {
-                        flag4 = skillDriverEvaluation.aimTarget.TestLOSNow();
+                        canUseSkill = skillDriverEvaluation.aimTarget.TestLOSNow();
                     }
-                    if (flag4)
+                    if (canUseSkill)
                     {
                         currentSkillMeetsActivationConditions = true;
                     }

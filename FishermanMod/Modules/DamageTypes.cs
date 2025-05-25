@@ -17,10 +17,6 @@ namespace FishermanMod.Modules
         public static R2API.DamageAPI.ModdedDamageType FishermanUppercut;
         public static R2API.DamageAPI.ModdedDamageType FishermanGrantSteady;
 
-
-
-
-
         public static void RegisterDamageTypes()
         {
             //Log.Debug("Damage registered");
@@ -41,17 +37,9 @@ namespace FishermanMod.Modules
 
         private static void GlobalEventManager_onServerDamageDealt(DamageReport damageReport)
         {
-            //orig( damageReport);
 
             DamageInfo damageInfo = damageReport.damageInfo;
             HealthComponent victim = damageReport.victim;
-
-
-            //if (PlatformMinionController.allDeployedPlatforms.Contains(damageReport.victim.gameObject))
-            //{
-            //    Log.Debug($"Platform hit {damageReport.damageDealt} ");
-            //}
-
 
             bool canProc = damageInfo.procCoefficient >= Mathf.Epsilon;
 

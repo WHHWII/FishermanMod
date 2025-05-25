@@ -149,7 +149,7 @@ namespace FishermanMod.Survivors.Fisherman
             InitializeCharacterMaster();
 
             AdditionalBodySetup();
-
+            
             AddHooks();
         }
 
@@ -744,10 +744,6 @@ namespace FishermanMod.Survivors.Fisherman
             if (bodyMass < maxMass && isHookImmune) return -1; // stop early if target is unhookable and unbleedable
             //flying vermin seems to be the only flyer in the game that doesnt use a VectorPID to fly.
             bool isFlyer = body.isFlying || (body.characterMotor && (body.characterMotor.isFlying || !body.characterMotor.isGrounded));//body.gameObject.GetComponent<VectorPID>() != null  || body.name == "FlyingVerminBody(Clone)"? true: false;
-
-            float dist = Vector3.Distance(enemyPosition, targetPos);
-
-
             Vector3 throwVelocity = FishermanSurvivor.GetHookThrowVelocity(targetPos, enemyPosition, isFlyer);
             //Log.Debug($"[HOOK][Effect] owner {targetPos} Enemy position {enemyPosition}");
             //Log.Debug($"[HOOK][Effect] throwvel {throwVelocity}");
@@ -900,8 +896,8 @@ namespace FishermanMod.Survivors.Fisherman
             Vector2 normailzedDistvec = xzDistanceVec / distanceToTarget;
             float y = isFlyer ? distanceVector.y : Mathf.Max(Trajectory.CalculateInitialYSpeed(timeToTarget, distanceVector.y), 6);
             float travelRate = distanceToTarget / timeToTarget;
-            Vector3 direction = new Vector3(normailzedDistvec.x * travelRate, y, normailzedDistvec.y * travelRate);
-            return direction;
+            Vector3 velocity = new Vector3(normailzedDistvec.x * travelRate, y, normailzedDistvec.y * travelRate);
+            return velocity;
         }
     }
 }
