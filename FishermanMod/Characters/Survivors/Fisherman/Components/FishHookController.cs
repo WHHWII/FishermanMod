@@ -110,6 +110,8 @@ namespace FishermanMod.Survivors.Fisherman.Components
             }
             if (isFlying)
             {
+                transform.LookAt(transform.position - (ownerTransform.position - transform.position));
+                //transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime);
                 timeFlying += Time.fixedDeltaTime;
                 // if hook is near player or has been flying for a long time, engange homing to force the hook to quickly return
                 if((distanceToOwner <= homeToBodyDistance && timeFlying >= minTimeBeforeReturning) || timeFlying >= maxFlyTime)

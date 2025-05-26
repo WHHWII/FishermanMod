@@ -166,7 +166,11 @@ namespace FishermanMod.Survivors.Fisherman.Components
             //    RoR2.Projectile.ProjectileManager.instance.FireProjectile(FishermanAssets.whaleMisslePrefab, transform.position, transform.rotation, ownerMaster.GetBody().gameObject, 1, 1, false);
             //}
             //Log.Debug(baseAi.localNavigator.targetPosition)
-
+            if (baseAi.currentEnemy != null && !baseAi.hasAimTarget)
+            {
+                //Log.Debug("forgor prevention. Assigned aimtarget to current enemy");
+                baseAi.skillDriverEvaluation.aimTarget.gameObject = baseAi.currentEnemy.gameObject;
+            }
         }
 
         void FixedUpdate()
@@ -188,6 +192,12 @@ namespace FishermanMod.Survivors.Fisherman.Components
             {
                 SetHover();
             }
+
+            //if (baseAi.stateMachine.state.GetType() == typeof(EntityStates.AI.Walker.LookBusy))
+            //{
+            //    Log.Debug("Hey Lazy ass. Set lookbusy to combat");
+            //    baseAi.stateMachine.SetNextState(new EntityStates.AI.Walker.Combat());
+            //}
             //standableRB.interpolation = RigidbodyInterpolation.Interpolate;
 
 
