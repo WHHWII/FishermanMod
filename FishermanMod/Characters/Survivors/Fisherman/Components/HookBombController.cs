@@ -35,6 +35,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
         float origAntiGravCoef;
         float origDrag;
         bool triggerized;
+        public int stocksConsumed = 1;
 
 
         void Start()
@@ -42,6 +43,8 @@ namespace FishermanMod.Survivors.Fisherman.Components
             owner = controller.owner;
             tracker = owner.GetComponent<SkillObjectTracker>();
             tracker.deployedBombs.Add(this);
+            tracker.deployedBomblets.Clear();
+
             body = controller.rigidbody;
             origAntiGravCoef = antiGrav.antiGravityCoefficient;
             origDrag = body.drag;
@@ -144,7 +147,16 @@ namespace FishermanMod.Survivors.Fisherman.Components
             explosionComponent.timerAfterImpact = false;
             explosionComponent.childrenDamageCoefficient = 1;
             explosionComponent.childrenProjectilePrefab = FishermanAssets.floatingBombletPrefab;
-            explosionComponent.childrenCount = 1;
+            explosionComponent.childrenCount = stocksConsumed;
+            if(stocksConsumed > 1)
+            {
+                explosionComponent.minPitchDegrees -= stocksConsumed * 10f;
+                explosionComponent.rangePitchDegrees += stocksConsumed * 10f;
+                explosionComponent.minRollDegrees -= stocksConsumed * 10f;
+                explosionComponent.rangeRollDegrees += stocksConsumed * 10f;
+                explosionComponent.minYawDegrees -= stocksConsumed * 10f;
+                explosionComponent.rangeYawDegrees += stocksConsumed * 10f;
+            }
 
             //explosionComponent.lifetimeAfterImpact = 1f;
             //explosionComponent.destroyOnEnemy = false;

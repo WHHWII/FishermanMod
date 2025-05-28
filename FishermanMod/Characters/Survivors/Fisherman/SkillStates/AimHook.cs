@@ -18,12 +18,16 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
     {
         float hookRangeGrowRate = 0.5f;
         float hookRangeMax = 70;
+        int stocksConsumed = 1;
         Transform poletip;
         RoR2.CameraTargetParams.AimRequest aimRequest;
 
         // private static EntityStates.Toolbot.AimStunDrone _goodState;
         public override void OnEnter()
         {
+            stocksConsumed = Mathf.Max(skillLocator.secondary.stock+1, 1);
+            characterBody.skillLocator.secondary.DeductStock(characterBody.skillLocator.secondary.stock);
+
             EntityStates.Toolbot.AimStunDrone _goodState = new EntityStates.Toolbot.AimStunDrone();
             maxDistance = 4;
             rayRadius = 1;
@@ -69,11 +73,11 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
             //cameraTargetParams.aimRequestStack.Add(newAimRequest);
             return newAimRequest;
         }
-        public override void OnExit() 
-        { 
+        public override void OnExit()
+        {
             base.OnExit();
 
-            if(base.isAuthority && !KeyIsDown() && !base.IsKeyDownAuthority())
+            if (base.isAuthority && !KeyIsDown() && !base.IsKeyDownAuthority())
                 PlayAnimation("Gesture, Override", "SecondaryCastEnd", "SecondaryCast.playbackRate", 0.65f);
             base.skillLocator.secondary.SetSkillOverride(gameObject, FishermanSurvivor.secondaryRecallFishHook, RoR2.GenericSkill.SkillOverridePriority.Upgrade);
             base.skillLocator.secondary.DeductStock(1);
@@ -81,9 +85,9 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
         }
         public override void FixedUpdate()
         {
-            
+
             base.FixedUpdate();
-            if(maxDistance < hookRangeMax)
+            if (maxDistance < hookRangeMax)
             {
                 maxDistance += hookRangeGrowRate;
             }
@@ -106,21 +110,43 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
 
         public override void FireProjectile()
         {
-            FireProjectileInfo fireProjectileInfo = default(FireProjectileInfo);
-            fireProjectileInfo.crit = RollCrit();
-            fireProjectileInfo.owner = base.gameObject;
-            fireProjectileInfo.position = currentTrajectoryInfo.finalRay.origin;
-            fireProjectileInfo.projectilePrefab = projectilePrefab;
-            fireProjectileInfo.rotation = Quaternion.LookRotation(currentTrajectoryInfo.finalRay.direction, Vector3.up);
-            fireProjectileInfo.speedOverride = currentTrajectoryInfo.speedOverride;
-            fireProjectileInfo.damage = damageCoefficient * damageStat;
-            FireProjectileInfo fireProjectileInfo2 = fireProjectileInfo;
-            if (setFuse)
+            Log.Debug("FUCKING HELLO HOOKY?");
+            for (int i = 0; i < stocksConsumed; i++)
             {
-                fireProjectileInfo2.fuseOverride = currentTrajectoryInfo.travelTime;
+                FireProjectileInfo fireProjectileInfo = default(FireProjectileInfo);
+                fireProjectileInfo.crit = RollCrit();
+                fireProjectileInfo.owner = base.gameObject;
+                fireProjectileInfo.position = currentTrajectoryInfo.finalRay.origin;
+                fireProjectileInfo.projectilePrefab = projectilePrefab;
+                if (i == 0)
+                {
+                    Log.Debug("firing first hook");
+                    fireProjectileInfo.rotation = Quaternion.LookRotation(currentTrajectoryInfo.finalRay.direction, Vector3.up);
+                }
+                else
+                {
+                    Log.Debug("firing extra hook");
+
+                    float spread = Mathf.Clamp(i * 0.025f, 0.1f, 0.3f);
+                    float x = Random.Range(-spread, spread);
+                    float y = Random.Range(-spread, spread);
+                    float z = Random.Range(-spread, spread);
+
+                    Vector3 aimDir = currentTrajectoryInfo.finalRay.direction + new Vector3(x,y,z);
+                    fireProjectileInfo.rotation = Quaternion.LookRotation(aimDir, Vector3.up);
+                    
+                }
+
+                fireProjectileInfo.speedOverride = currentTrajectoryInfo.speedOverride;
+                fireProjectileInfo.damage = damageCoefficient * damageStat;
+                FireProjectileInfo fireProjectileInfo2 = fireProjectileInfo;
+                if (setFuse)
+                {
+                    fireProjectileInfo2.fuseOverride = currentTrajectoryInfo.travelTime;
+                }
+                ModifyProjectile(ref fireProjectileInfo2);
+                ProjectileManager.instance.FireProjectile(fireProjectileInfo2);
             }
-            ModifyProjectile(ref fireProjectileInfo2);
-            ProjectileManager.instance.FireProjectile(fireProjectileInfo2);
         }
     }
 }

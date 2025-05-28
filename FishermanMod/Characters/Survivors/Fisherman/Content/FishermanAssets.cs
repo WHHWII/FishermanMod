@@ -449,11 +449,16 @@ namespace FishermanMod.Survivors.Fisherman
                 var pc = floatingBombletPrefab.GetComponent<ProjectileController>();
                 //pc.ghostPrefab = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Commando/CommandoGrenadeGhost.prefab").WaitForCompletion();
                 floatingBombletPrefab.layer = LayerIndex.projectile.intVal;
-
                 var pie = floatingBombletPrefab.GetComponent<ProjectileImpactExplosion>();
                 pie.explosionEffect = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Commando/OmniExplosionVFXCommandoGrenade.prefab").WaitForCompletion();
                 pie.lifetime = 1.5f;
+                pie.lifetimeRandomOffset = 0.1f;
                 pie.explodeOnLifeTimeExpiration = false;
+                var blc = floatingBombletPrefab.AddComponent<BombletController>();
+                blc.pie = pie;
+                blc.controller = pc;
+                blc.ps = floatingBombletPrefab.GetComponent<ProjectileSimple>();
+                blc.agf = floatingBombletPrefab.GetComponent<RoR2.AntiGravityForce>();
             }
             ////yes this is fucking stupid;
             //{

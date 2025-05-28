@@ -1,5 +1,6 @@
 ﻿using EntityStates;
 using FishermanMod.Survivors.Fisherman;
+using FishermanMod.Survivors.Fisherman.Components;
 using RoR2;
 using RoR2.Projectile;
 using UnityEngine;
@@ -18,6 +19,9 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
         public override void OnEnter()
         {
             projectilePrefab = FishermanAssets.hookBombProjectilePrefab;
+            HookBombController bomb = projectilePrefab.GetComponent<HookBombController>();
+            bomb.stocksConsumed = Mathf.Max(1, skillLocator.special.stock+1);
+            skillLocator.special.DeductStock(skillLocator.special.stock);
             //base.effectPrefab = Modules.Assets.SomeMuzzleEffect;
             //targetmuzzle = "muzzleThrow"
             attackSoundString = "HenryBombThrow";

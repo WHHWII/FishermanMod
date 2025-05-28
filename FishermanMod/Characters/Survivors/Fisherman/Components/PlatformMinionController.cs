@@ -141,36 +141,6 @@ namespace FishermanMod.Survivors.Fisherman.Components
                 objTracker?.platformAimTargetIndicator?.SetActive(false);
                 baseAi.ForceAcquireNearestEnemyIfNoCurrentEnemy();
             }
-
-
-            //if (baseAi.currentEnemy == null && (bool)objTracker?.platformAimTargetIndicator.activeSelf)
-            //{
-            //    objTracker.platformAimTargetIndicator.SetActive(false);
-            //}
-            //else
-            //{
-            //    objTracker.platformAimTargetIndicator.SetActive(false);
-            //}
-            //if (objTracker?.platformAimTargetIndicator) objTracker.platformAimTargetIndicator.transform.position = baseAi.currentEnemy.lastKnownBullseyePosition ?? transform.position;
-
-            //string logString = (baseAi.localNavigator.wasObstructedLastUpdate ? " ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: OBSTRUCTED" : "");
-            //ctr++;
-            //Log.Debug($" ---------------------------- PLATFORM NAV UPDATE {ctr} ------------------------\n" + 
-            //          $" WasObstructed: { baseAi.localNavigator.wasObstructedLastUpdate}{logString} \n" +
-            //          $" Fustration: {baseAi.localNavigator.walkFrustration} \n" +
-            //          $" ---------------------------- {ctr} --------------------------------------------\n"
-
-            //);
-            //if (baseAi.localNavigator.wasObstructedLastUpdate)
-            //{
-            //    RoR2.Projectile.ProjectileManager.instance.FireProjectile(FishermanAssets.whaleMisslePrefab, transform.position, transform.rotation, ownerMaster.GetBody().gameObject, 1, 1, false);
-            //}
-            //Log.Debug(baseAi.localNavigator.targetPosition)
-            if (baseAi.currentEnemy != null && !baseAi.hasAimTarget)
-            {
-                //Log.Debug("forgor prevention. Assigned aimtarget to current enemy");
-                baseAi.skillDriverEvaluation.aimTarget.gameObject = baseAi.currentEnemy.gameObject;
-            }
         }
 
         void FixedUpdate()

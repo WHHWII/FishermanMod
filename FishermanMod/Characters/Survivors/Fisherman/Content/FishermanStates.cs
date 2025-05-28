@@ -1,4 +1,5 @@
-﻿using FishermanMod.Survivors.Fisherman.SkillStates;
+﻿using FishermanMod.Modules;
+using FishermanMod.Survivors.Fisherman.SkillStates;
 
 namespace FishermanMod.Survivors.Fisherman
 {

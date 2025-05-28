@@ -19,6 +19,7 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Components
     {
         public List<FishHookController> deployedHooks;
         public List<HookBombController> deployedBombs;
+        public List<BombletController> deployedBomblets;
         public List<PlatformMinionController> deployedPlatforms;
         public GameObject platformPosTargetIndicator;
         public GameObject platformAimTargetIndicator;
@@ -85,27 +86,6 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Components
                 }
                 else
                 {
-                    ////Custom state is to allow the platoform to move to the specified target, AND shoot indipenently with ai.
-
-                    //ShantyMoveShootState customState = new ShantyMoveShootState();
-                    //customState.commandTarget = platformPosTargetIndicator.transform.position;
-                    //customState.startPosition = platform.transform.position;
-                    //customState.commanderObj = gameObject;
-                    //customState.objTracker = this;
-                    //customState.followingCommand = true;
-                    //customState.leashing = false;
-
-                    //CharacterMaster master = platform.GetComponent<RoR2.CharacterBody>().master;
-                    //master.GetComponent<RoR2.EntityStateMachine>().SetState(customState);
-                    ////platform.GetComponent<RoR2.CharacterBody>().inventory.CopyItemsFrom(characterBody.inventory);
-
-                    //BaseAI baseAi = master.GetComponent<RoR2.CharacterAI.BaseAI>();
-                    //CharacterMaster owner = baseAi.GetComponent<AIOwnership>()?.ownerMaster;
-                    //for (int i = 0; i < baseAi.skillDrivers.Length; i++)
-                    //{
-                    //    baseAi.skillDrivers[i].ignoreNodeGraph = true;
-                    //}
-
                     CharacterMaster master = platform.GetComponent<RoR2.CharacterBody>().master;
                     BaseAI ai = master.GetComponent<BaseAI>();
                     platformPosTargetIndicator.gameObject.SetActive(true);

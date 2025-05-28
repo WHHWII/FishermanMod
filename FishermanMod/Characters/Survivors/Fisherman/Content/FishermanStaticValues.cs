@@ -32,6 +32,8 @@ namespace FishermanMod.Survivors.Fisherman
 
         //special
         public const float hookbombDamageCoefficient = 5f;
+        public const float bombletBaseLifetime = 1.5f;
+
 
         public const float bottleDamageCoefficient = 1.5f;
         public const float bottleDamageBuff = 0.25f;

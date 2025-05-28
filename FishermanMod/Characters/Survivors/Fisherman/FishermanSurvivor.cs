@@ -156,7 +156,6 @@ namespace FishermanMod.Survivors.Fisherman
         private void AdditionalBodySetup()
         {
             AddHitboxes();
-            bodyPrefab.AddComponent<HenryWeaponComponent>();
             var drinkmdl = characterModelObject.GetComponent<ChildLocator>().FindChild("Drink");
             drinkmdl.gameObject.SetActive(false);
             SkillObjectTracker objTracker = bodyPrefab.AddComponent<SkillObjectTracker>();
@@ -745,6 +744,7 @@ namespace FishermanMod.Survivors.Fisherman
             //flying vermin seems to be the only flyer in the game that doesnt use a VectorPID to fly.
             bool isFlyer = body.isFlying || (body.characterMotor && (body.characterMotor.isFlying || !body.characterMotor.isGrounded));//body.gameObject.GetComponent<VectorPID>() != null  || body.name == "FlyingVerminBody(Clone)"? true: false;
             Vector3 throwVelocity = FishermanSurvivor.GetHookThrowVelocity(targetPos, enemyPosition, isFlyer);
+            
             //Log.Debug($"[HOOK][Effect] owner {targetPos} Enemy position {enemyPosition}");
             //Log.Debug($"[HOOK][Effect] throwvel {throwVelocity}");
 
@@ -790,6 +790,18 @@ namespace FishermanMod.Survivors.Fisherman
                 //damageInfo.force = force * 0.1f;
                 enemyHurtBox.healthComponent.ApplyDot(attacker, DotController.DotIndex.Bleed, 3, FishermanStaticValues.hookBleedCoefficient);
                 //Log.Debug($"Mass too large, hook failed. New force: {damageInfo.force} HookfailDamage: {hookFailDamage}");
+
+                TryFlinch(body, 0.05f);
+                if (body.characterMotor)
+                {
+                    if (body.characterMotor.isGrounded) body.characterMotor.Motor.ForceUnground();
+                    if (!isFlyer) body.characterMotor.disableAirControlUntilCollision = true;
+                    body.characterMotor.velocity += throwVelocity * 0.1f;
+                }
+                else if(body.rigidbody)
+                {
+                    body.rigidbody.AddForce(throwVelocity * 0.1f, ForceMode.Impulse);
+                }
                 return 0;
             }
             else if (!isHookImmune)
