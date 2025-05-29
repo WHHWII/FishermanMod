@@ -112,6 +112,43 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Components
             
         }
 
+        public bool SetAllPlatformEnemy(GameObject enemy)
+        {
+            List<PlatformMinionController> toRemove = new List<PlatformMinionController>();
+            foreach (PlatformMinionController platform in deployedPlatforms)
+            {
+                //Debug.Log("Platform instance: " + platform);
+                if (platform == null || !platform.characterBody.healthComponent.alive)
+                {
+                    toRemove.Add(platform);
+                    Debug.Log("Platform was null. Removing");
+                }
+                else
+                {
+                    CharacterMaster master = platform.GetComponent<RoR2.CharacterBody>().master;
+                    BaseAI ai = master.GetComponent<BaseAI>();
+                    platform.SetForcedEnemy(enemy);
+
+                    ai.currentEnemy.gameObject = enemy;
+                    ai.BeginSkillDriver(new BaseAI.SkillDriverEvaluation
+                    {
+                        target = ai.customTarget,
+                        aimTarget = ai.currentEnemy,
+                        dominantSkillDriver = GetComponent<AISkillDriver>(),
+                        separationSqrMagnitude = Vector3.Distance(ai.body.footPosition, ai.customTarget.gameObject.transform.position)
+                    }); ;
+                }
+
+            }
+            platformPosTargetIndicator.SetActive(true); // note that the target indicators will not work when there is more than one platform.
+            deployedPlatforms.RemoveAll((x) => toRemove.Contains(x));
+            if (deployedPlatforms.Count == 0)
+            {
+                return false;
+            }
+            toRemove.Clear();
+            return true;
+        }
         public void RegisterPlatform(PlatformMinionController newMinion)
         {
             if(deployedPlatforms.Count > 0)

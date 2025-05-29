@@ -52,6 +52,10 @@ namespace FishermanMod.Survivors.Fisherman.Components
         GameObject stupidzone;
 
 
+        GameObject forcedEnemy;
+        float forcedEnemyTime = 12f;
+        float forcedEnemyTimeStamp;
+
         public static HashSet<GameObject> allDeployedPlatforms = new HashSet<GameObject>();
 
 
@@ -106,6 +110,22 @@ namespace FishermanMod.Survivors.Fisherman.Components
         }
         float timeStamp;
         float flashdur = 0.5f;
+        public void LateUpdate()
+        {
+            //aim indicator
+            if (!objTracker) return;
+            if (baseAi.currentEnemy?.characterBody && baseAi.currentEnemy?.gameObject != objTracker?.gameObject)
+            {
+                if (!objTracker.platformAimTargetIndicator) objTracker.platformAimTargetIndicator = UnityEngine.GameObject.Instantiate(FishermanAssets.shantyBlueprintPrefab);
+                if (!objTracker.platformAimTargetIndicator.activeSelf) objTracker.platformAimTargetIndicator.SetActive(true);
+                objTracker.platformAimTargetIndicator.transform.position = baseAi.currentEnemy.characterBody.footPosition + (Vector3.up * 0.5f);
+            }
+            else
+            {
+                objTracker?.platformAimTargetIndicator?.SetActive(false);
+                baseAi.ForceAcquireNearestEnemyIfNoCurrentEnemy();
+            }
+        }
         public void Update()
         {
             //direaction indicator
@@ -128,19 +148,29 @@ namespace FishermanMod.Survivors.Fisherman.Components
                 lineRenderer.enabled = false;
             }
 
-            //aim indicator
-            if (!objTracker) return;
-            if (baseAi.currentEnemy?.characterBody && baseAi.currentEnemy?.gameObject != objTracker?.gameObject)
+
+            if(forcedEnemy && Time.time < forcedEnemyTimeStamp)
             {
-                if (!objTracker.platformAimTargetIndicator) objTracker.platformAimTargetIndicator = UnityEngine.GameObject.Instantiate(FishermanAssets.shantyBlueprintPrefab);
-                if (!objTracker.platformAimTargetIndicator.activeSelf) objTracker.platformAimTargetIndicator.SetActive(true);
-                objTracker.platformAimTargetIndicator.transform.position = baseAi.currentEnemy.characterBody.footPosition + (Vector3.up * 0.5f);
+                if(baseAi.currentEnemy.gameObject != forcedEnemy)
+                {
+                    Log.Debug("PMC | UPDATE | FORCE ENEMY | Setting Enemy");
+                    baseAi.currentEnemy.gameObject = forcedEnemy;
+                    baseAi.BeginSkillDriver(new BaseAI.SkillDriverEvaluation
+                    {
+                        target = baseAi.customTarget,
+                        aimTarget = baseAi.currentEnemy,
+                        dominantSkillDriver = baseAi.GetComponent<AISkillDriver>(),
+                        separationSqrMagnitude = Vector3.Distance(baseAi.body.footPosition, baseAi.customTarget.gameObject.transform.position)
+                    });
+                }
             }
-            else
-            {
-                objTracker?.platformAimTargetIndicator?.SetActive(false);
-                baseAi.ForceAcquireNearestEnemyIfNoCurrentEnemy();
-            }
+
+        }
+
+        public void SetForcedEnemy(GameObject enemy)
+        {
+            forcedEnemy = enemy;
+            forcedEnemyTimeStamp = Time.time + forcedEnemyTime;
         }
 
         void FixedUpdate()

@@ -199,7 +199,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
         void OnCollisionEnter(UnityEngine.Collision collision)
         {
             //if (collision.gameObject.GetComponent<MapZone>()) //Log.Debug("[HOOK] Hit bounds box: col enter");
-           // Log.Debug($"[HOOK] Collision Enter {collision.gameObject.name} C<==");
+            Log.Debug($"[HOOK] Collision Enter {collision.gameObject.name} C<==");
             HookBombController hookBomb = collision.gameObject.GetComponent<HookBombController>();
             if(!isFlying && hookBomb)
             {
@@ -209,21 +209,23 @@ namespace FishermanMod.Survivors.Fisherman.Components
             {
                 StartCoroutine(ThrowHookBomb(hookBomb));
             }
+
         }
         void OnCollisionExit(UnityEngine.Collision collision)
         {
-           // Log.Debug($"[HOOK] Collision Exit {collision.gameObject.name} C==>");
+            Log.Debug($"[HOOK] Collision Exit {collision.gameObject.name} C==>");
             HookBombController hookBomb = collision.gameObject.GetComponent<HookBombController>();
             if (hookBomb && CanThrow(hookBomb.gameObject))
             {
                 StartCoroutine(ThrowHookBomb(hookBomb));
             }
+
         }
 
         void OnTriggerEnter(Collider collider)
         {
             //if (collider.gameObject.GetComponent<MapZone>()) //Log.Debug("[HOOK] Hit bounds box: trig enter");
-           // Log.Debug($"[HOOK] Trigger Enter {collider.gameObject.name} T<==");
+            //Log.Debug($"[HOOK] Trigger Enter {collider.gameObject.name} T<==");
 
             if (!CanThrow(collider.gameObject)) return;
             HookBombController hookBomb = collider.transform.parent?.GetComponent<HookBombController>();
@@ -237,11 +239,15 @@ namespace FishermanMod.Survivors.Fisherman.Components
             }
             if (ThrowItem(collider)) return;
             ThrowInteractable(collider);
+            if (collider.gameObject.name.Contains("Shanty")) //todo the uhh not the dread stringy
+            {
+                ThrowOwner(collider.gameObject);
+            }
         }
         void OnTriggerExit(Collider collider)
         {
             //if (collider.gameObject.GetComponent<MapZone>()) //Log.Debug("[HOOK] exit bounds box: trig exit");
-           // Log.Debug($"[HOOK] Trigger Exit {collider.gameObject.name} T==>");
+            //Log.Debug($"[HOOK] Trigger Exit {collider.gameObject.name} T==>");
             if (!CanThrow(collider.gameObject)) return;
             HookBombController hookBomb = collider.transform.parent?.GetComponent<HookBombController>();
             if (!isFlying && hookBomb)
@@ -254,6 +260,10 @@ namespace FishermanMod.Survivors.Fisherman.Components
             }
             if (ThrowItem(collider)) return;
             ThrowInteractable(collider);
+            if (collider.gameObject.name.Contains("Shanty")) //todo the uhh not the dread stringy
+            {
+                ThrowOwner(collider.gameObject);
+            }
         }
 
         bool ThrowItem(Collider collider)
@@ -392,6 +402,25 @@ namespace FishermanMod.Survivors.Fisherman.Components
         {
             characterMotor.velocity = hitStopCachedState.characterVelocity;
             animator.SetFloat(hitStopCachedState.playbackName, hitStopCachedState.playbackRate);
+        }
+
+        void ThrowOwner(GameObject target)
+        {
+            bool isFlyer = false; //objTracker.characterMotor.isGrounded && (collision.gameObject.transform.position.y < ownerTransform.position.y);
+            if (Vector3.Distance(ownerTransform.position, target.transform.position) < 10)
+            {
+                return;
+            }
+            Vector3 throwTarget = ownerTransform.position;
+            throwTarget.y += 1;
+            Vector3 throwVelocity = FishermanSurvivor.GetHookThrowVelocity(target.transform.position, throwTarget, isFlyer);
+            if (objTracker.characterMotor)
+            {
+                if (objTracker.characterMotor.isGrounded) objTracker.characterMotor.Motor.ForceUnground();
+                if (!isFlyer) objTracker.characterMotor.disableAirControlUntilCollision = true;
+                objTracker.characterMotor.velocity = Vector3.zero;
+                objTracker.characterMotor.velocity = throwVelocity;
+            }
         }
     }
 

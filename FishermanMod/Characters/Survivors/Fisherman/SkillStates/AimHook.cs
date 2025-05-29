@@ -110,7 +110,6 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
 
         public override void FireProjectile()
         {
-            Log.Debug("FUCKING HELLO HOOKY?");
             for (int i = 0; i < stocksConsumed; i++)
             {
                 FireProjectileInfo fireProjectileInfo = default(FireProjectileInfo);
@@ -120,12 +119,10 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
                 fireProjectileInfo.projectilePrefab = projectilePrefab;
                 if (i == 0)
                 {
-                    Log.Debug("firing first hook");
                     fireProjectileInfo.rotation = Quaternion.LookRotation(currentTrajectoryInfo.finalRay.direction, Vector3.up);
                 }
                 else
                 {
-                    Log.Debug("firing extra hook");
 
                     float spread = Mathf.Clamp(i * 0.025f, 0.1f, 0.3f);
                     float x = Random.Range(-spread, spread);
