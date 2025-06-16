@@ -15,6 +15,7 @@ namespace FishermanMod.Survivors.Fisherman
             ////make sure you set Language.usingLanguageFolder and printingEnabled to true
             //Language.PrintOutput("Henry.txt");
             ////refer to guide on how to build and distribute your mod with the proper folders
+            ///
         }
 
         public static void AddFishermanTokens()

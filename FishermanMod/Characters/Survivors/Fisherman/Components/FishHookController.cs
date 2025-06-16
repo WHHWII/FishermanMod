@@ -411,15 +411,26 @@ namespace FishermanMod.Survivors.Fisherman.Components
             {
                 return;
             }
-            Vector3 throwTarget = ownerTransform.position;
-            throwTarget.y += 1;
-            Vector3 throwVelocity = FishermanSurvivor.GetHookThrowVelocity(target.transform.position, throwTarget, isFlyer);
+            Vector3 ownerPos = ownerTransform.position;
+            Vector3 destination = target.transform.position;
+            Vector3 directionToTarget = (destination - ownerPos).normalized;
+            Vector3 targetGroundPos = destination;
+            targetGroundPos.y = ownerPos.y;
+            Vector3 directionToGroundTarget = (targetGroundPos - ownerPos);
+
+            float angle = Vector3.Angle(directionToTarget, directionToGroundTarget);
+            destination.y += angle * 0.01f + 0.25f;
+
+
+            Log.Debug("AngleToTarget = " + angle);
+            float timeToTarget = Mathf.Clamp(angle * 0.1f, 2, 3);
+            Vector3 throwVelocity = FishermanSurvivor.GetHookThrowVelocity(destination, ownerPos, isFlyer, timeToTarget, 5 + timeToTarget);
             if (objTracker.characterMotor)
             {
                 if (objTracker.characterMotor.isGrounded) objTracker.characterMotor.Motor.ForceUnground();
-                if (!isFlyer) objTracker.characterMotor.disableAirControlUntilCollision = true;
+                //if (!isFlyer) objTracker.characterMotor.disableAirControlUntilCollision = true;
                 objTracker.characterMotor.velocity = Vector3.zero;
-                objTracker.characterMotor.velocity = throwVelocity;
+                objTracker.characterMotor.velocity = throwVelocity * 1.1f;
             }
         }
     }

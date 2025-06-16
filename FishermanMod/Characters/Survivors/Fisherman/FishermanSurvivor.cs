@@ -898,15 +898,15 @@ namespace FishermanMod.Survivors.Fisherman
         }
 
 
-        public static Vector3 GetHookThrowVelocity(Vector3 targetPos, Vector3 startPos, bool isFlyer)
+        public static Vector3 GetHookThrowVelocity(Vector3 targetPos, Vector3 startPos, bool isFlyer, float _timeToTarget = -1, float minimumYspeed = 6)
         {
             Vector3 distanceVector = (targetPos - startPos);
             Vector2 xzDistanceVec = new Vector2(distanceVector.x, distanceVector.z); // 
             float distanceToTarget = xzDistanceVec.magnitude;
-            float timeToTarget = Mathf.Min(distanceToTarget * 0.05f, 2);
+            float timeToTarget = _timeToTarget < 0 ? Mathf.Min(distanceToTarget * 0.05f, 2) : _timeToTarget;
 
             Vector2 normailzedDistvec = xzDistanceVec / distanceToTarget;
-            float y = isFlyer ? distanceVector.y : Mathf.Max(Trajectory.CalculateInitialYSpeed(timeToTarget, distanceVector.y), 6);
+            float y = isFlyer ? distanceVector.y : Mathf.Max(Trajectory.CalculateInitialYSpeed(timeToTarget, distanceVector.y), minimumYspeed);
             float travelRate = distanceToTarget / timeToTarget;
             Vector3 velocity = new Vector3(normailzedDistvec.x * travelRate, y, normailzedDistvec.y * travelRate);
             return velocity;
