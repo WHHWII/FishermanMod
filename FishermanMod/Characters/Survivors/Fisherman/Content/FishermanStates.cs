@@ -21,6 +21,24 @@ namespace FishermanMod.Survivors.Fisherman
             Modules.Content.AddEntityState(typeof(RecallHook));
 
             Modules.Content.AddEntityState(typeof(SummonPlatform));
+
+            Modules.Content.AddEntityState(typeof(ShantyCannon));
+
+            Modules.Content.AddEntityState(typeof(RecallHookBomb));
+
+            Modules.Content.AddEntityState(typeof(DirectPlatform));
+
+            Modules.Content.AddEntityState(typeof(RecallHook));
+
+            Modules.Content.AddEntityState(typeof(NervesDrinkState));
+
+            Modules.Content.AddEntityState(typeof(NervesThrowState));
+
+
+
+
+
+
         }
     }
 }

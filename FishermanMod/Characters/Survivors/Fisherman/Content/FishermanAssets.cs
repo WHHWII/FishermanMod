@@ -61,6 +61,7 @@ namespace FishermanMod.Survivors.Fisherman
         public static GameObject hookScannerPrefab;
         public static GameObject floatingBombletPrefab;
         public static GameObject floatingBombletPrefab2;
+        public static GameObject hookedObjectProjectilePrefab;
 
         public static GameObject whaleMisslePrefab; // depricated
 
@@ -201,6 +202,8 @@ namespace FishermanMod.Survivors.Fisherman
             Content.AddProjectilePrefab(whaleMisslePrefab);
             CreateBombletProjectile();
             Content.AddProjectilePrefab(floatingBombletPrefab);
+            CreateHookedObjectProjectile();
+            Content.AddProjectilePrefab(hookedObjectProjectilePrefab);
         }
 
         private static void CreateBottleProjectile()
@@ -358,9 +361,6 @@ namespace FishermanMod.Survivors.Fisherman
             var antiGrav = hookBombProjectilePrefab.GetComponent<AntiGravityForce>();
             antiGrav.antiGravityCoefficient = 0.3f;
 
-            var damageTypeComp = hookBombProjectilePrefab.AddComponent<DamageAPI.ModdedDamageTypeHolderComponent>();
-            damageTypeComp.Add(DamageTypes.FishermanTether);
-
             var startEvent = hookBombProjectilePrefab.GetComponent<RoR2.EntityLogic.DelayedEvent>();
             startEvent.CallDelayed(0.5f);
 
@@ -374,6 +374,7 @@ namespace FishermanMod.Survivors.Fisherman
             var simpleProj = hookBombProjectilePrefab.GetComponent<ProjectileSimple>();
             simpleProj.lifetime = 99999;
             var pDamageComp = hookBombProjectilePrefab.GetComponent<ProjectileDamage>();
+            pDamageComp.damageType.AddModdedDamageType(DamageTypes.FishermanTether);
             #endregion general
 
             #region  beam controler
@@ -403,7 +404,6 @@ namespace FishermanMod.Survivors.Fisherman
             bomb.childrenProjectilePrefab = floatingBombletPrefab;
             bomb.childrenCount = 1;
             bomb.childrenDamageCoefficient = FishermanStaticValues.hookbombDamageCoefficient;
-            bomb.explodeOnLifeTimeExpiration = false;
             #endregion Explosion
 
             //// TODO use triggers to allow hook to throw hook bomb after it sticks.
@@ -420,12 +420,12 @@ namespace FishermanMod.Survivors.Fisherman
             #region custom component
             var hookBomb = hookBombProjectilePrefab.AddComponent<HookBombController>();
             hookBomb.beamController = beamController;
+            hookBomb.beamController.inheritDamageType = true;
             hookBomb.controller = controller;
             hookBomb.damageComponent = pDamageComp;
             hookBomb.explosionComponent = bomb;
             hookBomb.stickComponent = stick;
             hookBomb.antiGrav = hookBombProjectilePrefab.GetComponent<AntiGravityForce>();
-            hookBomb.moddedDamageComp = damageTypeComp;
             hookBomb.bombColliders = hookBombProjectilePrefab.GetComponentsInChildren<SphereCollider>();
             #endregion custom Component
 
@@ -453,7 +453,6 @@ namespace FishermanMod.Survivors.Fisherman
                 pie.explosionEffect = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Commando/OmniExplosionVFXCommandoGrenade.prefab").WaitForCompletion();
                 pie.lifetime = 1.5f;
                 pie.lifetimeRandomOffset = 0.1f;
-                pie.explodeOnLifeTimeExpiration = false;
                 var blc = floatingBombletPrefab.AddComponent<BombletController>();
                 blc.pie = pie;
                 blc.controller = pc;
@@ -474,6 +473,21 @@ namespace FishermanMod.Survivors.Fisherman
             //    pie.childrenProjectilePrefab = floatingBombletPrefab;
             //}
 
+        }
+
+        private static void CreateHookedObjectProjectile()
+        {
+            hookedObjectProjectilePrefab = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/DLC3/Drifter/ThrownObjectProjectileNoStun.prefab").WaitForCompletion(), "hookedObjectProjectile");
+            var agf = hookedObjectProjectilePrefab.GetComponent<AntiGravityForce>();
+            agf.enabled = false;
+            agf.antiGravityCoefficient = 0.9f;
+            //hookedObjectProjectilePrefab.GetComponent<ProjectileDamage>().damageType = DamageType.NonLethal;
+            var tracker = hookedObjectProjectilePrefab.AddComponent<HookedObjectProjectile>();
+            tracker.proj = hookedObjectProjectilePrefab.GetComponent<ThrownObjectProjectileController>();
+
+            
+            //hookedObjectProjectilePrefab.TryGetComponent(out ThrownObjectProjectileController pc);
+            //pc.projectileImpactExplosion.OnProjectileExplosion = (Action<BlastAttack, BlastAttack.Result>)Delegate.Combine(pc.projectileImpactExplosion.OnProjectileExplosion, new Action<BlastAttack, BlastAttack.Result>(pc.CheckForDeadPassenger));
         }
         private static void CreateWhaleMissleProjectile()
         {

@@ -83,15 +83,15 @@ namespace FishermanMod.Modules
             //capacitor is hardcoded to track your "UpperArmR", "LowerArmR", and "HandR" bones.
             //this is for having the lightning on custom bones in your childlocator
 
-            GameObject display = R2API.PrefabAPI.InstantiateClone(itemDisplayPrefabs["displaylightningarmright"], "DisplayLightningCustom", false);
+            //GameObject display = R2API.PrefabAPI.InstantiateClone(itemDisplayPrefabs["displaylightningarmright"], "DisplayLightningCustom", false);
 
-            LimbMatcher limbMatcher = display.GetComponent<LimbMatcher>();
+            //LimbMatcher limbMatcher = display.GetComponent<LimbMatcher>();
 
-            limbMatcher.limbPairs[0].targetChildLimb = "LightningArm1";
-            limbMatcher.limbPairs[1].targetChildLimb = "LightningArm2";
-            limbMatcher.limbPairs[2].targetChildLimb = "LightningArmEnd";
+            //limbMatcher.limbPairs[0].targetChildLimb = "LightningArm1";
+            //limbMatcher.limbPairs[1].targetChildLimb = "LightningArm2";
+            //limbMatcher.limbPairs[2].targetChildLimb = "LightningArmEnd";
 
-            itemDisplayPrefabs["displaylightningarmcustom"] = display;
+            //itemDisplayPrefabs["displaylightningarmcustom"] = display;
             #endregion
         }
 

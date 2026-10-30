@@ -45,7 +45,7 @@ namespace FishermanMod.Modules
 
             if (damageInfo.HasModdedDamageType(FishermanTether))
             {
-                //Log.Info("TetherDamageTypeInvoked");
+                Log.Info("-----------------------------TetherDamageTypeInvoked-------------------------------");
                 if (!victim.body || !damageReport.damageInfo.inflictor) return;
                 victim.body.AddBuff(FishermanBuffs.hookTetherDebuff);
                 HookBombTetherVisual tetherVisual = victim.gameObject.AddComponent<HookBombTetherVisual>();
@@ -60,7 +60,8 @@ namespace FishermanMod.Modules
                     damageReport.attacker,
                     damageInfo.inflictor,
                     damageReport.attackerBody.footPosition,
-                    damageReport.victimBody.mainHurtBox
+                    damageReport.victimBody.mainHurtBox,
+                    damageReport.attackerBody.baseDamage * FishermanSurvivor.GetBodyMass(damageReport.victimBody) * FishermanStaticValues.thrownEnemyCoef
                 );
             }
 

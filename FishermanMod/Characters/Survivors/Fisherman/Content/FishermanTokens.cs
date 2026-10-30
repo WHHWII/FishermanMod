@@ -79,7 +79,7 @@ namespace FishermanMod.Survivors.Fisherman
             Language.Add(prefix + "UTILITY_MINION_NAME", "Junior");
 
             Language.Add(prefix + "UTILITY_DIRECT_NAME", Tokens.FishermanText("Direct Platform", 3));
-            Language.Add(prefix + "UTILITY_DIRECT_DESCRIPTION", $"Tap to direct the platform to move to a targeted location. Hold to Destroy it.");
+            Language.Add(prefix + "UTILITY_DIRECT_DESCRIPTION", $"Tap to direct the platform to move to a targeted location or target a fish with its cannon. Hold to Destroy it.");
 
             Language.Add(prefix + "UTILITY_WHALE_NAME", Tokens.FishermanText("Strange Friend", 3));
             Language.Add(prefix + "UTILITY_WHALE_DESCRIPTION", $"Release a <style=cIsUtility>Smackable</style> whale that <style=cIsUtility>inherits all your items.</style> Emits smog that deals <style=cIsDamage>{100f * 4f * FishermanStaticValues.whaleMissleDotDamage}% damage per second</style> for each enemy killed.");

@@ -10,12 +10,13 @@ using Rewired.UI.ControlMapper;
 using RoR2;
 using RoR2.Projectile;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace FishermanMod.Survivors.Fisherman.Components
 {
     //TODO: Tether visual components are not properly getting cleaned up
     //TODO: Recall hook bomb is throwing an error on activation
-    public class HookBombController : MonoBehaviour
+    public class HookBombController : NetworkBehaviour
     {
 
         public ProjectileController controller;
@@ -27,7 +28,6 @@ namespace FishermanMod.Survivors.Fisherman.Components
         public Rigidbody body;
         public AntiGravityForce antiGrav;
         public Vector3 lastVelocity;
-        public DamageAPI.ModdedDamageTypeHolderComponent moddedDamageComp;
         public SphereCollider[] bombColliders;
         public bool wasStuckByHook;
         SkillObjectTracker tracker;
@@ -52,7 +52,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
             stickComponent.stickEvent.AddListener(ResetDragAndGrav);
             stickComponent.stickEvent.AddListener(TriggerizeAllColliders);
 
-
+            damageComponent.damageType.AddModdedDamageType(DamageTypes.FishermanTether);
 
             GameObject hi = Instantiate(FishermanAssets.bombIndicator, transform);
             hi.GetComponent<PositionIndicator>().targetTransform = transform;
@@ -112,7 +112,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
         {
             lastVelocity = body.velocity;
             if (!body.detectCollisions) body.detectCollisions = true; // TODO not this.
-            if(triggerized && !stickComponent.stuck || !stickComponent.stuckTransform)
+            if (triggerized && !stickComponent.stuck || !stickComponent.stuckTransform)
             {
                 DeTriggerizeAllColliders();
             }
@@ -120,7 +120,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
 
         public void HookAllTethers()
         {
-            moddedDamageComp.Remove(DamageTypes.FishermanTether);
+            damageComponent.damageType.RemoveModdedDamageType(DamageTypes.FishermanTether);
 
             foreach (var target in beamController.previousTargets)
             {
@@ -131,6 +131,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
                         owner, gameObject,
                         transform.position,
                         target.body.mainHurtBox,
+                        tracker.characterBody.baseDamage * FishermanSurvivor.GetBodyMass(target.body) * FishermanStaticValues.thrownEnemyCoef,
                         false
                     );
 
@@ -142,13 +143,12 @@ namespace FishermanMod.Survivors.Fisherman.Components
 
             explosionComponent.blastDamageCoefficient = 1;
             explosionComponent.falloffModel = BlastAttack.FalloffModel.None;
-            explosionComponent.explodeOnLifeTimeExpiration = false;
             explosionComponent.lifetime = 2f;
             explosionComponent.timerAfterImpact = false;
             explosionComponent.childrenDamageCoefficient = 1;
             explosionComponent.childrenProjectilePrefab = FishermanAssets.floatingBombletPrefab;
             explosionComponent.childrenCount = stocksConsumed;
-            if(stocksConsumed > 1)
+            if (stocksConsumed > 1)
             {
                 explosionComponent.minPitchDegrees -= stocksConsumed * 10f;
                 explosionComponent.rangePitchDegrees += stocksConsumed * 10f;
@@ -163,12 +163,12 @@ namespace FishermanMod.Survivors.Fisherman.Components
             //RoR2.Projectile.ProjectileManager.instance.FireProjectile(FishermanAssets.floatingBombletPrefab, transform.position, transform.rotation, owner, 100, 0, false);
 
             //Destroy(gameObject);
-            
+
         }
 
         void OnDestroy()
         {
-            if(beamController) tracker.CleanupHookBombTethers(beamController.previousTargets);
+            if (beamController) tracker.CleanupHookBombTethers(beamController.previousTargets);
             //FishermanSurvivor.SetDeployedHookBomb(null);
         }
 

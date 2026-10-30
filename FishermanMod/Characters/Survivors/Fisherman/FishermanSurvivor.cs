@@ -8,15 +8,16 @@ using FishermanMod.Survivors.Fisherman.SkillStates;
 using HG;
 using R2API.Networking;
 using RoR2;
+using RoR2.Projectile;
 using RoR2.Skills;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
-using UnityEngine.UIElements;
-using UnityEngine.XR;
-using static UnityEngine.GridBrushBase;
+using Vector2 = UnityEngine.Vector2;
+using Vector3 = UnityEngine.Vector3;
+using Quaternion = UnityEngine.Quaternion;
+using System.Collections;
+using Rewired.UI.ControlMapper;
 
 namespace FishermanMod.Survivors.Fisherman
 {
@@ -149,7 +150,7 @@ namespace FishermanMod.Survivors.Fisherman
             InitializeCharacterMaster();
 
             AdditionalBodySetup();
-            
+
             AddHooks();
         }
 
@@ -159,7 +160,8 @@ namespace FishermanMod.Survivors.Fisherman
             var drinkmdl = characterModelObject.GetComponent<ChildLocator>().FindChild("Drink");
             drinkmdl.gameObject.SetActive(false);
             SkillObjectTracker objTracker = bodyPrefab.AddComponent<SkillObjectTracker>();
-            
+            bodyPrefab.GetComponent<CharacterBody>().vehicleIdleStateMachine = Array.Empty<EntityStateMachine>();
+
 
 
             //bodyPrefab.AddComponent<HuntressTrackerComopnent>();
@@ -417,6 +419,7 @@ namespace FishermanMod.Survivors.Fisherman
             });
 
             Skills.AddUtilitySkills(bodyPrefab, utilitySummonPlatform);
+
             //Skills.AddUtilitySkills(bodyPrefab, whaleMissle);
 
 
@@ -537,10 +540,7 @@ namespace FishermanMod.Survivors.Fisherman
                 forceSprintDuringState = false,
             });
 
-
-
             Skills.AddSpecialSkills(bodyPrefab, specialThrowHookBomb, specialDrinkFlask);
-
 
 
         }
@@ -729,26 +729,26 @@ namespace FishermanMod.Survivors.Fisherman
         //}
 
 
-        public static int ApplyFishermanPassiveFishHookEffect(GameObject attacker, GameObject inflictor, Vector3 targetPos, HurtBox enemyHurtBox, bool joltAttackerOnFail = true)
+        public static int ApplyFishermanPassiveFishHookEffect(GameObject attacker, GameObject inflictor, Vector3 targetPos, HurtBox enemyHurtBox, float projDamage, bool joltAttackerOnFail = true)
         {
             if (!attacker || !inflictor || !enemyHurtBox) return -1;
             #region calculuateThrowingArc 
             float maxMass = FishermanStaticValues.hookMaxMass;
             CharacterBody body = enemyHurtBox.healthComponent.body;
             Vector3 enemyPosition = enemyHurtBox.transform.position;
-            Rigidbody bodyRB = enemyHurtBox.healthComponent.GetComponent<Rigidbody>();
-            float bodyMass = (bodyRB ? bodyRB.mass : maxMass + 1); // no rigid body = too heavy to hook 
+            Rigidbody bodyRB = body.rigidbody;
+            float bodyMass = GetBodyMass(body); // no rigid body = too heavy to hook 
             bool isHookImmune = body.HasBuff(FishermanBuffs.hookImmunityBuff);
 
             if (bodyMass < maxMass && isHookImmune) return -1; // stop early if target is unhookable and unbleedable
             //flying vermin seems to be the only flyer in the game that doesnt use a VectorPID to fly.
             bool isFlyer = body.isFlying || (body.characterMotor && (body.characterMotor.isFlying || !body.characterMotor.isGrounded));//body.gameObject.GetComponent<VectorPID>() != null  || body.name == "FlyingVerminBody(Clone)"? true: false;
             Vector3 throwVelocity = FishermanSurvivor.GetHookThrowVelocity(targetPos, enemyPosition, isFlyer);
-            
+
             //Log.Debug($"[HOOK][Effect] owner {targetPos} Enemy position {enemyPosition}");
             //Log.Debug($"[HOOK][Effect] throwvel {throwVelocity}");
 
-            #endregion 
+            #endregion
             //Log.Debug($"\nHookInfo: " +
             //    $"\n\tName: {body.name}" +
             //    $"\n\tIsFlyer: {isFlyer}" +
@@ -762,7 +762,7 @@ namespace FishermanMod.Survivors.Fisherman
             //);
 
 
-            if (bodyMass > maxMass)
+            if (bodyMass > maxMass) // hook fail
             {
 
                 var wave = new Wave
@@ -775,8 +775,7 @@ namespace FishermanMod.Survivors.Fisherman
                 ShakeEmitter localShaker = ShakeEmitter.CreateSimpleShakeEmitter(attacker.transform.position, wave, 0.1f, 10, true);
                 if (joltAttackerOnFail)
                 {
-                    var attackerBody = attacker.GetComponent<CharacterBody>();
-                    if (attackerBody && attackerBody.characterMotor)
+                    if (attacker.TryGetComponent(out CharacterBody attackerBody) && attackerBody.characterMotor)
                     {
                         if (attackerBody.characterMotor.isGrounded) attackerBody.characterMotor.Motor.ForceUnground();
                         attackerBody.characterMotor.velocity = Vector3.zero;
@@ -791,6 +790,8 @@ namespace FishermanMod.Survivors.Fisherman
                 enemyHurtBox.healthComponent.ApplyDot(attacker, DotController.DotIndex.Bleed, 3, FishermanStaticValues.hookBleedCoefficient);
                 //Log.Debug($"Mass too large, hook failed. New force: {damageInfo.force} HookfailDamage: {hookFailDamage}");
 
+
+                // apply weak hook for additive force
                 TryFlinch(body, 0.05f);
                 if (body.characterMotor)
                 {
@@ -798,31 +799,35 @@ namespace FishermanMod.Survivors.Fisherman
                     if (!isFlyer) body.characterMotor.disableAirControlUntilCollision = true;
                     body.characterMotor.velocity += throwVelocity * 0.1f;
                 }
-                else if(body.rigidbody)
+                else if (body.rigidbody)
                 {
                     body.rigidbody.AddForce(throwVelocity * 0.1f, ForceMode.Impulse);
                 }
                 return 0;
             }
-            else if (!isHookImmune)
+            else if (!isHookImmune) // hook success
             {
                 //play hook success sound effect
                 //show hook success decal on enemy
                 //Log.Debug("Hook Succeeded");
                 body.AddTimedBuff(FishermanBuffs.hookImmunityBuff, 0.3f);
                 TryFlinch(body, FishermanStaticValues.hookFlinchChance);
-                if (body.characterMotor)
-                {
-                    if (body.characterMotor.isGrounded) body.characterMotor.Motor.ForceUnground();
-                    if (!isFlyer) body.characterMotor.disableAirControlUntilCollision = true;
-                    body.characterMotor.velocity = Vector3.zero;
-                    body.characterMotor.velocity = throwVelocity;
-                }
-                else
-                {
-                    body.rigidbody.AddForce(throwVelocity, ForceMode.VelocityChange);
-                }
+                //if (body.characterMotor)
+                //{
+                //    if (body.characterMotor.isGrounded) body.characterMotor.Motor.ForceUnground();
+                //    if (!isFlyer) body.characterMotor.disableAirControlUntilCollision = true;
+                //    body.characterMotor.velocity = Vector3.zero;
+                //    body.characterMotor.velocity = throwVelocity;
 
+
+                //    ;
+                //}
+                //else
+                //{
+                //    body.rigidbody.AddForce(throwVelocity, ForceMode.VelocityChange);
+                //}
+                if (body.healthComponent.alive)
+                    body.StartCoroutine(FireHookedObjectProjectile(body.gameObject, attacker, bodyMass, throwVelocity, isFlyer));
 
                 var wave = new Wave
                 {
@@ -838,6 +843,91 @@ namespace FishermanMod.Survivors.Fisherman
             }
             return -1;
 
+
+        }
+
+        public static float GetBodyMass(CharacterBody body)
+        {
+            return MathF.Max((body.rigidbody ? body.rigidbody.mass : FishermanStaticValues.hookMaxMass + 1), 100); // no rigid body = too heavy to hook 
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="passenger"> the entity to move</param>
+        /// <param name="yanker">the object to where the projectile will try to move to </param>
+        /// <param name="projectileDamage"></param>
+        /// <param name="throwVelocity"></param>
+        /// <param name="isFlyer"></param>
+        /// <param name="customOwner"></param>
+        /// <returns></returns>
+        public static IEnumerator FireHookedObjectProjectile(GameObject passenger, GameObject yanker, float projectileDamage, Vector3 throwVelocity, bool isFlyer, GameObject customOwner = null)
+        {
+            //wait a frame before creating projectile to prevent issue projectile can instantly hit its own passenger in some cases
+            yield return new WaitForEndOfFrame();
+
+            //projectile setup
+            FireProjectileInfo fireProjectileInfo = default;
+            fireProjectileInfo.projectilePrefab = FishermanAssets.hookedObjectProjectilePrefab;
+            fireProjectileInfo.position = passenger.transform.position;
+            fireProjectileInfo.rotation = Util.QuaternionSafeLookRotation(throwVelocity.normalized);
+            //fireProjectileInfo.procChainMask = procChainMask7;
+            fireProjectileInfo.target = passenger;
+            fireProjectileInfo.owner = customOwner ? customOwner : yanker;
+            fireProjectileInfo.damage = projectileDamage;
+            //fireProjectileInfo.damageTypeOverride |= DamageType.NonLethal;
+            fireProjectileInfo.crit = false;
+            fireProjectileInfo.damageColorIndex = DamageColorIndex.Item;
+            fireProjectileInfo.useSpeedOverride = true;
+            fireProjectileInfo.speedOverride = throwVelocity.magnitude;
+
+            Log.Debug("creating projectile");
+            ThrownObjectProjectileController vehicleProjectile = ProjectileManager.instance.FireProjectileImmediateServer(fireProjectileInfo, null, 0).GetComponent<ThrownObjectProjectileController>();
+            if (vehicleProjectile)
+            {
+
+                // rebind events in an attempt to fix an issue where "CheckDeadPassenger" is not being called before "EjectPassengerToFinalPosition" despite cloning vanilla stuff
+                if (vehicleProjectile.TryGetComponent(out ProjectileStickOnImpact pis))
+                {
+                    pis.stickEvent.RemoveListener(vehicleProjectile.EjectPassengerToFinalPosition);
+                    pis.stickEvent.AddListener(CheckDeadPassengerWrapper);
+                    pis.stickEvent.AddListener(vehicleProjectile.EjectPassengerToFinalPosition);
+                }
+                void CheckDeadPassengerWrapper()
+                {
+                    Log.Debug("Checking for dead passenger with my event");
+                    vehicleProjectile.CheckForDeadPassenger(new BlastAttack(), new BlastAttack.Result());
+                }
+
+                //passenger setup
+                Log.Debug("setting passenger: " + passenger.gameObject.name);
+                vehicleProjectile.SetPassengerServer(passenger);
+                Log.Debug("passenger set: " + vehicleProjectile?.passenger);
+                vehicleProjectile.DisableCollision(0.1f);
+                vehicleProjectile.rotateObject.enabled = true;
+                if (passenger.TryGetComponent(out CharacterBody pBody) && pBody.isPlayerControlled)
+                {
+                    vehicleProjectile.transform.rotation = fireProjectileInfo.rotation;
+                }
+
+                if (isFlyer)
+                {
+                    //set up tracker to cause early exit on flyers to prevent them from drifting off into space
+                    HookedObjectProjectile tracker = vehicleProjectile.GetComponent<HookedObjectProjectile>();
+                    tracker.StartPos = passenger.transform.position;
+                    tracker.endPos = yanker.transform.position;
+                    tracker.maxDistance = Vector3.Distance(tracker.StartPos, tracker.endPos) * 1.2f;
+                    tracker.checkDistance = true;
+
+                    //reduce liftime on flyer
+                    if (vehicleProjectile.TryGetComponent(out ProjectileSimple ps)) ps.lifetime = 5;
+
+                    //reduce gravity on flyers for straighter path
+                    vehicleProjectile.GetComponent<AntiGravityForce>().enabled = true;
+
+                }
+
+            }
 
         }
 
@@ -904,11 +994,14 @@ namespace FishermanMod.Survivors.Fisherman
             Vector2 xzDistanceVec = new Vector2(distanceVector.x, distanceVector.z); // 
             float distanceToTarget = xzDistanceVec.magnitude;
             float timeToTarget = _timeToTarget < 0 ? Mathf.Min(distanceToTarget * 0.05f, 2) : _timeToTarget;
-
             Vector2 normailzedDistvec = xzDistanceVec / distanceToTarget;
             float y = isFlyer ? distanceVector.y : Mathf.Max(Trajectory.CalculateInitialYSpeed(timeToTarget, distanceVector.y), minimumYspeed);
             float travelRate = distanceToTarget / timeToTarget;
             Vector3 velocity = new Vector3(normailzedDistvec.x * travelRate, y, normailzedDistvec.y * travelRate);
+            if (distanceToTarget <= 1)
+            {
+                velocity.y = 1;
+            }
             return velocity;
         }
     }

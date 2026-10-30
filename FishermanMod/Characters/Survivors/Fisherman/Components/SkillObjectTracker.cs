@@ -209,6 +209,7 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Components
        
         public void CleanupHookBombTethers(List<HealthComponent> previousTargets)
         {
+            if(previousTargets.Count <= 0) return;
             StartCoroutine(Cleanup());
             IEnumerator Cleanup()
             {

@@ -7,10 +7,13 @@ namespace FishermanMod.Survivors.Fisherman
     {
         //passive
         public const float hookMaxMass = 700f;
-        public const float hookBleedCoefficient = 0.5f;
+        public const float hookBleedCoefficient = 0.3f;
         public const float hookFlinchChance = 0.75f;
         public const float baseHookHitStop = 0.04f;
         public static float hitStopMod = 1f;
+        public static float thrownEnemyCoef = 0.05f;
+        public static float thrownInteractableCoef = 3;
+
         public static float CurHitStop
         {
             get { return baseHookHitStop * hitStopMod; }
