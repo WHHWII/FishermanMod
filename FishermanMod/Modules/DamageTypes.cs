@@ -48,8 +48,17 @@ namespace FishermanMod.Modules
                 Log.Info("-----------------------------TetherDamageTypeInvoked-------------------------------");
                 if (!victim.body || !damageReport.damageInfo.inflictor) return;
                 victim.body.AddBuff(FishermanBuffs.hookTetherDebuff);
-                HookBombTetherVisual tetherVisual = victim.gameObject.AddComponent<HookBombTetherVisual>();
-                tetherVisual.lineTerminationObject = damageReport.damageInfo.inflictor;
+                // NETWORKING: onServerDamageDealt only runs on the server, so adding the visual here meant only the host ever saw tethers.
+                // The bomb broadcasts it to every client instead.
+                if (damageReport.damageInfo.inflictor.TryGetComponent(out HookBombController hookBomb))
+                {
+                    hookBomb.AddTetherVisual(victim.gameObject);
+                }
+                else
+                {
+                    HookBombTetherVisual tetherVisual = victim.gameObject.AddComponent<HookBombTetherVisual>();
+                    tetherVisual.lineTerminationObject = damageReport.damageInfo.inflictor;
+                }
             }
 
             if (damageInfo.HasModdedDamageType(FishermanHookPassive))

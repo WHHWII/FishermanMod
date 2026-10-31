@@ -772,16 +772,26 @@ namespace FishermanMod.Survivors.Fisherman
                     cycleOffset = 0.2f
                 };
 
-                ShakeEmitter localShaker = ShakeEmitter.CreateSimpleShakeEmitter(attacker.transform.position, wave, 0.1f, 10, true);
-                if (joltAttackerOnFail)
+                // NETWORKING: this runs on the server (damage hooks / server-side hook logic). Setting the attacker's velocity here
+                // does nothing for a remote player, whose own client simulates their body, and the screen shake only reached the host's camera.
+                // The tracker sends both to the right machines; non-Fisherman attackers keep the old local behaviour.
+                if (attacker.TryGetComponent(out SkillObjectTracker attackerTracker))
                 {
-                    if (attacker.TryGetComponent(out CharacterBody attackerBody) && attackerBody.characterMotor)
+                    attackerTracker.HookFeedback(true, joltAttackerOnFail ? -throwVelocity * 0.3f : Vector3.zero);
+                }
+                else
+                {
+                    ShakeEmitter localShaker = ShakeEmitter.CreateSimpleShakeEmitter(attacker.transform.position, wave, 0.1f, 10, true);
+                    if (joltAttackerOnFail)
                     {
-                        if (attackerBody.characterMotor.isGrounded) attackerBody.characterMotor.Motor.ForceUnground();
-                        attackerBody.characterMotor.velocity = Vector3.zero;
-                        attackerBody.characterMotor.velocity = -throwVelocity * 0.3f;
+                        if (attacker.TryGetComponent(out CharacterBody attackerBody) && attackerBody.characterMotor)
+                        {
+                            if (attackerBody.characterMotor.isGrounded) attackerBody.characterMotor.Motor.ForceUnground();
+                            attackerBody.characterMotor.velocity = Vector3.zero;
+                            attackerBody.characterMotor.velocity = -throwVelocity * 0.3f;
+                        }
+                        FishermanStaticValues.hitStopMod = 2;
                     }
-                    FishermanStaticValues.hitStopMod = 2;
                 }
                 //Log.Info($"Attacker: {attacker.name} Inflictor {inflictor.name}");
                 //play hook fail sound effect
@@ -829,14 +839,22 @@ namespace FishermanMod.Survivors.Fisherman
                 if (body.healthComponent.alive)
                     body.StartCoroutine(FireHookedObjectProjectile(body.gameObject, attacker, bodyMass, throwVelocity, isFlyer));
 
-                var wave = new Wave
+                // NETWORKING: same as the fail case, shake on every client instead of just the host
+                if (attacker.TryGetComponent(out SkillObjectTracker attackerTracker))
                 {
-                    amplitude = 1f,
-                    frequency = 10f,
-                    cycleOffset = 0.2f
-                };
+                    attackerTracker.HookFeedback(false, Vector3.zero);
+                }
+                else
+                {
+                    var wave = new Wave
+                    {
+                        amplitude = 1f,
+                        frequency = 10f,
+                        cycleOffset = 0.2f
+                    };
 
-                ShakeEmitter localShaker = ShakeEmitter.CreateSimpleShakeEmitter(attacker.transform.position, wave, 0.1f, 10, true);
+                    ShakeEmitter localShaker = ShakeEmitter.CreateSimpleShakeEmitter(attacker.transform.position, wave, 0.1f, 10, true);
+                }
 
 
                 return 1;
@@ -863,8 +881,14 @@ namespace FishermanMod.Survivors.Fisherman
         /// <returns></returns>
         public static IEnumerator FireHookedObjectProjectile(GameObject passenger, GameObject yanker, float projectileDamage, Vector3 throwVelocity, bool isFlyer, GameObject customOwner = null)
         {
+            // NETWORKING: FireProjectileImmediateServer and SetPassengerServer are server-only. Every caller should already be on the server
+            // (damage hooks, server-side hook logic, Commands), this just makes a stray client call a no-op instead of an error.
+            if (!UnityEngine.Networking.NetworkServer.active) yield break;
+
             //wait a frame before creating projectile to prevent issue projectile can instantly hit its own passenger in some cases
             yield return new WaitForEndOfFrame();
+            // the passenger or yanker can die/despawn during that frame
+            if (!passenger || !yanker) yield break;
 
             //projectile setup
             FireProjectileInfo fireProjectileInfo = default;

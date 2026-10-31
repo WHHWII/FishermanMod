@@ -40,7 +40,8 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
             {
                 if (base.fixedAge >= chargeDestroyThreshold)
                 {
-                    objTracker.DestroyAllPlatforms();
+                    // NETWORKING: killing the platform's master is server-only
+                    objTracker.DestroyAllPlatformsAuthority();
                     outer.SetNextStateToMain();
 
                 }
@@ -53,10 +54,9 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
                     }
                 
                     PlayAnimation("LeftArm, Override", "UtilityPlatform", "UtilityPlatform.playbackRate", 0.65f);
-                    if (!objTracker.platformPosTargetIndicator)
-                    {
-                        objTracker.platformPosTargetIndicator = UnityEngine.GameObject.Instantiate(FishermanAssets.shantyBlueprintPrefab);
-                    }
+                    // NETWORKING: the raycasts below run here on the authority (it has the real aim), the result is sent to the server.
+                    // The indicator is also moved locally right away so the owner doesn't wait a round trip to see it.
+                    GameObject posIndicator = objTracker.GetOrCreatePlatformPosTarget();
 
 
 
@@ -93,7 +93,6 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
                             }
                             if (enemyObj)
                             {
-                                objTracker.SetAllPlatformEnemy(enemyObj);
                                 Log.Debug("Set Platform Enemy");
                                 break;
                             }
@@ -103,7 +102,7 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
 
 
                         Vector3 targ = Vector3.zero;
-                        if (enemyObj)
+                        if (enemyObj && objTracker.HasLivePlatforms())
                         {
                             Vector3 platformPos = objTracker.deployedPlatforms[0].transform.position;
                             targ = platformPos + (enemyObj.transform.position - platformPos).normalized * Mathf.Max(Vector3.Distance(platformPos, enemyObj.transform.position) - range * 0.5f, 5);
@@ -112,14 +111,18 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
                         {
                             targ = possibleMoveTargets[0].point + possibleMoveTargets[0].normal * commandPointOffset;
                         }
-                        objTracker.platformPosTargetIndicator.transform.position = targ;
+                        posIndicator.transform.position = targ;
                     }
                     else
                     {
-                        objTracker.platformPosTargetIndicator.transform.position = aimray.GetPoint(range);
+                        posIndicator.transform.position = aimray.GetPoint(range);
                     }
+                    posIndicator.SetActive(true);
 
-                    if (!objTracker.DirectAllPlatforms())
+                    // NETWORKING: the platform AI only exists on the server. Send the command there, then decide locally
+                    // whether to drop the "direct" override using our own (synced-from-spawns) list of platforms.
+                    objTracker.DirectPlatformsAuthority(posIndicator.transform.position, enemyObj);
+                    if (!objTracker.HasLivePlatforms())
                     {
                         skillLocator.utility.UnsetSkillOverride(gameObject, FishermanSurvivor.utilityDirectPlatform, RoR2.GenericSkill.SkillOverridePriority.Upgrade);
                         skillLocator.utility.DeductStock(1);

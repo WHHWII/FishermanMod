@@ -26,7 +26,11 @@ namespace FishermanMod.Survivors.Fisherman.Components
     //TODO grab allies (non-player)
     //TODO fix crashing when recalling hook in certain conditions. (out of bounds on some maps, some entities)
     //TODO fix sticking hook to midflight manowar causes it to fly away
-    public class FishHookController : MonoBehaviour
+    // NETWORKING: the hook is a projectile, so the server simulates it and clients only see its synced transform.
+    // Everything that changes game state (catching/throwing objects, recall physics, damage, destroying the hook) is server-only,
+    // otherwise every client would run its own copy of the catch logic off slightly different positions.
+    // Clients still run the cosmetic parts (fishing line, recall flash) and the owner applies hitstop to their own character.
+    public class FishHookController : NetworkBehaviour
     {
         public Rigidbody rb;
         public ProjectileStickOnImpact stickComponent;
@@ -57,20 +61,29 @@ namespace FishermanMod.Survivors.Fisherman.Components
 
         List<HookBombController> bombsToThrow = new List<HookBombController>();
 
-        void Awake()
-        {
-            //Log.Debug("[HOOK] New Hook Created ------------------------------------------------------------------------------------------------------------");
-            GameObject hi = Instantiate(FishermanAssets.hookIndicator, transform);
-            hi.GetComponent<PositionIndicator>().targetTransform = transform;
-            hi.transform.position = Vector3.zero;
-        }
-
         void Start()
         {
             //grappleOwnerRef.enabled = false;
+            // NETWORKING: controller.owner is synced, but can still be missing on a client if the owner died the same frame
+            if (!controller.owner)
+            {
+                if (NetworkServer.active) Destroy(gameObject);
+                enabled = false;
+                return;
+            }
             ownerTransform = controller.owner.transform;
             objTracker = ownerTransform.GetComponent<SkillObjectTracker>();
             objTracker.deployedHooks.Add(this);
+
+            // NETWORKING: the hook indicator is HUD clutter for anyone but the Fisherman who threw it.
+            // Moved here from Awake because the owner is only known once ProjectileController has synced it.
+            if (Util.HasEffectiveAuthority(controller.owner))
+            {
+                GameObject hi = Instantiate(FishermanAssets.hookIndicator, transform);
+                hi.GetComponent<PositionIndicator>().targetTransform = transform;
+                hi.transform.position = Vector3.zero;
+            }
+
             hookCollider.enabled = true;
             stickComponent.stickEvent.AddListener(OnStickEvent);
             projectileDamage.force = 0;
@@ -95,6 +108,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
         }
         void Update()
         {
+            if (!objTracker || !objTracker.fishingPoleTip) return;
             lineRenderer.SetPosition(0, transform.position);
             lineRenderer.SetPosition(1, Vector3.Lerp(transform.position, objTracker.fishingPoleTip.position, 0.5f) + (Vector3.up * 0.1f));
             lineRenderer.SetPosition(2, objTracker.fishingPoleTip.position);
@@ -102,11 +116,22 @@ namespace FishermanMod.Survivors.Fisherman.Components
 
         void FixedUpdate()
         {
-            if (controller.owner == null) Destroy(gameObject);
+            // NETWORKING: hitstop is applied on the owner's machine (see RpcApplyHitStop), so tick it wherever it is active
+            if (inHitPause) UpdateHitStop();
+
+            // NETWORKING: everything below moves/destroys the projectile, which only the server may do.
+            // Clients get the result through the projectile's network transform, and Destroy on the server despawns it everywhere.
+            if (!NetworkServer.active) return;
+
+            if (controller.owner == null)
+            {
+                Destroy(gameObject);
+                return;
+            }
             distanceToOwner = Vector3.Distance(transform.position, ownerTransform.position);
             if (!isFlying && distanceToOwner > autoTriggerDistance)
             {
-                StartCoroutine(FlyBack());
+                Recall();
             }
             if (isFlying)
             {
@@ -134,9 +159,40 @@ namespace FishermanMod.Survivors.Fisherman.Components
                     projSimple.lifetime = 0.0001f;
 
                 }
-                UpdateHitStop();
             }
         }
+
+        // NETWORKING: entry point for recalling, server only. Starts the physics side here and tells clients to play the cosmetic side.
+        [Server]
+        public void Recall()
+        {
+            if (isFlying) return;
+            StartCoroutine(FlyBack());
+            RpcOnRecalled();
+        }
+
+        [ClientRpc]
+        void RpcOnRecalled()
+        {
+            // the host already ran FlyBack (which includes the line flash) through Recall()
+            if (NetworkServer.active) return;
+            isFlying = true;
+            StartCoroutine(RecallLineFlash());
+        }
+
+        IEnumerator RecallLineFlash()
+        {
+            float startWidth = lineRenderer.startWidth;
+            float endWidth = lineRenderer.endWidth;
+
+            lineRenderer.startWidth *= 10f;
+            lineRenderer.endWidth *= 10f;
+            for (int i = 0; i < 5; i++) yield return new WaitForEndOfFrame();
+            lineRenderer.startWidth = startWidth;
+            lineRenderer.endWidth = endWidth;
+        }
+
+        // server only, start it through Recall() so clients get the cosmetic side too
         public IEnumerator FlyBack()
         {
             //Log.Debug("[HOOK] Flyback Start");
@@ -174,19 +230,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
             projectileDamage.damage = objTracker.characterBody.damage * FishermanStaticValues.castDamageCoefficient;
             projOverlap.damageCoefficient = 1;
 
-            float startWidth = lineRenderer.startWidth;
-            float endWidth = lineRenderer.endWidth;
-
-            lineRenderer.startWidth *= 10f;
-            lineRenderer.endWidth *= 10f;
-            yield return new WaitForEndOfFrame();
-            yield return new WaitForEndOfFrame();
-            yield return new WaitForEndOfFrame();
-            yield return new WaitForEndOfFrame();
-            yield return new WaitForEndOfFrame();
-            lineRenderer.startWidth = startWidth;
-            lineRenderer.endWidth = endWidth;
-
+            yield return RecallLineFlash();
         }
         bool CanThrow(GameObject gameObject)
         {
@@ -198,6 +242,8 @@ namespace FishermanMod.Survivors.Fisherman.Components
         }
         void OnCollisionEnter(UnityEngine.Collision collision)
         {
+            // NETWORKING: catching things is server-only, clients would otherwise throw the same object a second time
+            if (!NetworkServer.active) return;
             //if (collision.gameObject.GetComponent<MapZone>()) //Log.Debug("[HOOK] Hit bounds box: col enter");
             Log.Debug($"[HOOK] Collision Enter {collision.gameObject.name} C<==");
             HookBombController hookBomb = collision.gameObject.GetComponent<HookBombController>();
@@ -213,6 +259,8 @@ namespace FishermanMod.Survivors.Fisherman.Components
         }
         void OnCollisionExit(UnityEngine.Collision collision)
         {
+            // NETWORKING: catching things is server-only, clients would otherwise throw the same object a second time
+            if (!NetworkServer.active) return;
             Log.Debug($"[HOOK] Collision Exit {collision.gameObject.name} C==>");
             HookBombController hookBomb = collision.gameObject.GetComponent<HookBombController>();
             if (hookBomb && CanThrow(hookBomb.gameObject))
@@ -224,6 +272,8 @@ namespace FishermanMod.Survivors.Fisherman.Components
 
         void OnTriggerEnter(Collider collider)
         {
+            // NETWORKING: catching things is server-only, clients would otherwise throw the same object a second time
+            if (!NetworkServer.active) return;
             //if (collider.gameObject.GetComponent<MapZone>()) //Log.Debug("[HOOK] Hit bounds box: trig enter");
             Log.Debug($"[HOOK] Trigger Enter {collider.gameObject.name} T<==");
 
@@ -251,6 +301,8 @@ namespace FishermanMod.Survivors.Fisherman.Components
         }
         void OnTriggerExit(Collider collider)
         {
+            // NETWORKING: catching things is server-only, clients would otherwise throw the same object a second time
+            if (!NetworkServer.active) return;
             //if (collider.gameObject.GetComponent<MapZone>()) //Log.Debug("[HOOK] exit bounds box: trig exit");
             //Log.Debug($"[HOOK] Trigger Exit {collider.gameObject.name} T==>");
             if (!CanThrow(collider.gameObject)) return;
@@ -373,12 +425,17 @@ namespace FishermanMod.Survivors.Fisherman.Components
         void OnDestroy()
         {
             //Log.Debug("[HOOK] HOOK DESTROYED ------------------------------------------------------------------------------------------------------------");
+            // keeps the owner's list (and the hook viewer UI on every client) from holding destroyed hooks
+            if (objTracker) objTracker.deployedHooks.Remove(this);
 
             //FishermanSurvivor.SetDeployedHook(null);
         }
 
         void SpawnRadar(GameObject obj)
         {
+            // NETWORKING: the effect is transmitted to every client, so only the server spawns it.
+            // OnStickEvent also fires on clients (ProjectileStickOnImpact syncs its stuck state), which would double it up.
+            if (!NetworkServer.active) return;
             EffectData effectData = new EffectData();
             effectData.origin = obj.transform.position;
             EffectManager.SpawnEffect(FishermanAssets.hookScannerPrefab, effectData, true);
@@ -394,7 +451,31 @@ namespace FishermanMod.Survivors.Fisherman.Components
         float hitPauseTimer;
         string playbackRateParam = "SecondaryCast.playbackRate";
 
+        // NETWORKING: hits are found on the server, but hitstop freezes the owner's own movement and animator,
+        // so it has to run where the owner's body is simulated (their client, or the server for the host/AI).
         void ApplyHitStop(GameObject gameObject)
+        {
+            if (!NetworkServer.active || !objTracker) return;
+            if (objTracker.characterBody.hasEffectiveAuthority)
+            {
+                ApplyHitStopLocal();
+            }
+            else
+            {
+                RpcApplyHitStop();
+            }
+        }
+
+        [ClientRpc]
+        void RpcApplyHitStop()
+        {
+            if (NetworkServer.active || !objTracker || !objTracker.characterBody.hasEffectiveAuthority) return;
+            ApplyHitStopLocal();
+        }
+
+        // FishermanStaticValues.hitStopMod is read locally on purpose: it's set by the hook-fail jolt (SkillObjectTracker.ApplyHookFeedback),
+        // which also runs on the owner's machine, so the server's copy (which belongs to the host) never leaks into a remote player's hitstop.
+        void ApplyHitStopLocal()
         {
             if (!inHitPause && FishermanStaticValues.CurHitStop > 0f)
             {
