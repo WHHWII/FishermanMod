@@ -4,6 +4,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using RoR2;
+using UnityEngine.Networking;
 
 namespace FishermanMod.Survivors.Fisherman.Components
 {
@@ -41,8 +42,9 @@ namespace FishermanMod.Survivors.Fisherman.Components
             if (lineTerminationObject == null || owner == null)
             {
                 Destroy(lineContainer);
-                //even though this is just a visual, and the debuff should be removed already by other components, this is here just in case this damage type is used anywhere else. Which it shouldnt be. this is also probably not networked because it isnt networked
-                if (owner && owner.HasBuff(FishermanBuffs.hookTetherDebuff))
+                //even though this is just a visual, and the debuff should be removed already by other components, this is here just in case this damage type is used anywhere else. Which it shouldnt be.
+                // NETWORKING: this visual now exists on every client (HookBombController.RpcAddTetherVisual), but buffs can only be removed on the server
+                if (NetworkServer.active && owner && owner.HasBuff(FishermanBuffs.hookTetherDebuff))
                 {
                     owner.RemoveBuff(FishermanBuffs.hookTetherDebuff);
                 }

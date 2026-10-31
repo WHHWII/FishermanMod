@@ -1,5 +1,6 @@
 ﻿using EntityStates;
 using FishermanMod.Survivors.Fisherman;
+using FishermanMod.Characters.Survivors.Fisherman.Components;
 using FishermanMod.Survivors.Fisherman.Components;
 using RoR2;
 using RoR2.Projectile;
@@ -19,8 +20,14 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
         public override void OnEnter()
         {
             projectilePrefab = FishermanAssets.hookBombProjectilePrefab;
-            HookBombController bomb = projectilePrefab.GetComponent<HookBombController>();
-            bomb.stocksConsumed = Mathf.Max(1, skillLocator.special.stock+1);
+            // NETWORKING: this used to be written onto the projectile prefab, which only affected the machine that fired it
+            // (a client's prefab edit never reaches the server, where the bomb is actually spawned).
+            // The authority sends the count to the server before base.OnEnter fires the projectile; see SkillObjectTracker.pendingHookBombStocks.
+            if (isAuthority)
+            {
+                int stocksConsumed = Mathf.Max(1, skillLocator.special.stock + 1);
+                GetComponent<SkillObjectTracker>().SetPendingHookBombStocksAuthority(stocksConsumed);
+            }
             skillLocator.special.DeductStock(skillLocator.special.stock);
             //base.effectPrefab = Modules.Assets.SomeMuzzleEffect;
             //targetmuzzle = "muzzleThrow"

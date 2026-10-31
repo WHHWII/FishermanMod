@@ -51,27 +51,35 @@ namespace FishermanMod.Survivors.Fisherman.Components
             var list = CollectionPool<GameObject, List<GameObject>>.RentCollection();
             if (hud && hud.targetBodyObject)
             {
-                if (!objectTracker) objectTracker = hud.targetBodyObject.GetComponent<SkillObjectTracker>();
+                // NETWORKING: on clients the lists can briefly hold objects the server already destroyed, hence the null checks below.
+                // Also re-fetch when spectating someone else so we don't keep showing the previous body's objects.
+                if (!objectTracker || objectTracker.gameObject != hud.targetBodyObject) objectTracker = hud.targetBodyObject.GetComponent<SkillObjectTracker>();
+            }
+            if (objectTracker && hud && hud.targetBodyObject)
+            {
                 foreach (var hookObject in objectTracker.deployedHooks)
                 {
+                    if (!hookObject) continue;
                     var dist = Vector3.Distance(hookObject.transform.position, hud.targetBodyObject.transform.position);
-                    if (hookObject && dist < maxViewRange && dist > minViewRange)
+                    if (dist < maxViewRange && dist > minViewRange)
                     {
                         list.Add(hookObject.gameObject);
                     }
                 }
                 foreach (var hookObject in objectTracker.deployedBombs)
                 {
+                    if (!hookObject) continue;
                     var dist = Vector3.Distance(hookObject.transform.position, hud.targetBodyObject.transform.position);
-                    if (hookObject && dist < maxViewRange && dist > minViewRange)
+                    if (dist < maxViewRange && dist > minViewRange)
                     {
                         list.Add(hookObject.gameObject);
                     }
                 }
                 foreach (var hookObject in objectTracker.deployedPlatforms)
                 {
+                    if (!hookObject) continue;
                     var dist = Vector3.Distance(hookObject.transform.position, hud.targetBodyObject.transform.position);
-                    if (hookObject && dist < maxViewRange && dist > minViewRange)
+                    if (dist < maxViewRange && dist > minViewRange)
                     {
                         list.Add(hookObject.gameObject);
                     }

@@ -12,13 +12,15 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
     {
         public override void OnEnter()
         {
+            // NETWORKING: animation outside the authority check so other players see it too
+            PlayAnimation("LeftArm, Override", "UtilityPlatform", "UtilityPlatform.playbackRate", 0.65f);
             if (base.isAuthority)
             {
-                PlayAnimation("LeftArm, Override", "UtilityPlatform", "UtilityPlatform.playbackRate", 0.65f);
                 base.skillLocator.special.UnsetSkillOverride(gameObject, FishermanSurvivor.specialRecallHookBomb, RoR2.GenericSkill.SkillOverridePriority.Upgrade);
                 base.skillLocator.special.DeductStock(1); // may change this to deduct all stocks if all stocks are fired at once.
-                gameObject.GetComponent<SkillObjectTracker>().HookAllBombs();
-                
+                // NETWORKING: detonation and reeling in happen on the server
+                gameObject.GetComponent<SkillObjectTracker>().HookAllBombsAuthority();
+
             }
             outer.SetNextStateToMain();
             base.OnEnter();

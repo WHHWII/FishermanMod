@@ -50,6 +50,9 @@ namespace FishermanMod.Characters.Survivors.Fisherman.Components
 
         void FixedUpdate()
         {
+            // NETWORKING: the passenger checks and early exit eject/destroy the vehicle projectile, which is server-only.
+            // The fields this reads (endPos, checkDistance, ...) are also only ever set on the server in FireHookedObjectProjectile.
+            if (!NetworkServer.active) return;
             Log.Debug($" proj vel: {proj.projectileRigidbody.velocity.normalized}");
 
             if (Time.time >= timestamp)

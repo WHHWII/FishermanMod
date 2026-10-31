@@ -16,18 +16,20 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
     {
         public override void OnEnter()
         {
+            // NETWORKING: animations aren't synced by themselves, every client plays them from the state, so this sits outside the authority check
+            PlayAnimation("Gesture, Override", "SecondaryCastRecall", "SecondaryCast.playbackRate", 0.65f);
             if (base.isAuthority)
             {
-                PlayAnimation("Gesture, Override", "SecondaryCastRecall", "SecondaryCast.playbackRate", 0.65f);
                 base.skillLocator.secondary.UnsetSkillOverride(gameObject, FishermanSurvivor.secondaryRecallFishHook, RoR2.GenericSkill.SkillOverridePriority.Upgrade);
                 base.skillLocator.secondary.DeductStock(1); // may change this to deduct all stocks if all hooks are fired at once.
                 SkillObjectTracker objt = characterBody.GetComponent<SkillObjectTracker>();
                 if (objt)
                 {
                     //objt.animator = base.GetModelAnimator();
-                    objt.RecallAllHooks();
+                    // NETWORKING: hooks are simulated on the server, this forwards the recall there when we're a client
+                    objt.RecallHooksAuthority();
                 }
-                
+
 
             }
             

@@ -154,21 +154,16 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
                         if (base.skillLocator)
                         {
                             GenericSkill skill = base.skillLocator.GetSkill(SkillSlot.Utility);
-                            if (skill && objTracker.deployedPlatforms.Count == 0)
+                            if (skill && !objTracker.HasLivePlatforms())
                             {
                                 //Log.Debug("Deducting Stock");
                                 //skill.DeductStock(1);
                                 //Log.Debug("Attempting Spawn");
                                 //base.characterBody.SendConstructTurret(base.characterBody, currentPlacementInfo.position, currentPlacementInfo.rotation, MasterCatalog.FindMasterIndex(platformMasterPrefab));
-                                MasterSummon masterSummon = new MasterSummon();
-                                masterSummon.useAmbientLevel = true;
-                                masterSummon.masterPrefab = platformMasterPrefab;
-                                masterSummon.ignoreTeamMemberLimit = false;
-                                masterSummon.teamIndexOverride = TeamIndex.Player;
-                                masterSummon.summonerBodyObject = base.gameObject;
-                                masterSummon.position = GetPlacementInfo().position;
-                                masterSummon.rotation = Util.QuaternionSafeLookRotation(base.characterDirection.forward);
-                                CharacterMaster platformMaster = masterSummon.Perform();
+                                // NETWORKING: MasterSummon.Perform only works on the server (it silently returns null on clients),
+                                // so the authority picks the spot and the summon itself is requested from the server.
+                                // The server-side MasterSummon setup lives in SkillObjectTracker.SummonPlatform.
+                                objTracker.SummonPlatformAuthority(GetPlacementInfo().position, Util.QuaternionSafeLookRotation(base.characterDirection.forward));
                                 //if (platformMaster)
                                 //{
                                 //    //platformMaster.inventory.CopyItemsFrom(base.characterBody.inventory);

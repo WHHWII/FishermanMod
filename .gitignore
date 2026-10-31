@@ -70,3 +70,6 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# the mod csproj carries the UNet weave step (see NETWORKING.md), so it has to be committed
+!FishermanMod/FishermanMod.csproj

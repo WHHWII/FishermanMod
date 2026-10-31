@@ -16,6 +16,8 @@ namespace FishermanMod.Survivors.Fisherman.Components
 {
     //TODO: Tether visual components are not properly getting cleaned up
     //TODO: Recall hook bomb is throwing an error on activation
+    // NETWORKING: like the hook, the bomb is a server-simulated projectile. Tethering, reeling enemies in and the explosion are server-only;
+    // clients get the bomb's transform from the projectile's network transform and the tether lines through RpcAddTetherVisual.
     public class HookBombController : NetworkBehaviour
     {
 
@@ -41,9 +43,24 @@ namespace FishermanMod.Survivors.Fisherman.Components
         void Start()
         {
             owner = controller.owner;
+            if (!owner)
+            {
+                if (NetworkServer.active) Destroy(gameObject);
+                enabled = false;
+                return;
+            }
             tracker = owner.GetComponent<SkillObjectTracker>();
             tracker.deployedBombs.Add(this);
             tracker.deployedBomblets.Clear();
+
+            // NETWORKING: ThrowBomb used to write this onto the prefab, which only worked on the machine that fired it.
+            // The authority now sends the count to the server first (SkillObjectTracker.SetPendingHookBombStocksAuthority),
+            // and only the server needs it since HookAllTethers runs there.
+            if (NetworkServer.active)
+            {
+                stocksConsumed = tracker.pendingHookBombStocks;
+                tracker.pendingHookBombStocks = 1;
+            }
 
             body = controller.rigidbody;
             origAntiGravCoef = antiGrav.antiGravityCoefficient;
@@ -54,9 +71,33 @@ namespace FishermanMod.Survivors.Fisherman.Components
 
             damageComponent.damageType.AddModdedDamageType(DamageTypes.FishermanTether);
 
-            GameObject hi = Instantiate(FishermanAssets.bombIndicator, transform);
-            hi.GetComponent<PositionIndicator>().targetTransform = transform;
-            hi.transform.position = Vector3.zero;
+            // NETWORKING: only the Fisherman who threw it needs the HUD indicator
+            if (Util.HasEffectiveAuthority(owner))
+            {
+                GameObject hi = Instantiate(FishermanAssets.bombIndicator, transform);
+                hi.GetComponent<PositionIndicator>().targetTransform = transform;
+                hi.transform.position = Vector3.zero;
+            }
+        }
+
+        // NETWORKING: the tether debuff is applied on the server (DamageTypes.FishermanTether), but the chain line is a purely local visual,
+        // so the server tells every client to draw it. The host receives this too, as its own client.
+        [Server]
+        public void AddTetherVisual(GameObject victim)
+        {
+            RpcAddTetherVisual(victim);
+        }
+
+        [ClientRpc]
+        void RpcAddTetherVisual(GameObject victim)
+        {
+            if (!victim) return;
+            foreach (HookBombTetherVisual existing in victim.GetComponents<HookBombTetherVisual>())
+            {
+                if (existing.lineTerminationObject == gameObject) return;
+            }
+            HookBombTetherVisual tetherVisual = victim.AddComponent<HookBombTetherVisual>();
+            tetherVisual.lineTerminationObject = gameObject;
         }
 
         public void DisableAllColliders()
@@ -118,15 +159,16 @@ namespace FishermanMod.Survivors.Fisherman.Components
             }
         }
 
+        [Server]
         public void HookAllTethers()
         {
             damageComponent.damageType.RemoveModdedDamageType(DamageTypes.FishermanTether);
 
             foreach (var target in beamController.previousTargets)
             {
+                if (!target || !target.body) continue;
                 if (target.body.HasBuff(FishermanBuffs.hookTetherDebuff))
                 {
-                    if (!target) continue;
                     FishermanSurvivor.ApplyFishermanPassiveFishHookEffect(
                         owner, gameObject,
                         transform.position,
@@ -168,7 +210,10 @@ namespace FishermanMod.Survivors.Fisherman.Components
 
         void OnDestroy()
         {
-            if (beamController) tracker.CleanupHookBombTethers(beamController.previousTargets);
+            if (!tracker) return;
+            tracker.deployedBombs.Remove(this);
+            // NETWORKING: removing the tether debuff is server-only
+            if (NetworkServer.active && beamController) tracker.CleanupHookBombTethers(beamController.previousTargets);
             //FishermanSurvivor.SetDeployedHookBomb(null);
         }
 

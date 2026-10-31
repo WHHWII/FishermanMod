@@ -21,9 +21,24 @@ using static UnityEngine.UI.GridLayoutGroup;
 
 namespace FishermanMod.Survivors.Fisherman.Components
 {
-    public class PlatformMinionController : MonoBehaviour
+    // NETWORKING: the platform is an AI minion, and BaseAI only runs on the server, so everything that steers the AI
+    // (hover point, command expiry, forced enemy) is server-only here.
+    // Clients still need to show the owner where the platform is headed and what it's aiming at, so the server mirrors
+    // that into the SyncVars below. The owner is resolved through MinionOwnership (synced to clients) instead of
+    // AIOwnership (server-only), otherwise objTracker was null on every client and Start threw.
+    public class PlatformMinionController : NetworkBehaviour
     {
         public bool debug = false;
+
+        [SyncVar]
+        bool hasCommandTarget;
+        [SyncVar]
+        Vector3 commandTargetPosition;
+        [SyncVar]
+        GameObject aimTargetObject;
+        bool ownerResolved;
+        bool appliedHasCommandTarget;
+        Vector3 appliedCommandTargetPosition;
 
         float commandPointOffset = 3;
         public bool wasStuckByHook;
@@ -71,10 +86,24 @@ namespace FishermanMod.Survivors.Fisherman.Components
             //driver.requireEquipmentReady
             //gameObject.layer = 11;
             //something somehting euler angles cross productud vector3 up 
-            baseAi = GetComponent<CharacterBody>().master.GetComponent<RoR2.CharacterAI.BaseAI>();
-            ownerMaster = baseAi.GetComponent<AIOwnership>()?.ownerMaster;
-            objTracker = ownerMaster?.GetBodyObject().GetComponent<SkillObjectTracker>();
-            objTracker?.RegisterPlatform(this);
+            TryResolveOwner();
+        }
+
+        // NETWORKING: on clients the master and its MinionOwnership arrive through separate network messages,
+        // so the owner may not be known yet in Start. Keep trying from Update until it is.
+        void TryResolveOwner()
+        {
+            if (ownerResolved) return;
+            CharacterMaster master = characterBody ? characterBody.master : null;
+            if (!master) return;
+            baseAi = master.GetComponent<RoR2.CharacterAI.BaseAI>();
+            ownerMaster = master.minionOwnership ? master.minionOwnership.ownerMaster : null;
+            if (!ownerMaster && baseAi) ownerMaster = baseAi.GetComponent<AIOwnership>()?.ownerMaster;
+            GameObject ownerBodyObject = ownerMaster ? ownerMaster.GetBodyObject() : null;
+            objTracker = ownerBodyObject ? ownerBodyObject.GetComponent<SkillObjectTracker>() : null;
+            if (!objTracker) return;
+            ownerResolved = true;
+            objTracker.RegisterPlatform(this);
             //characterBody.AddBuff(RoR2.RoR2Content.Buffs.Immune);
             //for (int i = 0; i < baseAi.skillDrivers.Length; i++)
             //{
@@ -95,12 +124,11 @@ namespace FishermanMod.Survivors.Fisherman.Components
                 lineRenderer = lr;
             }
 
-            if (!objTracker.platformAimTargetIndicator) objTracker.platformAimTargetIndicator = UnityEngine.GameObject.Instantiate(FishermanAssets.shantyBlueprintPrefab);
-            if (!objTracker.platformPosTargetIndicator)
-            {
-                objTracker.platformPosTargetIndicator = UnityEngine.GameObject.Instantiate(FishermanAssets.shantyBlueprintPrefab);
-            }
-            SetHover();
+            // NETWORKING: indicators are only created where they're used. The aim indicator is a visual for the owner;
+            // the position target is the AI's customTarget on the server and the owner's visual (see SkillObjectTracker.GetOrCreatePlatformPosTarget)
+            if (OwnerIsLocal()) objTracker.GetOrCreatePlatformAimIndicator();
+            if (NetworkServer.active || OwnerIsLocal()) objTracker.GetOrCreatePlatformPosTarget();
+            if (NetworkServer.active) SetHover();
             var ownerHUD = HUD.readOnlyInstanceList.Where(el => el.targetBodyObject == objTracker.gameObject);
             foreach (HUD hud in ownerHUD)
             {
@@ -108,28 +136,58 @@ namespace FishermanMod.Survivors.Fisherman.Components
             }
 
         }
+        bool OwnerIsLocal()
+        {
+            return objTracker && objTracker.characterBody && objTracker.characterBody.hasEffectiveAuthority;
+        }
+
         float timeStamp;
         float flashdur = 0.5f;
         public void LateUpdate()
         {
-            //aim indicator
             if (!objTracker) return;
-            if (baseAi.currentEnemy?.characterBody && baseAi.currentEnemy?.gameObject != objTracker?.gameObject)
+
+            if (NetworkServer.active && baseAi)
             {
-                if (!objTracker.platformAimTargetIndicator) objTracker.platformAimTargetIndicator = UnityEngine.GameObject.Instantiate(FishermanAssets.shantyBlueprintPrefab);
-                if (!objTracker.platformAimTargetIndicator.activeSelf) objTracker.platformAimTargetIndicator.SetActive(true);
-                objTracker.platformAimTargetIndicator.transform.position = baseAi.currentEnemy.characterBody.footPosition + (Vector3.up * 0.5f);
+                // NETWORKING: the AI's enemy only exists on the server, mirror it so the owner's client can draw the aim indicator
+                GameObject enemy = baseAi.currentEnemy?.characterBody && baseAi.currentEnemy.gameObject != objTracker.gameObject ? baseAi.currentEnemy.gameObject : null;
+                if (aimTargetObject != enemy) aimTargetObject = enemy;
+                if (!enemy) baseAi.ForceAcquireNearestEnemyIfNoCurrentEnemy();
             }
-            else
+
+            //aim indicator, owner only
+            if (!OwnerIsLocal()) return;
+            CharacterBody aimBody = aimTargetObject ? aimTargetObject.GetComponent<CharacterBody>() : null;
+            if (aimBody)
             {
-                objTracker?.platformAimTargetIndicator?.SetActive(false);
-                baseAi.ForceAcquireNearestEnemyIfNoCurrentEnemy();
+                GameObject aimIndicator = objTracker.GetOrCreatePlatformAimIndicator();
+                if (!aimIndicator.activeSelf) aimIndicator.SetActive(true);
+                aimIndicator.transform.position = aimBody.footPosition + (Vector3.up * 0.5f);
+            }
+            else if (objTracker.platformAimTargetIndicator)
+            {
+                objTracker.platformAimTargetIndicator.SetActive(false);
+            }
+
+            // NETWORKING: on the host the position indicator *is* the AI target, so it's already in the right place.
+            // A remote owner has their own local copy that follows the synced command point.
+            // Only applied when the synced values change, so DirectPlatform's immediate local placement isn't snapped back
+            // to the old point while the command is still on its way to the server.
+            if (!NetworkServer.active && (appliedHasCommandTarget != hasCommandTarget || appliedCommandTargetPosition != commandTargetPosition))
+            {
+                appliedHasCommandTarget = hasCommandTarget;
+                appliedCommandTargetPosition = commandTargetPosition;
+                GameObject posIndicator = objTracker.GetOrCreatePlatformPosTarget();
+                posIndicator.SetActive(hasCommandTarget);
+                if (hasCommandTarget) posIndicator.transform.position = commandTargetPosition;
             }
         }
         public void Update()
         {
+            if (!ownerResolved) TryResolveOwner();
+
             //direaction indicator
-            if (debug)
+            if (debug && baseAi)
             {
                 lineRenderer.SetPosition(0, baseAi.localNavigator.currentSnapshot.chestPosition);
                 Vector3 temp = ownerMaster.GetBody().transform.position;
@@ -149,7 +207,8 @@ namespace FishermanMod.Survivors.Fisherman.Components
             }
 
 
-            if(forcedEnemy && Time.time < forcedEnemyTimeStamp)
+            // NETWORKING: steering the AI, server only
+            if(NetworkServer.active && forcedEnemy && Time.time < forcedEnemyTimeStamp)
             {
                 if(baseAi.currentEnemy.gameObject != forcedEnemy)
                 {
@@ -175,7 +234,8 @@ namespace FishermanMod.Survivors.Fisherman.Components
 
         void FixedUpdate()
         {
-            if (!objTracker) return;
+            // NETWORKING: command expiry and re-hovering change the AI's target, server only
+            if (!objTracker || !NetworkServer.active || !baseAi) return;
             if (baseAi.customTarget.gameObject) commandAge += Time.fixedDeltaTime;
 
             float distToLeader = Vector3.Distance(transform.position, objTracker.transform.position);
@@ -193,6 +253,12 @@ namespace FishermanMod.Survivors.Fisherman.Components
                 SetHover();
             }
 
+            // NETWORKING: mirror the command point for the owner's indicator (SyncVars only send when the value actually changes)
+            GameObject commandTarget = baseAi.customTarget.gameObject;
+            bool hasTarget = commandTarget && commandTarget.activeSelf;
+            if (hasCommandTarget != hasTarget) hasCommandTarget = hasTarget;
+            if (hasTarget && commandTargetPosition != commandTarget.transform.position) commandTargetPosition = commandTarget.transform.position;
+
             //if (baseAi.stateMachine.state.GetType() == typeof(EntityStates.AI.Walker.LookBusy))
             //{
             //    Log.Debug("Hey Lazy ass. Set lookbusy to combat");
@@ -203,6 +269,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
 
         }
 
+        [Server]
         void SetHover()
         {
             RaycastHit hit;
@@ -217,13 +284,11 @@ namespace FishermanMod.Survivors.Fisherman.Components
                 hoverPos = hoverRay.GetPoint(30);
             }
 
-            if (objTracker.platformPosTargetIndicator)
-            {
-                objTracker.platformPosTargetIndicator.transform.position = hoverPos;
-                baseAi.customTarget.gameObject = objTracker.platformPosTargetIndicator.gameObject;
-                baseAi.customTarget.lastKnownBullseyePosition = hoverPos;
-                objTracker.platformPosTargetIndicator.gameObject.SetActive(true);
-            }
+            GameObject posTarget = objTracker.GetOrCreatePlatformPosTarget();
+            posTarget.transform.position = hoverPos;
+            baseAi.customTarget.gameObject = posTarget;
+            baseAi.customTarget.lastKnownBullseyePosition = hoverPos;
+            posTarget.SetActive(true);
         }
 
         void OnDestroy()
@@ -234,7 +299,9 @@ namespace FishermanMod.Survivors.Fisherman.Components
                 HudOverlayManager.RemoveOverlay(overlayController);
             }
             allDeployedPlatforms.Remove(gameObject);
-            objTracker.ProccessPlatfromDeath();
+            // only if we're still the registered platform: when a new platform replaces this one, the old body is destroyed a frame later
+            // and used to wipe the new platform from the list (now also on clients, which keep their own list)
+            if (objTracker && objTracker.deployedPlatforms.Contains(this)) objTracker.ProccessPlatfromDeath();
         }
 
 
@@ -283,6 +350,7 @@ namespace FishermanMod.Survivors.Fisherman.Components
 
             instance.name = "ShantyPrimaryRoot";
 
+            // NETWORKING: on a remote owner's client this shows the platform's primary as last synced, which is fine for a cooldown display
             instance.GetComponent<SkillIcon>().targetSkill = characterBody.skillLocator.primary;
         }
 

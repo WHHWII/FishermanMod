@@ -30,8 +30,11 @@ namespace FishermanMod.Survivors.Fisherman.SkillStates
 
             damageCoefficient = DamageCoefficient;
 
-            AIOwnership aiOwnership = characterBody.master.GetComponent<AIOwnership>();
-            ownerBody = aiOwnership?.ownerMaster.GetBody();
+            // NETWORKING: this state runs on the server (AI authority) and on clients. AIOwnership is only filled in on the server,
+            // MinionOwnership is synced, so use that and fall back to AIOwnership.
+            CharacterMaster ownerMaster = characterBody.master ? characterBody.master.minionOwnership.ownerMaster : null;
+            if (!ownerMaster && characterBody.master) ownerMaster = characterBody.master.GetComponent<AIOwnership>()?.ownerMaster;
+            ownerBody = ownerMaster ? ownerMaster.GetBody() : null;
             //Log.Debug($"aiowner : {aiOwnership} OwnerMasteR: {aiOwnership?.ownerMaster} Body: {ownerBody}");
             //proc coefficient is set on the components of the projectile prefab
             //base.projectilePitchBonus = 0;
